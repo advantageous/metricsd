@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
 	"time"
+	"strings"
 )
 
 type AwsCloudMetricRepeater struct {
@@ -40,13 +41,21 @@ func (cw AwsCloudMetricRepeater)ProcessMetrics(metrics []m.Metric) error {
 		case m.COUNT:
 			value := float64(d.GetValue())
 			datum := aDatum(d.GetName())
-			datum.Unit = aws.String(cloudwatch.StandardUnitCount)
+			if strings.HasSuffix(d.GetName(), "Per") {
+				datum.Unit = aws.String(cloudwatch.StandardUnitCount)
+			} else {
+				datum.Unit = aws.String(cloudwatch.StandardUnitPercent)
+			}
 			datum.Value = aws.Float64(float64(value))
 			data = append(data, datum)
 		case m.LEVEL:
 			value := float64(d.GetValue())
 			datum := aDatum(d.GetName())
-			datum.Unit = aws.String(cloudwatch.StandardUnitKilobytes)
+			if strings.HasSuffix(d.GetName(), "Per") {
+				datum.Unit = aws.String(cloudwatch.StandardUnitKilobytes)
+			} else {
+				datum.Unit = aws.String(cloudwatch.StandardUnitPercent)
+			}
 			datum.Value = aws.Float64(float64(value))
 			data = append(data, datum)
 		case m.TIMING:
