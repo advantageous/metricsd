@@ -46,14 +46,13 @@ func (cw AwsCloudMetricRepeater)ProcessMetrics(metrics []m.Metric) error {
 		case m.LEVEL:
 			value := float64(d.GetValue())
 			datum := aDatum(d.GetName())
-			datum.Unit = aws.String(cloudwatch.StandardUnitCount)
+			datum.Unit = aws.String(cloudwatch.StandardUnitKilobytes)
 			datum.Value = aws.Float64(float64(value))
 			data = append(data, datum)
-
 		case m.TIMING:
 			value := float64(d.GetValue())
 			datum := aDatum(d.GetName())
-			datum.Unit = aws.String(cloudwatch.StandardUnitCount)
+			datum.Unit = aws.String(cloudwatch.StandardUnitMilliseconds)
 			datum.Value = aws.Float64(float64(value))
 			data = append(data, datum)
 
