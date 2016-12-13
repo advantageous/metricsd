@@ -4,7 +4,7 @@ import (
 	"testing"
 	"os"
 	"fmt"
-	l "github.com/advantageous/metrics/logger/test"
+	l "github.com/advantageous/metricsd/logger/test"
 )
 func TestCpuCounts(z *testing.T) {
 

@@ -1,7 +1,7 @@
 package metric
 
 import (
-	l "github.com/advantageous/metrics/logger"
+	l "github.com/advantageous/metricsd/logger"
 	"os/exec"
 	"runtime"
 	"strings"

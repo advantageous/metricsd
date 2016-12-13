@@ -5,7 +5,7 @@ import (
 	"strings"
 	"runtime"
 	"os/exec"
-	l "github.com/advantageous/metrics/logger"
+	l "github.com/advantageous/metricsd/logger"
 )
 
 

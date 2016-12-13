@@ -1,9 +1,9 @@
 package main
 
 import (
-	m "github.com/advantageous/metrics/metric"
-	r "github.com/advantageous/metrics/repeater"
-	l "github.com/advantageous/metrics/logger"
+	m "github.com/advantageous/metricsd/metric"
+	r "github.com/advantageous/metricsd/repeater"
+	l "github.com/advantageous/metricsd/logger"
 	"time"
 )
 

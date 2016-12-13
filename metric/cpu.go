@@ -4,7 +4,7 @@ import (
 	"os"
 	"strings"
 	"bufio"
-	l "github.com/advantageous/metrics/logger"
+	l "github.com/advantageous/metricsd/logger"
 	"fmt"
 	"errors"
 	"runtime"

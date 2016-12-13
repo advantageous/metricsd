@@ -1,8 +1,8 @@
 package repeater
 
 import (
-	lg "github.com/advantageous/metrics/logger"
-	m "github.com/advantageous/metrics/metric"
+	lg "github.com/advantageous/metricsd/logger"
+	m "github.com/advantageous/metricsd/metric"
 
 )
 

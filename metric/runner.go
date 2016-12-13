@@ -5,7 +5,7 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
-	lg "github.com/advantageous/metrics/logger"
+	lg "github.com/advantageous/metricsd/logger"
 
 )
 
