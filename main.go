@@ -5,14 +5,23 @@ import (
 	r "github.com/advantageous/metricsd/repeater"
 	l "github.com/advantageous/metricsd/logger"
 	"time"
+	"flag"
 )
 
 func main() {
+
+	configFile := flag.String("host", "/etc/metricsd.conf", "metrics config")
 	logger := l.NewSimpleLogger("main")
-	logger.Println("Starting up")
+
 	gatherers := []m.MetricsGatherer{m.NewCPUMetricsGatherer(nil),
 		m.NewDiskMetricsGatherer(nil),
 		m.NewFreeMetricGatherer(nil)}
-	repeaters := []m.MetricsRepeater{r.NewLogMetricsRepeater()}
+
+	config, err := m.LoadConfig(*configFile, logger)
+	if err!=nil {
+		panic(err)
+	}
+
+	repeaters := []m.MetricsRepeater{r.NewAwsCloudMetricRepeater(config)}
 	m.RunWorker(gatherers, repeaters, nil, time.Second * 10)
 }

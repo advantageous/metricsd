@@ -7,7 +7,7 @@ import (
 	"os"
 	"io/ioutil"
 	"io"
-	lg "github.com/advantageous/metrics/logger"
+	lg "github.com/advantageous/metricsd/logger"
 )
 
 type TestLogger struct {
