@@ -8,15 +8,11 @@ import (
 )
 
 func main() {
-
-
 	logger := l.NewSimpleLogger("main")
-
 	logger.Println("Starting up")
-
-
-	gatherers := []m.MetricsGatherer{m.NewCPUMetricsGatherer( nil  ), m.NewDiskMetricsGatherer(nil), m.NewFreeMetricGatherer(nil)}
+	gatherers := []m.MetricsGatherer{m.NewCPUMetricsGatherer(nil),
+		m.NewDiskMetricsGatherer(nil),
+		m.NewFreeMetricGatherer(nil)}
 	repeaters := []m.MetricsRepeater{r.NewLogMetricsRepeater()}
-
 	m.RunWorker(gatherers, repeaters, nil, time.Second * 10)
 }

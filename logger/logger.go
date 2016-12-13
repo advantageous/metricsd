@@ -21,8 +21,6 @@ const (
 	DEBUG
 )
 
-
-
 type Logger interface {
 	Printf(format string, args ...interface{})
 	Emergencyf(format string, args ...interface{})
@@ -54,7 +52,6 @@ type Logger interface {
 	Info(args ...interface{})
 	Debug(args ...interface{})
 }
-
 
 func NewSimpleLogger(name string) Logger {
 	return NewLogger(name, INFO, true, os.Stderr, os.Stderr, os.Stderr, os.Stderr, os.Stderr, os.Stdout, os.Stdout, ioutil.Discard)
@@ -130,18 +127,18 @@ func NewSyslogLogger(logLevel LogLevel, panicOnEmergency bool) Logger {
 	basicLogger.panicOnEmergency = panicOnEmergency
 	basicLogger.alert, err = syslog.NewLogger(syslog.LOG_ALERT, log.Ldate | log.Ltime | log.Lshortfile)
 
-	if err!=nil {
+	if err != nil {
 		logger = NewSimpleLogger("main")
 		logger.WarnError("Unable to attach to simple logger", err)
 	}
 
-	basicLogger.emergency, err  = syslog.NewLogger(syslog.LOG_EMERG, log.Ldate | log.Ltime | log.Lshortfile)
-	basicLogger.critical, err  = syslog.NewLogger(syslog.LOG_NOTICE, log.Ldate | log.Ltime | log.Lshortfile)
-	basicLogger.notice, err  = syslog.NewLogger(syslog.LOG_NOTICE, log.Ldate | log.Ltime | log.Lshortfile)
-	basicLogger.debug, err  = syslog.NewLogger(syslog.LOG_DEBUG, log.Ldate | log.Ltime | log.Lshortfile)
-	basicLogger.info, err  = syslog.NewLogger(syslog.LOG_INFO, log.Ldate | log.Ltime | log.Lshortfile)
-	basicLogger.warning, err  = syslog.NewLogger(syslog.LOG_WARNING, log.Ldate | log.Ltime | log.Lshortfile)
-	basicLogger.error, err  = syslog.NewLogger(syslog.LOG_ERR, log.Ldate | log.Ltime | log.Lshortfile)
+	basicLogger.emergency, err = syslog.NewLogger(syslog.LOG_EMERG, log.Ldate | log.Ltime | log.Lshortfile)
+	basicLogger.critical, err = syslog.NewLogger(syslog.LOG_NOTICE, log.Ldate | log.Ltime | log.Lshortfile)
+	basicLogger.notice, err = syslog.NewLogger(syslog.LOG_NOTICE, log.Ldate | log.Ltime | log.Lshortfile)
+	basicLogger.debug, err = syslog.NewLogger(syslog.LOG_DEBUG, log.Ldate | log.Ltime | log.Lshortfile)
+	basicLogger.info, err = syslog.NewLogger(syslog.LOG_INFO, log.Ldate | log.Ltime | log.Lshortfile)
+	basicLogger.warning, err = syslog.NewLogger(syslog.LOG_WARNING, log.Ldate | log.Ltime | log.Lshortfile)
+	basicLogger.error, err = syslog.NewLogger(syslog.LOG_ERR, log.Ldate | log.Ltime | log.Lshortfile)
 
 	return logger
 

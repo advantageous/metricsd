@@ -69,7 +69,6 @@ func NewCPUMetricsGatherer(logger l.Logger) *CPUMetricsGatherer {
 	return NewCPUMetricsGathererWithPath(statFile, logger)
 }
 
-
 func (cpu *CPUMetricsGatherer) SetPath(path string) {
 	cpu.path = path
 }
@@ -214,10 +213,12 @@ func (cpu *CPUMetricsGatherer) readCpuStats() (*CpuStats, error) {
 
 		if bytes, _, err := fd.ReadLine(); err == nil {
 			line = string(bytes)
-		} else if err.Error() == "EOF" { //Error EOF is ok
+		} else if err.Error() == "EOF" {
+			//Error EOF is ok
 			cpu.logger.Debug("EOF while reading /proc/stat file")
 			break
-		} else { //Others errors are not ok
+		} else {
+			//Others errors are not ok
 			cpu.logger.PrintError("Error reading line from /proc/stat", err)
 			return nil, err
 		}

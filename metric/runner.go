@@ -6,7 +6,6 @@ import (
 	"syscall"
 	"time"
 	lg "github.com/advantageous/metricsd/logger"
-
 )
 
 func makeTerminateChannel() <-chan os.Signal {
@@ -43,8 +42,8 @@ func RunWorker(gatherers []MetricsGatherer, repeaters []MetricsRepeater, logger 
 	}
 }
 func processMetrics(metrics []Metric, repeaters []MetricsRepeater, logger lg.Logger) {
-	for _,r := range repeaters {
-		if err:=r.ProcessMetrics(metrics); err !=nil {
+	for _, r := range repeaters {
+		if err := r.ProcessMetrics(metrics); err != nil {
 			logger.PrintError("Repeater failed", err)
 		}
 	}

@@ -35,7 +35,7 @@ Field 11 -- weighted # of milliseconds spent doing I/Os
  */
 
 type DiskMetricsGatherer struct {
-	logger   l.Logger
+	logger l.Logger
 }
 
 func NewDiskMetricsGatherer(logger   l.Logger) *DiskMetricsGatherer {
@@ -46,8 +46,6 @@ func NewDiskMetricsGatherer(logger   l.Logger) *DiskMetricsGatherer {
 	return &DiskMetricsGatherer{logger:logger}
 }
 
-
-
 func (disk *DiskMetricsGatherer) GetMetrics() ([]Metric, error) {
 	var metrics = []Metric{}
 
@@ -57,12 +55,12 @@ func (disk *DiskMetricsGatherer) GetMetrics() ([]Metric, error) {
 	var args []string
 	if runtime.GOOS == "linux" {
 		command = "/usr/bin/df"
-		args = []string{"-B",  "512"}
+		args = []string{"-B", "512"}
 	} else if runtime.GOOS == "darwin" {
 		command = "/bin/df"
 		args = []string{"-b", "-l"}
 	}
-	if out, err := exec.Command(command, args...).Output(); err!=nil {
+	if out, err := exec.Command(command, args...).Output(); err != nil {
 		return nil, err
 	} else {
 		output = string(out)
@@ -72,15 +70,14 @@ func (disk *DiskMetricsGatherer) GetMetrics() ([]Metric, error) {
 		if strings.HasPrefix(line, "/dev/") {
 
 			var name string
-			var total , used, available uint64
+			var total, used, available uint64
 			fmt.Sscanf(line, "%s %d %d %d", &name, &total, &used, &available)
 			var totalF, availableF float64
 
 			totalF = float64(total)
 			availableF = float64(available)
 
-			var calc = availableF/totalF * 100.0
-
+			var calc = availableF / totalF * 100.0
 
 			metrics = append(metrics, metric{
 				metricType: LEVEL,

@@ -18,7 +18,6 @@ type BasicLogger struct {
 	panicOnEmergency bool
 }
 
-
 func (l *BasicLogger) Info(args ...interface{}) {
 	if (INFO <= l.logLevel) {
 		l.info.Output(2, fmt.Sprintln(args...))

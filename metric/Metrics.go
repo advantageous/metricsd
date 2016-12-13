@@ -1,12 +1,10 @@
 package metric
 
-
 type MetricType byte
 type MetricIntervalType byte
 
 type MetricValue int64
 type MetricIntervalValue int64
-
 
 const (
 	COUNT MetricType = iota
@@ -14,7 +12,7 @@ const (
 	TIMING
 )
 
-type Metric interface  {
+type Metric interface {
 	GetType() MetricType
 	GetValue() MetricValue
 	GetName() string
@@ -30,10 +28,9 @@ type MetricsRepeater interface {
 
 type metric struct {
 	metricType MetricType
-	value MetricValue
-	name string
+	value      MetricValue
+	name       string
 }
-
 
 func (m metric) GetType() MetricType {
 	return m.metricType

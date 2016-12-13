@@ -8,11 +8,8 @@ import (
 	l "github.com/advantageous/metricsd/logger"
 )
 
-
-
-
 type FreeMetricGatherer struct {
-	logger   l.Logger
+	logger l.Logger
 }
 
 func NewFreeMetricGatherer(logger   l.Logger) *FreeMetricGatherer {
@@ -22,8 +19,6 @@ func NewFreeMetricGatherer(logger   l.Logger) *FreeMetricGatherer {
 	}
 	return &FreeMetricGatherer{logger:logger}
 }
-
-
 
 func (disk *FreeMetricGatherer) GetMetrics() ([]Metric, error) {
 	var metrics = []Metric{}
@@ -36,13 +31,13 @@ func (disk *FreeMetricGatherer) GetMetrics() ([]Metric, error) {
 	} else if runtime.GOOS == "darwin" {
 		command = "/usr/local/bin/free"
 	}
-	if out, err := exec.Command(command).Output(); err!=nil {
+	if out, err := exec.Command(command).Output(); err != nil {
 		return nil, err
 	} else {
 		output = string(out)
 	}
 
-	lines :=  strings.Split(output, "\n");
+	lines := strings.Split(output, "\n");
 	line1 := lines[1]
 	line2 := lines[2]
 
@@ -85,7 +80,6 @@ func (disk *FreeMetricGatherer) GetMetrics() ([]Metric, error) {
 		usedPercent = (float64(used) / totalF) * 100.0
 		metrics = append(metrics, metric{LEVEL, MetricValue(int64(usedPercent)), "mSwpUsedPer"})
 	}
-
 
 	return metrics, nil
 
