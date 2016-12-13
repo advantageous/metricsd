@@ -1,9 +1,5 @@
+## Metricsd
 
-## Items todo
-
-* Add logging
-* Add Timer
-* Create Unit file
-* Create config file
-* Deploy
+Reads OS metrics and sends data to CloudWatch Metrics.
+ 
 
