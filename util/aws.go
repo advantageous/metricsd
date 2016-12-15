@@ -1,16 +1,16 @@
 package util
 
 import (
-	awsCredentials "github.com/aws/aws-sdk-go/aws/credentials"
-	awsSession "github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
-	"github.com/aws/aws-sdk-go/aws/ec2metadata"
-	"os"
-	"github.com/aws/aws-sdk-go/service/ec2"
-	"strings"
 	l "github.com/advantageous/metricsd/logger"
 	m "github.com/advantageous/metricsd/metric"
+	"github.com/aws/aws-sdk-go/aws"
+	awsCredentials "github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
+	"github.com/aws/aws-sdk-go/aws/ec2metadata"
+	awsSession "github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/ec2"
+	"os"
+	"strings"
 )
 
 var awsLogger = l.NewSimpleLogger("aws")
@@ -29,8 +29,8 @@ func NewAWSSession(cfg *m.Config) *awsSession.Session {
 		return awsSession.New(awsConfig)
 	} else {
 		return awsSession.New(&aws.Config{
-			Region:      aws.String(getRegion(metaDataClient, cfg, session)),
-			MaxRetries:  aws.Int(3),
+			Region:     aws.String(getRegion(metaDataClient, cfg, session)),
+			MaxRetries: aws.Int(3),
 		})
 	}
 
@@ -106,14 +106,14 @@ func getCredentials(client *ec2metadata.EC2Metadata) *awsCredentials.Credentials
 		return awsCredentials.NewChainCredentials([]awsCredentials.Provider{
 			&awsCredentials.EnvProvider{},
 			&ec2rolecreds.EC2RoleProvider{
-				Client:client,
+				Client: client,
 			},
 		})
 	}
 
 }
 
-func findAZ(metaClient *ec2metadata.EC2Metadata) (string) {
+func findAZ(metaClient *ec2metadata.EC2Metadata) string {
 
 	az, err := metaClient.GetMetadata("placement/availability-zone")
 
@@ -125,7 +125,7 @@ func findAZ(metaClient *ec2metadata.EC2Metadata) (string) {
 	return az
 }
 
-func findInstanceName(instanceId string, region string, session *awsSession.Session) (string) {
+func findInstanceName(instanceId string, region string, session *awsSession.Session) string {
 
 	var name = "NO_NAME"
 	var err error
@@ -164,5 +164,3 @@ func findInstanceName(instanceId string, region string, session *awsSession.Sess
 		return name
 	}
 }
-
-

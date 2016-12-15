@@ -1,11 +1,11 @@
 package metric
 
 import (
+	"fmt"
 	l "github.com/advantageous/metricsd/logger"
 	"os/exec"
 	"runtime"
 	"strings"
-	"fmt"
 )
 
 //
@@ -32,18 +32,18 @@ Field 11 -- weighted # of milliseconds spent doing I/Os
     last update of this field.  This can provide an easy measure of both
     I/O completion time and the backlog that may be accumulating.
 
- */
+*/
 
 type DiskMetricsGatherer struct {
 	logger l.Logger
 }
 
-func NewDiskMetricsGatherer(logger   l.Logger) *DiskMetricsGatherer {
+func NewDiskMetricsGatherer(logger l.Logger) *DiskMetricsGatherer {
 
 	if logger == nil {
 		logger = l.GetSimpleLogger("MT_DISK_DEBUG", "disk")
 	}
-	return &DiskMetricsGatherer{logger:logger}
+	return &DiskMetricsGatherer{logger: logger}
 }
 
 func (disk *DiskMetricsGatherer) GetMetrics() ([]Metric, error) {
@@ -81,8 +81,8 @@ func (disk *DiskMetricsGatherer) GetMetrics() ([]Metric, error) {
 
 			metrics = append(metrics, metric{
 				metricType: LEVEL,
-				name : "dU" + strings.ToUpper(name[5:]) + "AvailPer",
-				value: MetricValue(calc),
+				name:       "dU" + strings.ToUpper(name[5:]) + "AvailPer",
+				value:      MetricValue(calc),
 			})
 
 		}

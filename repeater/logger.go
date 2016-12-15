@@ -9,7 +9,7 @@ type LogMetricsRepeater struct {
 	logger lg.Logger
 }
 
-func (lr LogMetricsRepeater)ProcessMetrics(metrics []m.Metric) error {
+func (lr LogMetricsRepeater) ProcessMetrics(metrics []m.Metric) error {
 	for _, m := range metrics {
 		lr.logger.Printf("%s %d %d", m.GetName(), m.GetType(), m.GetValue())
 	}

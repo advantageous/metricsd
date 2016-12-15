@@ -2,22 +2,22 @@ package metric
 
 import (
 	"fmt"
-	"strings"
-	"runtime"
-	"os/exec"
 	l "github.com/advantageous/metricsd/logger"
+	"os/exec"
+	"runtime"
+	"strings"
 )
 
 type FreeMetricGatherer struct {
 	logger l.Logger
 }
 
-func NewFreeMetricGatherer(logger   l.Logger) *FreeMetricGatherer {
+func NewFreeMetricGatherer(logger l.Logger) *FreeMetricGatherer {
 
 	if logger == nil {
 		logger = l.GetSimpleLogger("MT_FREE_DEBUG", "free")
 	}
-	return &FreeMetricGatherer{logger:logger}
+	return &FreeMetricGatherer{logger: logger}
 }
 
 func (disk *FreeMetricGatherer) GetMetrics() ([]Metric, error) {
@@ -37,7 +37,7 @@ func (disk *FreeMetricGatherer) GetMetrics() ([]Metric, error) {
 		output = string(out)
 	}
 
-	lines := strings.Split(output, "\n");
+	lines := strings.Split(output, "\n")
 	line1 := lines[1]
 	line2 := lines[2]
 

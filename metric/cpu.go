@@ -1,13 +1,13 @@
 package metric
 
 import (
-	"os"
-	"strings"
 	"bufio"
-	l "github.com/advantageous/metricsd/logger"
-	"fmt"
 	"errors"
+	"fmt"
+	l "github.com/advantageous/metricsd/logger"
+	"os"
 	"runtime"
+	"strings"
 )
 
 type CpuTimeType byte
@@ -51,7 +51,7 @@ func NewCPUMetricsGathererWithPath(path string, logger l.Logger) *CPUMetricsGath
 		logger = l.GetSimpleLogger("MT_CPU_DEBUG", "cpu")
 	}
 	return &CPUMetricsGatherer{
-		path: path,
+		path:   path,
 		logger: logger,
 	}
 }
@@ -244,7 +244,7 @@ func (cpu *CPUMetricsGatherer) readCpuStats() (*CpuStats, error) {
 
 func (cpu *CPUMetricsGatherer) parseLine(name string, value uint64, line string, stats *CpuStats) error {
 
-	switch (name) {
+	switch name {
 	case "ctxt":
 		stats.ContextSwitchCount = CpuCount(value)
 	case "btime":
