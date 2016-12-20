@@ -1,21 +1,22 @@
 package metric
 
 import (
-	"io/ioutil"
-	"github.com/hashicorp/hcl"
 	l "github.com/advantageous/metricsd/logger"
+	"github.com/hashicorp/hcl"
+	"io/ioutil"
+	"time"
 )
 
 type Config struct {
-	AWSRegion      string 	`hcl:"aws_region"`
-	EC2InstanceId  string 	`hcl:"ec2_instance_id"`
-	Debug          bool    	`hcl:"debug"`
-	Local          bool    	`hcl:"local"`
-	MetricPrefix  string 	`hcl:"metric_prefix"`
+	AWSRegion         string        `hcl:"aws_region"`
+	EC2InstanceId     string        `hcl:"ec2_instance_id"`
+	Debug             bool          `hcl:"debug"`
+	Local             bool          `hcl:"local"`
+	MetricPrefix      string        `hcl:"metric_prefix"`
+	TimePeriodSeconds time.Duration `hcl:"interval_seconds"`
 }
 
 func LoadConfig(filename string, logger l.Logger) (*Config, error) {
-
 
 	if logger == nil {
 		logger = l.NewSimpleLogger("config")
@@ -30,14 +31,11 @@ func LoadConfig(filename string, logger l.Logger) (*Config, error) {
 	return LoadConfigFromString(string(configBytes), logger)
 }
 
-
 func LoadConfigFromString(data string, logger l.Logger) (*Config, error) {
-
 
 	if logger == nil {
 		logger = l.NewSimpleLogger("config")
 	}
-
 
 	config := &Config{}
 	logger.Println("Loading log...")
@@ -45,6 +43,10 @@ func LoadConfigFromString(data string, logger l.Logger) (*Config, error) {
 	err := hcl.Decode(&config, data)
 	if err != nil {
 		return nil, err
+	}
+
+	if config.TimePeriodSeconds == 0 {
+		config.TimePeriodSeconds = 30
 	}
 
 	return config, nil

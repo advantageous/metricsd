@@ -1,13 +1,13 @@
 package repeater
 
 import (
-	m "github.com/advantageous/metricsd/metric"
 	lg "github.com/advantageous/metricsd/logger"
+	m "github.com/advantageous/metricsd/metric"
 	"github.com/advantageous/metricsd/util"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
-	"time"
 	"strings"
+	"time"
 )
 
 type AwsCloudMetricRepeater struct {
@@ -16,7 +16,7 @@ type AwsCloudMetricRepeater struct {
 	config *m.Config
 }
 
-func (cw AwsCloudMetricRepeater)ProcessMetrics(metrics []m.Metric) error {
+func (cw AwsCloudMetricRepeater) ProcessMetrics(metrics []m.Metric) error {
 
 	timestamp := aws.Time(time.Now())
 
@@ -37,7 +37,7 @@ func (cw AwsCloudMetricRepeater)ProcessMetrics(metrics []m.Metric) error {
 			cw.logger.Printf("%s %d %d", d.GetName(), d.GetType(), d.GetValue())
 		}
 
-		switch(d.GetType()) {
+		switch d.GetType() {
 		case m.COUNT:
 			value := float64(d.GetValue())
 			datum := aDatum(d.GetName())
@@ -67,10 +67,10 @@ func (cw AwsCloudMetricRepeater)ProcessMetrics(metrics []m.Metric) error {
 
 		}
 
-		if index % 20 == 0  && index != 0{
+		if index%20 == 0 && index != 0 {
 			data = []*cloudwatch.MetricDatum{}
 
-			if  len (data) > 0 {
+			if len(data) > 0 {
 				request := &cloudwatch.PutMetricDataInput{
 					Namespace:  aws.String(cw.config.MetricPrefix),
 					MetricData: data,
@@ -86,13 +86,11 @@ func (cw AwsCloudMetricRepeater)ProcessMetrics(metrics []m.Metric) error {
 				}
 			}
 
-
 		}
 
 	}
 
-
-	if  len (data) > 0 {
+	if len(data) > 0 {
 		request := &cloudwatch.PutMetricDataInput{
 			Namespace:  aws.String(cw.config.MetricPrefix),
 			MetricData: data,

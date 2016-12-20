@@ -1,10 +1,10 @@
 package metric
 
 import (
-	"testing"
-	"os"
 	"fmt"
 	l "github.com/advantageous/metricsd/logger/test"
+	"os"
+	"testing"
 )
 
 func TestCpuCounts(z *testing.T) {
@@ -13,7 +13,7 @@ func TestCpuCounts(z *testing.T) {
 
 	dir, _ := os.Getwd()
 	fmt.Println("DIR", dir)
-	cpuG := NewCPUMetricsGathererWithPath(dir + "/test-data/proc/stat", MetricInterval{30, SECONDS}, test)
+	cpuG := NewCPUMetricsGathererWithPath(dir+"/test-data/proc/stat", MetricInterval{30, SECONDS}, test)
 
 	metrics, err := cpuG.GetMetrics()
 

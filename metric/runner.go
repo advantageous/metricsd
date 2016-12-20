@@ -1,11 +1,11 @@
 package metric
 
 import (
+	lg "github.com/advantageous/metricsd/logger"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
-	lg "github.com/advantageous/metricsd/logger"
 )
 
 func makeTerminateChannel() <-chan os.Signal {

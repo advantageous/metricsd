@@ -1,11 +1,11 @@
 package main
 
 import (
+	"flag"
+	l "github.com/advantageous/metricsd/logger"
 	m "github.com/advantageous/metricsd/metric"
 	r "github.com/advantageous/metricsd/repeater"
-	l "github.com/advantageous/metricsd/logger"
 	"time"
-	"flag"
 )
 
 func main() {
@@ -18,10 +18,10 @@ func main() {
 		m.NewFreeMetricGatherer(nil)}
 
 	config, err := m.LoadConfig(*configFile, logger)
-	if err!=nil {
+	if err != nil {
 		panic(err)
 	}
 
 	repeaters := []m.MetricsRepeater{r.NewAwsCloudMetricRepeater(config)}
-	m.RunWorker(gatherers, repeaters, nil, time.Second * 10)
+	m.RunWorker(gatherers, repeaters, nil, config.TimePeriodSeconds * time.Second)
 }
