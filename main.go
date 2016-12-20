@@ -23,5 +23,6 @@ func main() {
 	}
 
 	repeaters := []m.MetricsRepeater{r.NewAwsCloudMetricRepeater(config)}
+
 	m.RunWorker(gatherers, repeaters, nil, config.TimePeriodSeconds * time.Second)
 }

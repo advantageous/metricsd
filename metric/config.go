@@ -16,6 +16,7 @@ type Config struct {
 	TimePeriodSeconds time.Duration `hcl:"interval_seconds"`
 }
 
+
 func LoadConfig(filename string, logger l.Logger) (*Config, error) {
 
 	if logger == nil {
