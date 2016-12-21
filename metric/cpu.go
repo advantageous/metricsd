@@ -106,7 +106,7 @@ func convertToMetrics(lastTimeStats *CpuStats, nowStats *CpuStats) []Metric {
 
 		softInterruptCount := nowStats.SoftInterruptCount - lastTimeStats.SoftInterruptCount
 		if softInterruptCount > 0 {
-			metrics = append(metrics, metric{COUNT, MetricValue(softInterruptCount), "softirqCnt", "cpu"})
+			metrics = append(metrics, metric{COUNT, MetricValue(softInterruptCount), "softIrqCnt", "cpu"})
 		}
 
 		interruptCount := nowStats.InterruptCount - lastTimeStats.InterruptCount
@@ -121,7 +121,7 @@ func convertToMetrics(lastTimeStats *CpuStats, nowStats *CpuStats) []Metric {
 
 		processCount := nowStats.ProcessCount - lastTimeStats.ProcessCount
 		if processCount > 0 {
-			metrics = append(metrics, metric{COUNT, MetricValue(processCount), "processesTtlCnt", "cpu"})
+			metrics = append(metrics, metric{COUNT, MetricValue(processCount), "processesStrtCnt", "cpu"})
 		}
 
 		for index, c := range nowStats.CpuTimeList {
@@ -148,7 +148,7 @@ func convertToMetrics(lastTimeStats *CpuStats, nowStats *CpuStats) []Metric {
 
 			Irq := c.Irq - lastTimeStats.CpuTimeList[index].Irq
 			if Irq > 0 {
-				metrics = append(metrics, metric{COUNT, MetricValue(Irq), c.Name + "IrqCnt", "cpu"})
+				metrics = append(metrics, metric{COUNT, MetricValue(Irq), c.Name + "IrqJif", "cpu"})
 			}
 
 			GuestNice := c.GuestNice - lastTimeStats.CpuTimeList[index].GuestNice
@@ -173,7 +173,7 @@ func convertToMetrics(lastTimeStats *CpuStats, nowStats *CpuStats) []Metric {
 
 			SoftIrq := c.SoftIrq - lastTimeStats.CpuTimeList[index].SoftIrq
 			if SoftIrq > 0 {
-				metrics = append(metrics, metric{COUNT, MetricValue(SoftIrq), c.Name + "SoftCnt", "cpu"})
+				metrics = append(metrics, metric{COUNT, MetricValue(SoftIrq), c.Name + "SoftIrqJif", "cpu"})
 			}
 
 		}
