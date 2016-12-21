@@ -6,3 +6,7 @@ metrics
 
 
 /bin/packer/ec2_env.sh
+
+metricsd
+
+metricsd_linux
