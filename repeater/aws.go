@@ -85,39 +85,25 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(metrics []m.Metric) error {
 		if cw.config.Debug {
 			cw.logger.Printf("%s %d %d %s", d.GetName(), d.GetType(), d.GetValue(), d.GetProvider())
 		}
+		value := float64(d.GetValue())
+		datum := createDatum(d.GetName(), d.GetProvider())
+		datum.Value = aws.Float64(float64(value))
 
 		switch d.GetType() {
 		case m.COUNT:
-			value := float64(d.GetValue())
-			datum := createDatum(d.GetName(), d.GetProvider())
-			if !strings.HasSuffix(d.GetName(), "Per") {
-				datum.Unit = aws.String(cloudwatch.StandardUnitCount)
-			} else {
-				datum.Unit = aws.String(cloudwatch.StandardUnitPercent)
-			}
-			datum.Value = aws.Float64(float64(value))
-			data = append(data, datum)
+			datum.Unit = aws.String(cloudwatch.StandardUnitCount)
 		case m.LEVEL:
-			value := float64(d.GetValue())
-			datum := createDatum(d.GetName(), d.GetProvider())
 			datum.Unit = aws.String(cloudwatch.StandardUnitKilobytes)
-			datum.Value = aws.Float64(float64(value))
-			data = append(data, datum)
 		case m.LEVEL_PERCENT:
-			value := float64(d.GetValue())
-			datum := createDatum(d.GetName(), d.GetProvider())
 			datum.Unit = aws.String(cloudwatch.StandardUnitPercent)
-			datum.Value = aws.Float64(float64(value))
-			data = append(data, datum)
-
 		case m.TIMING:
-			value := float64(d.GetValue())
-			datum := createDatum(d.GetName(), d.GetProvider())
 			datum.Unit = aws.String(cloudwatch.StandardUnitMilliseconds)
-			datum.Value = aws.Float64(float64(value))
-			data = append(data, datum)
-
+		default:
+			datum.Unit = aws.String(cloudwatch.StandardUnitCount)
 		}
+
+		data = append(data, datum)
+
 
 		if index%20 == 0 && index != 0 {
 			data = []*cloudwatch.MetricDatum{}
