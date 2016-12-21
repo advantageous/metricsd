@@ -83,7 +83,7 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(metrics []m.Metric) error {
 	for index, d := range metrics {
 
 		if cw.config.Debug {
-			cw.logger.Printf("%s %d %d", d.GetName(), d.GetType(), d.GetValue())
+			cw.logger.Printf("%s %d %d %s", d.GetName(), d.GetType(), d.GetValue(), d.GetProvider())
 		}
 
 		switch d.GetType() {
@@ -100,13 +100,16 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(metrics []m.Metric) error {
 		case m.LEVEL:
 			value := float64(d.GetValue())
 			datum := createDatum(d.GetName(), d.GetProvider())
-			if !strings.HasSuffix(d.GetName(), "Per") {
-				datum.Unit = aws.String(cloudwatch.StandardUnitKilobytes)
-			} else {
-				datum.Unit = aws.String(cloudwatch.StandardUnitPercent)
-			}
+			datum.Unit = aws.String(cloudwatch.StandardUnitKilobytes)
 			datum.Value = aws.Float64(float64(value))
 			data = append(data, datum)
+		case m.LEVEL_PERCENT:
+			value := float64(d.GetValue())
+			datum := createDatum(d.GetName(), d.GetProvider())
+			datum.Unit = aws.String(cloudwatch.StandardUnitPercent)
+			datum.Value = aws.Float64(float64(value))
+			data = append(data, datum)
+
 		case m.TIMING:
 			value := float64(d.GetValue())
 			datum := createDatum(d.GetName(), d.GetProvider())

@@ -85,7 +85,7 @@ func (disk *DiskMetricsGatherer) GetMetrics() ([]Metric, error) {
 			var total, used, available uint64
 			fmt.Sscanf(line, "%s %d %d %d", &name, &total, &used, &available)
 			var totalF, availableF float64
-			
+
 			println("diskusage 1", name, total, used, available)
 			totalF = float64(total)
 			availableF = float64(available)
@@ -96,7 +96,7 @@ func (disk *DiskMetricsGatherer) GetMetrics() ([]Metric, error) {
 
 			metrics = append(metrics, metric{
 				metricType: LEVEL_PERCENT,
-				name:       "dU-" + name[5:] + "-AvailPer",
+				name:       "dUVol" + name[5:] + "AvailPer",
 				value:      MetricValue(calc),
 				provider:   "disk",
 			})

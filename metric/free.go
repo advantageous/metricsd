@@ -69,10 +69,10 @@ func (disk *FreeMetricGatherer) GetMetrics() ([]Metric, error) {
 	totalF := float64(total)
 
 	freePercent := (float64(free) / totalF) * 100.0
-	metrics = append(metrics, metric{LEVEL, MetricValue(int64(freePercent)), "mFreePer", "ram"})
+	metrics = append(metrics, metric{LEVEL_PERCENT, MetricValue(int64(freePercent)), "mFreePer", "ram"})
 
 	usedPercent := (float64(used) / totalF) * 100.0
-	metrics = append(metrics, metric{LEVEL, MetricValue(int64(usedPercent)), "mUsedPer", "ram"})
+	metrics = append(metrics, metric{LEVEL_PERCENT, MetricValue(int64(usedPercent)), "mUsedPer", "ram"})
 
 	fmt.Sscanf(line2, "%s %d %d %d", &mem, &total, &free, &used)
 
@@ -85,9 +85,9 @@ func (disk *FreeMetricGatherer) GetMetrics() ([]Metric, error) {
 
 		totalF = float64(total)
 		freePercent = (float64(free) / totalF) * 100.0
-		metrics = append(metrics, metric{LEVEL, MetricValue(int64(freePercent)), "mSwpFreePer", "ram"})
+		metrics = append(metrics, metric{LEVEL_PERCENT, MetricValue(int64(freePercent)), "mSwpFreePer", "ram"})
 		usedPercent = (float64(used) / totalF) * 100.0
-		metrics = append(metrics, metric{LEVEL, MetricValue(int64(usedPercent)), "mSwpUsedPer", "ram"})
+		metrics = append(metrics, metric{LEVEL_PERCENT, MetricValue(int64(usedPercent)), "mSwpUsedPer", "ram"})
 	}
 
 	return metrics, nil

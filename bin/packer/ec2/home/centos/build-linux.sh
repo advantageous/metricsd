@@ -5,7 +5,6 @@ rm metricsd_linux
 
 set -e
 
-/usr/lib/systemd/systemd-journald &
 
 cd /gopath/src/github.com/advantageous/metricsd/
 
