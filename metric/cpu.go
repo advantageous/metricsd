@@ -128,52 +128,52 @@ func convertToMetrics(lastTimeStats *CpuStats, nowStats *CpuStats) []Metric {
 
 			guest := c.Guest - lastTimeStats.CpuTimeList[index].Guest
 			if guest > 0 {
-				metrics = append(metrics, metric{COUNT, MetricValue(guest), c.Name + "-guest", "cpu"})
+				metrics = append(metrics, metric{COUNT, MetricValue(guest), c.Name + "Guest", "cpu"})
 			}
 
 			user := c.User - lastTimeStats.CpuTimeList[index].User
 			if user > 0 {
-				metrics = append(metrics, metric{COUNT, MetricValue(user), c.Name + "-usr", "cpu"})
+				metrics = append(metrics, metric{COUNT, MetricValue(user), c.Name + "Usr", "cpu"})
 			}
 
 			idle := c.Idle - lastTimeStats.CpuTimeList[index].Idle
 			if idle > 0 {
-				metrics = append(metrics, metric{COUNT, MetricValue(idle), c.Name + "-idle", "cpu"})
+				metrics = append(metrics, metric{COUNT, MetricValue(idle), c.Name + "Idle", "cpu"})
 			}
 
 			IoWait := c.IoWait - lastTimeStats.CpuTimeList[index].IoWait
 			if IoWait > 0 {
-				metrics = append(metrics, metric{COUNT, MetricValue(IoWait), c.Name + "-iowait", "cpu"})
+				metrics = append(metrics, metric{COUNT, MetricValue(IoWait), c.Name + "Iowait", "cpu"})
 			}
 
 			Irq := c.Irq - lastTimeStats.CpuTimeList[index].Irq
 			if Irq > 0 {
-				metrics = append(metrics, metric{COUNT, MetricValue(Irq), c.Name + "-irq", "cpu"})
+				metrics = append(metrics, metric{COUNT, MetricValue(Irq), c.Name + "Irq", "cpu"})
 			}
 
 			GuestNice := c.GuestNice - lastTimeStats.CpuTimeList[index].GuestNice
 			if GuestNice > 0 {
-				metrics = append(metrics, metric{COUNT, MetricValue(GuestNice), c.Name + "-guestnice", "cpu"})
+				metrics = append(metrics, metric{COUNT, MetricValue(GuestNice), c.Name + "Guestnice", "cpu"})
 			}
 
 			Steal := c.Steal - lastTimeStats.CpuTimeList[index].Steal
 			if Steal > 0 {
-				metrics = append(metrics, metric{COUNT, MetricValue(Steal), c.Name + "-steal", "cpu"})
+				metrics = append(metrics, metric{COUNT, MetricValue(Steal), c.Name + "Steal", "cpu"})
 			}
 
 			Nice := c.Nice - lastTimeStats.CpuTimeList[index].Nice
 			if Nice > 0 {
-				metrics = append(metrics, metric{COUNT, MetricValue(Nice), c.Name + "-nice", "cpu"})
+				metrics = append(metrics, metric{COUNT, MetricValue(Nice), c.Name + "Nice", "cpu"})
 			}
 
 			System := c.System - lastTimeStats.CpuTimeList[index].System
 			if System > 0 {
-				metrics = append(metrics, metric{COUNT, MetricValue(System), c.Name + "-sys", "cpu"})
+				metrics = append(metrics, metric{COUNT, MetricValue(System), c.Name + "Sys", "cpu"})
 			}
 
 			SoftIrq := c.SoftIrq - lastTimeStats.CpuTimeList[index].SoftIrq
 			if SoftIrq > 0 {
-				metrics = append(metrics, metric{COUNT, MetricValue(SoftIrq), c.Name + "-softirq", "cpu"})
+				metrics = append(metrics, metric{COUNT, MetricValue(SoftIrq), c.Name + "Softirq", "cpu"})
 			}
 
 		}
@@ -185,21 +185,21 @@ func convertToMetrics(lastTimeStats *CpuStats, nowStats *CpuStats) []Metric {
 		metrics = append(metrics, metric{COUNT, MetricValue(nowStats.ContextSwitchCount), "processes", "cpu"})
 
 		for _, c := range nowStats.CpuTimeList {
-			metrics = append(metrics, metric{COUNT, MetricValue(c.Guest), c.Name + "-guest", "cpu"})
-			metrics = append(metrics, metric{COUNT, MetricValue(c.User), c.Name + "-usr", "cpu"})
-			metrics = append(metrics, metric{COUNT, MetricValue(c.Idle), c.Name + "-idle", "cpu"})
-			metrics = append(metrics, metric{COUNT, MetricValue(c.IoWait), c.Name + "-iowait", "cpu"})
-			metrics = append(metrics, metric{COUNT, MetricValue(c.Irq), c.Name + "-irq", "cpu"})
-			metrics = append(metrics, metric{COUNT, MetricValue(c.GuestNice), c.Name + "-guestnice", "cpu"})
-			metrics = append(metrics, metric{COUNT, MetricValue(c.Steal), c.Name + "-steal", "cpu"})
-			metrics = append(metrics, metric{COUNT, MetricValue(c.Nice), c.Name + "-nice", "cpu"})
-			metrics = append(metrics, metric{COUNT, MetricValue(c.System), c.Name + "-sys", "cpu"})
-			metrics = append(metrics, metric{COUNT, MetricValue(c.SoftIrq), c.Name + "-softirq", "cpu"})
+			metrics = append(metrics, metric{COUNT, MetricValue(c.Guest), c.Name + "Guest", "cpu"})
+			metrics = append(metrics, metric{COUNT, MetricValue(c.User), c.Name + "Usr", "cpu"})
+			metrics = append(metrics, metric{COUNT, MetricValue(c.Idle), c.Name + "Idle", "cpu"})
+			metrics = append(metrics, metric{COUNT, MetricValue(c.IoWait), c.Name + "Iowait", "cpu"})
+			metrics = append(metrics, metric{COUNT, MetricValue(c.Irq), c.Name + "Irq", "cpu"})
+			metrics = append(metrics, metric{COUNT, MetricValue(c.GuestNice), c.Name + "Guestnice", "cpu"})
+			metrics = append(metrics, metric{COUNT, MetricValue(c.Steal), c.Name + "Steal", "cpu"})
+			metrics = append(metrics, metric{COUNT, MetricValue(c.Nice), c.Name + "Nice", "cpu"})
+			metrics = append(metrics, metric{COUNT, MetricValue(c.System), c.Name + "Sys", "cpu"})
+			metrics = append(metrics, metric{COUNT, MetricValue(c.SoftIrq), c.Name + "Softirq", "cpu"})
 		}
 	}
 
-	metrics = append(metrics, metric{COUNT, MetricValue(nowStats.ContextSwitchCount), "procs_running", "cpu"})
-	metrics = append(metrics, metric{COUNT, MetricValue(nowStats.ContextSwitchCount), "procs_blocked", "cpu"})
+	metrics = append(metrics, metric{COUNT, MetricValue(nowStats.ContextSwitchCount), "procsRunning", "cpu"})
+	metrics = append(metrics, metric{COUNT, MetricValue(nowStats.ContextSwitchCount), "procsBlocked", "cpu"})
 
 	return metrics
 }
@@ -254,6 +254,11 @@ func (cpu *CPUMetricsGatherer) readCpuStats() (*CpuStats, error) {
 
 func (cpu *CPUMetricsGatherer) parseLine(name string, value uint64, line string, stats *CpuStats) error {
 
+	if cpu.debug {
+		cpu.logger.Println("LINE", line)
+		cpu.logger.Println(name, value)
+	}
+
 	switch name {
 	case "ctxt":
 		stats.ContextSwitchCount = CpuCount(value)
@@ -279,6 +284,15 @@ func (cpu *CPUMetricsGatherer) parseLine(name string, value uint64, line string,
 				&t.Idle, &t.IoWait, &t.Irq,
 				&t.SoftIrq, &t.Steal, &t.Guest,
 				&t.GuestNice)
+
+			if cpu.debug {
+				cpu.logger.Printf("Name = %s,\t User=%d,\t Nice=%d,\t System=%d \n" +
+					"Idle = %d,\t IoWait = %d,\t Irq = %d,\tSftIrq=%d \n" +
+					"Steal = %d,\t Guest=%d,\t GuestNice=%d",
+					t.Name, t.User, t.Nice, t.System,
+					&t.Idle, &t.IoWait, &t.Irq, &t.SoftIrq,
+					&t.Steal, &t.Guest, &t.GuestNice)
+			}
 
 			if err != nil {
 				cpu.logger.PrintError("Failure parsing cpu stats", err)
