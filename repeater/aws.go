@@ -90,7 +90,7 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(metrics []m.Metric) error {
 		case m.COUNT:
 			value := float64(d.GetValue())
 			datum := createDatum(d.GetName(), d.GetProvider())
-			if strings.HasSuffix(d.GetName(), "Per") {
+			if !strings.HasSuffix(d.GetName(), "Per") {
 				datum.Unit = aws.String(cloudwatch.StandardUnitCount)
 			} else {
 				datum.Unit = aws.String(cloudwatch.StandardUnitPercent)
@@ -100,7 +100,7 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(metrics []m.Metric) error {
 		case m.LEVEL:
 			value := float64(d.GetValue())
 			datum := createDatum(d.GetName(), d.GetProvider())
-			if strings.HasSuffix(d.GetName(), "Per") {
+			if !strings.HasSuffix(d.GetName(), "Per") {
 				datum.Unit = aws.String(cloudwatch.StandardUnitKilobytes)
 			} else {
 				datum.Unit = aws.String(cloudwatch.StandardUnitPercent)
