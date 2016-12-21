@@ -86,13 +86,15 @@ func (disk *DiskMetricsGatherer) GetMetrics() ([]Metric, error) {
 			fmt.Sscanf(line, "%s %d %d %d", &name, &total, &used, &available)
 			var totalF, availableF float64
 
-			println("diskusage 1", name, total, used, available)
 			totalF = float64(total)
 			availableF = float64(available)
 
 			var calc = availableF / totalF * 100.0
 
-			println("diskusage 2", name, total, used, available, calc)
+			if disk.debug {
+				disk.logger.Printf("name %s total %d used %d available %d calc %2.2f\n",
+					name, total, used, available, calc)
+			}
 
 			metrics = append(metrics, metric{
 				metricType: LEVEL_PERCENT,

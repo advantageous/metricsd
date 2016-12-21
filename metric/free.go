@@ -29,7 +29,7 @@ func NewFreeMetricGatherer(logger l.Logger, config *Config) *FreeMetricGatherer 
 	}
 }
 
-func (disk *FreeMetricGatherer) GetMetrics() ([]Metric, error) {
+func (gatherer *FreeMetricGatherer) GetMetrics() ([]Metric, error) {
 	var metrics = []Metric{}
 
 	var output string
@@ -60,6 +60,11 @@ func (disk *FreeMetricGatherer) GetMetrics() ([]Metric, error) {
 
 	fmt.Sscanf(line1, "%s %d %d %d %d %d %d", &mem, &total, &free, &used, &shared, &buffer, &available)
 
+
+	if gatherer.debug {
+		gatherer.logger.Printf("name %s total %d, free %d, used %d," +
+			" shared%d %d, buffer %d, available %d\n", mem, total, free, used, shared, buffer, available)
+	}
 	metrics = append(metrics, metric{LEVEL, MetricValue(free), "mFree", "ram"})
 	metrics = append(metrics, metric{LEVEL, MetricValue(used), "mUsed", "ram"})
 	metrics = append(metrics, metric{LEVEL, MetricValue(shared), "mShared", "ram"})
