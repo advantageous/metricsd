@@ -36,14 +36,23 @@ Field 11 -- weighted # of milliseconds spent doing I/Os
 
 type DiskMetricsGatherer struct {
 	logger l.Logger
+	debug  bool
 }
 
-func NewDiskMetricsGatherer(logger l.Logger) *DiskMetricsGatherer {
+func NewDiskMetricsGatherer(logger l.Logger, config *Config) *DiskMetricsGatherer {
 
 	if logger == nil {
-		logger = l.GetSimpleLogger("MT_DISK_DEBUG", "disk")
+		if config.Debug {
+			logger = l.NewSimpleDebugLogger("disk")
+		} else {
+			logger = l.GetSimpleLogger("MT_DISK_DEBUG", "disk")
+		}
 	}
-	return &DiskMetricsGatherer{logger: logger}
+
+	return &DiskMetricsGatherer{
+		logger: logger,
+		debug:config.Debug,
+	}
 }
 
 func (disk *DiskMetricsGatherer) GetMetrics() ([]Metric, error) {
@@ -56,6 +65,9 @@ func (disk *DiskMetricsGatherer) GetMetrics() ([]Metric, error) {
 	if runtime.GOOS == "linux" {
 		command = "/usr/bin/df"
 		args = []string{"-B", "512"}
+		if disk.debug {
+			disk.logger.Println("Linux", "/usr/bin/df -B 512")
+		}
 	} else if runtime.GOOS == "darwin" {
 		command = "/bin/df"
 		args = []string{"-b", "-l"}
@@ -73,15 +85,18 @@ func (disk *DiskMetricsGatherer) GetMetrics() ([]Metric, error) {
 			var total, used, available uint64
 			fmt.Sscanf(line, "%s %d %d %d", &name, &total, &used, &available)
 			var totalF, availableF float64
-
+			
+			println("diskusage 1", name, total, used, available)
 			totalF = float64(total)
 			availableF = float64(available)
 
 			var calc = availableF / totalF * 100.0
 
+			println("diskusage 2", name, total, used, available, calc)
+
 			metrics = append(metrics, metric{
-				metricType: LEVEL,
-				name:       "dU" + strings.ToUpper(name[5:]) + "AvailPer",
+				metricType: LEVEL_PERCENT,
+				name:       "dU-" + name[5:] + "-AvailPer",
 				value:      MetricValue(calc),
 				provider:   "disk",
 			})

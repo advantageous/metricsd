@@ -20,8 +20,9 @@ func main() {
 
 	repeaters := []m.MetricsRepeater{r.NewAwsCloudMetricRepeater(config)}
 
-	gatherers := []m.MetricsGatherer{m.NewCPUMetricsGatherer(nil, config),
-		m.NewDiskMetricsGatherer(nil),
+	gatherers := []m.MetricsGatherer{
+		//m.NewCPUMetricsGatherer(nil, config),
+		m.NewDiskMetricsGatherer(nil, config),
 		m.NewFreeMetricGatherer(nil, config)}
 
 	m.RunWorker(gatherers, repeaters, nil, config.TimePeriodSeconds*time.Second)

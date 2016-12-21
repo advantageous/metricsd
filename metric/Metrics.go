@@ -10,6 +10,7 @@ const (
 	COUNT MetricType = iota
 	LEVEL
 	TIMING
+	LEVEL_PERCENT
 )
 
 type Metric interface {
