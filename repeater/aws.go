@@ -6,7 +6,6 @@ import (
 	"github.com/advantageous/metricsd/util"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
-	"strings"
 	"time"
 )
 
