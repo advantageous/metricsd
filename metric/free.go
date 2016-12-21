@@ -63,7 +63,7 @@ func (gatherer *FreeMetricGatherer) GetMetrics() ([]Metric, error) {
 
 	if gatherer.debug {
 		gatherer.logger.Printf("name %s total %d, used %d, free %d," +
-			" shared%d %d, buffer %d, available %d\n", mem, total, used, free, shared, buffer, available)
+			" shared%d , buffer %d, available %d\n", mem, total, used, free, shared, buffer, available)
 	}
 	metrics = append(metrics, metric{LEVEL, MetricValue(free), "mFree", "ram"})
 	metrics = append(metrics, metric{LEVEL, MetricValue(used), "mUsed", "ram"})
@@ -79,7 +79,7 @@ func (gatherer *FreeMetricGatherer) GetMetrics() ([]Metric, error) {
 	usedPercent := (float64(used) / totalF) * 100.0
 	metrics = append(metrics, metric{LEVEL_PERCENT, MetricValue(int64(usedPercent)), "mUsedPer", "ram"})
 
-	fmt.Sscanf(line2, "%s %d %d %d", &mem, &total, &free, &used)
+	fmt.Sscanf(line2, "%s %d %d %d", &mem, &total, &used, &free)
 
 	if free == 0 && used == 0 && total == 0 {
 
