@@ -58,12 +58,12 @@ func (gatherer *FreeMetricGatherer) GetMetrics() ([]Metric, error) {
 	var available uint64
 	var mem string
 
-	fmt.Sscanf(line1, "%s %d %d %d %d %d %d", &mem, &total, &free, &used, &shared, &buffer, &available)
+	fmt.Sscanf(line1, "%s %d %d %d %d %d %d", &mem, &total, &used, &free, &shared, &buffer, &available)
 
 
 	if gatherer.debug {
-		gatherer.logger.Printf("name %s total %d, free %d, used %d," +
-			" shared%d %d, buffer %d, available %d\n", mem, total, free, used, shared, buffer, available)
+		gatherer.logger.Printf("name %s total %d, used %d, free %d," +
+			" shared%d %d, buffer %d, available %d\n", mem, total, used, free, shared, buffer, available)
 	}
 	metrics = append(metrics, metric{LEVEL, MetricValue(free), "mFree", "ram"})
 	metrics = append(metrics, metric{LEVEL, MetricValue(used), "mUsed", "ram"})
