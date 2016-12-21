@@ -51,7 +51,7 @@ func NewDiskMetricsGatherer(logger l.Logger, config *Config) *DiskMetricsGathere
 
 	return &DiskMetricsGatherer{
 		logger: logger,
-		debug:config.Debug,
+		debug:  config.Debug,
 	}
 }
 
