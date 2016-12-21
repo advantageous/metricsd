@@ -5,7 +5,7 @@
     "aws_region": "us-west-2",
     "aws_ami_image": "ami-d2c924b2",
     "aws_instance_type": "m4.large",
-    "image_version" : "0.6"
+    "image_version" : "0.1"
   },
   "builders": [
     {
@@ -16,12 +16,12 @@
       "source_ami": "{{user `aws_ami_image`}}",
       "instance_type": "{{user `aws_instance_type`}}",
       "ssh_username": "centos",
-      "ami_name": "centos-7-systemd-cloud-watch-{{user `image_version`}}",
+      "ami_name": "centos-7-systemd-metricsd-{{user `image_version`}}",
       "tags": {
-        "Name": "centos-7-systemd-cloud-watch-{{user `image_version`}}",
+        "Name": "centos-7-systemd-metricsd-{{user `image_version`}}",
         "OS_Version": "LinuxCentOs7",
         "Release": "7",
-        "Description": "Base CentOs7 with prerequisites for go development for rsyslog-journald-repeater"
+        "Description": "Base CentOs7 with prerequisites for go development for metricsd"
       },
       "user_data_file": "config/user-data.sh"
     }
@@ -41,7 +41,7 @@
       "type": "shell",
       "scripts": [
         "scripts/ec2-provision.sh",
-        "scripts/040-logagent.sh"
+        "scripts/010-metricsd.sh"
       ]
     },
     {

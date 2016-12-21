@@ -9,7 +9,7 @@ chown centos /home/centos/.bash_profile
 
 sudo mkdir -p /gopath/src/github.com/advantageous/
 sudo chown centos /gopath/src/github.com/advantageous/
-git clone https://github.com/advantageous/rsyslog-journald-repeater.git /gopath/src/github.com/advantageous/rsyslog-journald-repeater
+git clone https://github.com/advantageous/metricsd.git /gopath/src/github.com/advantageous/metricsd
 
 sudo chown -R centos /gopath
 
