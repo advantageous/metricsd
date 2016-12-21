@@ -10,3 +10,5 @@ metrics
 metricsd
 
 metricsd_linux
+
+bin/packer/ec2_env.sh

@@ -17,4 +17,4 @@ echo "Running go build"
 go build
 echo "Renaming output to _linux"
 mv metricsd metricsd_linux
-cp  metricsd_linux /usr/bin/metricsd
+sudo cp  metricsd_linux /usr/bin/metricsd

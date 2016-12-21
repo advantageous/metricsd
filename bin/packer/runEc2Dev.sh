@@ -12,7 +12,7 @@ echo "${instance_id} is being created"
 
 aws ec2 wait instance-exists --instance-ids "$instance_id"
 
-aws ec2 create-tags --resources "${instance_id}" --tags Key=Name,Value="i.int.dev.rysyslog-journald-repeater"
+aws ec2 create-tags --resources "${instance_id}" --tags Key=Name,Value="i.int.dev.metricsd"
 
 echo "${instance_id} was tagged waiting to login"
 
