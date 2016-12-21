@@ -9,11 +9,12 @@ import (
 
 type Config struct {
 	AWSRegion         string        `hcl:"aws_region"`
+	IpAddress         string        `hcl:"ip_address"`
 	EC2InstanceId     string        `hcl:"ec2_instance_id"`
 	Debug             bool          `hcl:"debug"`
 	Local             bool          `hcl:"local"`
-	MetricPrefix      string        `hcl:"metric_prefix"`
-	ParentNameSpace   string        `hcl:"namespace"`
+	NameSpace         string        `hcl:"namespace"`
+	Env               string        `hcl:"env"`
 	TimePeriodSeconds time.Duration `hcl:"interval_seconds"`
 }
 

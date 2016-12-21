@@ -27,6 +27,32 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(metrics []m.Metric) error {
 		}
 	}
 
+
+	dimensions := make([]*cloudwatch.Dimension, 0, 3)
+
+	instanceIdDim := &cloudwatch.Dimension{
+		Name: aws.String("instanceId"),
+		Value: aws.String(cw.config.EC2InstanceId),
+	}
+	dimensions = append(dimensions, instanceIdDim)
+
+	if cw.config.IpAddress != "" {
+		ipDim := &cloudwatch.Dimension{
+			Name: aws.String("ip"),
+			Value: aws.String(cw.config.IpAddress),
+		}
+		dimensions = append(dimensions, ipDim)
+	}
+
+	if cw.config.Env != "" {
+		dim := &cloudwatch.Dimension{
+			Name: aws.String("Environment"),
+			Value: aws.String(cw.config.Env),
+		}
+		dimensions = append(dimensions, dim)
+	}
+
+
 	data := []*cloudwatch.MetricDatum{}
 
 	var err error
@@ -67,12 +93,12 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(metrics []m.Metric) error {
 
 		}
 
-		if index%20 == 0 && index != 0 {
+		if index % 20 == 0 && index != 0 {
 			data = []*cloudwatch.MetricDatum{}
 
 			if len(data) > 0 {
 				request := &cloudwatch.PutMetricDataInput{
-					Namespace:  aws.String(cw.config.MetricPrefix),
+					Namespace:  aws.String(cw.config.NameSpace),
 					MetricData: data,
 				}
 				_, err = cw.conn.PutMetricData(request)
@@ -92,7 +118,7 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(metrics []m.Metric) error {
 
 	if len(data) > 0 {
 		request := &cloudwatch.PutMetricDataInput{
-			Namespace:  aws.String(cw.config.MetricPrefix),
+			Namespace:  aws.String(cw.config.NameSpace),
 			MetricData: data,
 		}
 		_, err = cw.conn.PutMetricData(request)

@@ -10,7 +10,6 @@ import (
 	awsSession "github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"os"
-	"strings"
 )
 
 var awsLogger = l.NewSimpleLogger("aws")
@@ -21,15 +20,21 @@ func NewAWSSession(cfg *m.Config) *awsSession.Session {
 	credentials := getCredentials(metaDataClient)
 
 	if credentials != nil {
+
+		credentials:=getCredentials(metaDataClient)
+		readMeta(metaDataClient, cfg, session)
+
 		awsConfig := &aws.Config{
-			Credentials: getCredentials(metaDataClient),
-			Region:      aws.String(getRegion(metaDataClient, cfg, session)),
+			Credentials: credentials,
+			Region:      aws.String(cfg.AWSRegion),
 			MaxRetries:  aws.Int(3),
 		}
 		return awsSession.New(awsConfig)
 	} else {
+		readMeta(metaDataClient, cfg, session)
+
 		return awsSession.New(&aws.Config{
-			Region:     aws.String(getRegion(metaDataClient, cfg, session)),
+			Region:     aws.String(cfg.AWSRegion),
 			MaxRetries: aws.Int(3),
 		})
 	}
@@ -47,15 +52,13 @@ func getClient(config *m.Config) (*ec2metadata.EC2Metadata, *awsSession.Session)
 	}
 }
 
-func getRegion(client *ec2metadata.EC2Metadata, config *m.Config, session *awsSession.Session) string {
+func readMeta(client *ec2metadata.EC2Metadata, config *m.Config, session *awsSession.Session) {
 
 	if client == nil {
 		awsLogger.Info("Client missing using config to set region")
 		if config.AWSRegion == "" {
 			awsLogger.Info("AWSRegion missing using default region us-west-2")
-			return "us-west-2"
-		} else {
-			return config.AWSRegion
+			config.AWSRegion = "us-west-2"
 		}
 	} else {
 		region, err := client.Region()
@@ -65,28 +68,12 @@ func getRegion(client *ec2metadata.EC2Metadata, config *m.Config, session *awsSe
 		}
 
 		config.AWSRegion = region
+		config.IpAddress = findLocalIp(client)
 		config.EC2InstanceId, err = client.GetMetadata("instance-id")
 		if err != nil {
 			awsLogger.Error("Unable to get instance id from aws meta client : %s %v", err.Error(), err)
 			os.Exit(4)
 		}
-
-		if config.MetricPrefix == "" {
-			var az, name, ip string
-			az = findAZ(client)
-			ip = findLocalIp(client)
-
-			name = findInstanceName(config.EC2InstanceId, config.AWSRegion, session)
-
-			if config.ParentNameSpace == "" {
-				config.MetricPrefix = name + "-" + strings.Replace(ip, ".", "-", -1) + "-" + az
-			} else {
-				config.MetricPrefix = config.ParentNameSpace + "/" + name + "-" + strings.Replace(ip, ".", "-", -1) + "-" + az
-			}
-			awsLogger.Infof("MetricPrefix was not set so using %s \n", config.MetricPrefix)
-		}
-
-		return region
 	}
 
 }
