@@ -106,100 +106,82 @@ func convertToMetrics(lastTimeStats *CpuStats, nowStats *CpuStats) []Metric {
 
 		softInterruptCount := nowStats.SoftInterruptCount - lastTimeStats.SoftInterruptCount
 		if softInterruptCount > 0 {
-			metrics = append(metrics, metric{COUNT, MetricValue(softInterruptCount), "softirq", "cpu"})
+			metrics = append(metrics, metric{COUNT, MetricValue(softInterruptCount), "softirqCnt", "cpu"})
 		}
 
 		interruptCount := nowStats.InterruptCount - lastTimeStats.InterruptCount
 		if interruptCount > 0 {
-			metrics = append(metrics, metric{COUNT, MetricValue(interruptCount), "intr", "cpu"})
+			metrics = append(metrics, metric{COUNT, MetricValue(interruptCount), "intrCnt", "cpu"})
 		}
 
 		contextSwitchCount := nowStats.ContextSwitchCount - lastTimeStats.ContextSwitchCount
 		if contextSwitchCount > 0 {
-			metrics = append(metrics, metric{COUNT, MetricValue(contextSwitchCount), "ctxt", "cpu"})
+			metrics = append(metrics, metric{COUNT, MetricValue(contextSwitchCount), "ctxtCnt", "cpu"})
 		}
 
 		processCount := nowStats.ProcessCount - lastTimeStats.ProcessCount
 		if processCount > 0 {
-			metrics = append(metrics, metric{COUNT, MetricValue(processCount), "processes", "cpu"})
+			metrics = append(metrics, metric{COUNT, MetricValue(processCount), "processesTtlCnt", "cpu"})
 		}
 
 		for index, c := range nowStats.CpuTimeList {
 
 			guest := c.Guest - lastTimeStats.CpuTimeList[index].Guest
 			if guest > 0 {
-				metrics = append(metrics, metric{COUNT, MetricValue(guest), c.Name + "Guest", "cpu"})
+				metrics = append(metrics, metric{COUNT, MetricValue(guest), c.Name + "GuestJif", "cpu"})
 			}
 
 			user := c.User - lastTimeStats.CpuTimeList[index].User
 			if user > 0 {
-				metrics = append(metrics, metric{COUNT, MetricValue(user), c.Name + "Usr", "cpu"})
+				metrics = append(metrics, metric{COUNT, MetricValue(user), c.Name + "UsrJif", "cpu"})
 			}
 
 			idle := c.Idle - lastTimeStats.CpuTimeList[index].Idle
 			if idle > 0 {
-				metrics = append(metrics, metric{COUNT, MetricValue(idle), c.Name + "Idle", "cpu"})
+				metrics = append(metrics, metric{COUNT, MetricValue(idle), c.Name + "IdleJif", "cpu"})
 			}
 
 			IoWait := c.IoWait - lastTimeStats.CpuTimeList[index].IoWait
 			if IoWait > 0 {
-				metrics = append(metrics, metric{COUNT, MetricValue(IoWait), c.Name + "Iowait", "cpu"})
+				metrics = append(metrics, metric{COUNT, MetricValue(IoWait), c.Name + "IowaitJif", "cpu"})
 			}
 
 			Irq := c.Irq - lastTimeStats.CpuTimeList[index].Irq
 			if Irq > 0 {
-				metrics = append(metrics, metric{COUNT, MetricValue(Irq), c.Name + "Irq", "cpu"})
+				metrics = append(metrics, metric{COUNT, MetricValue(Irq), c.Name + "IrqCnt", "cpu"})
 			}
 
 			GuestNice := c.GuestNice - lastTimeStats.CpuTimeList[index].GuestNice
 			if GuestNice > 0 {
-				metrics = append(metrics, metric{COUNT, MetricValue(GuestNice), c.Name + "Guestnice", "cpu"})
+				metrics = append(metrics, metric{COUNT, MetricValue(GuestNice), c.Name + "GuestniceJif", "cpu"})
 			}
 
 			Steal := c.Steal - lastTimeStats.CpuTimeList[index].Steal
 			if Steal > 0 {
-				metrics = append(metrics, metric{COUNT, MetricValue(Steal), c.Name + "Steal", "cpu"})
+				metrics = append(metrics, metric{COUNT, MetricValue(Steal), c.Name + "StealJif", "cpu"})
 			}
 
 			Nice := c.Nice - lastTimeStats.CpuTimeList[index].Nice
 			if Nice > 0 {
-				metrics = append(metrics, metric{COUNT, MetricValue(Nice), c.Name + "Nice", "cpu"})
+				metrics = append(metrics, metric{COUNT, MetricValue(Nice), c.Name + "NiceJif", "cpu"})
 			}
 
 			System := c.System - lastTimeStats.CpuTimeList[index].System
 			if System > 0 {
-				metrics = append(metrics, metric{COUNT, MetricValue(System), c.Name + "Sys", "cpu"})
+				metrics = append(metrics, metric{COUNT, MetricValue(System), c.Name + "SysJif", "cpu"})
 			}
 
 			SoftIrq := c.SoftIrq - lastTimeStats.CpuTimeList[index].SoftIrq
 			if SoftIrq > 0 {
-				metrics = append(metrics, metric{COUNT, MetricValue(SoftIrq), c.Name + "Softirq", "cpu"})
+				metrics = append(metrics, metric{COUNT, MetricValue(SoftIrq), c.Name + "SoftCnt", "cpu"})
 			}
 
 		}
 
-	} else {
-		metrics = append(metrics, metric{COUNT, MetricValue(nowStats.SoftInterruptCount), "softirq", "cpu"})
-		metrics = append(metrics, metric{COUNT, MetricValue(nowStats.InterruptCount), "intr", "cpu"})
-		metrics = append(metrics, metric{COUNT, MetricValue(nowStats.ContextSwitchCount), "ctxt", "cpu"})
-		metrics = append(metrics, metric{COUNT, MetricValue(nowStats.ContextSwitchCount), "processes", "cpu"})
-
-		for _, c := range nowStats.CpuTimeList {
-			metrics = append(metrics, metric{COUNT, MetricValue(c.Guest), c.Name + "Guest", "cpu"})
-			metrics = append(metrics, metric{COUNT, MetricValue(c.User), c.Name + "Usr", "cpu"})
-			metrics = append(metrics, metric{COUNT, MetricValue(c.Idle), c.Name + "Idle", "cpu"})
-			metrics = append(metrics, metric{COUNT, MetricValue(c.IoWait), c.Name + "Iowait", "cpu"})
-			metrics = append(metrics, metric{COUNT, MetricValue(c.Irq), c.Name + "Irq", "cpu"})
-			metrics = append(metrics, metric{COUNT, MetricValue(c.GuestNice), c.Name + "Guestnice", "cpu"})
-			metrics = append(metrics, metric{COUNT, MetricValue(c.Steal), c.Name + "Steal", "cpu"})
-			metrics = append(metrics, metric{COUNT, MetricValue(c.Nice), c.Name + "Nice", "cpu"})
-			metrics = append(metrics, metric{COUNT, MetricValue(c.System), c.Name + "Sys", "cpu"})
-			metrics = append(metrics, metric{COUNT, MetricValue(c.SoftIrq), c.Name + "Softirq", "cpu"})
-		}
 	}
 
-	metrics = append(metrics, metric{COUNT, MetricValue(nowStats.ContextSwitchCount), "procsRunning", "cpu"})
-	metrics = append(metrics, metric{COUNT, MetricValue(nowStats.ContextSwitchCount), "procsBlocked", "cpu"})
+	metrics = append(metrics, metric{COUNT, MetricValue(nowStats.ProcessRunningCount), "procsRunning", "cpu"})
+	metrics = append(metrics, metric{COUNT, MetricValue(nowStats.ProcessBlockCount), "procsBlocked", "cpu"})
 
 	return metrics
 }
