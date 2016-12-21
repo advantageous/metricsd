@@ -18,6 +18,7 @@ type CPUMetricsGatherer struct {
 	path     string
 	lastTime *CpuStats
 	logger   l.Logger
+	debug    bool
 }
 
 type CpuStats struct {
@@ -45,7 +46,7 @@ type CpuTimes struct {
 	GuestNice CpuTime
 }
 
-func NewCPUMetricsGathererWithPath(path string, logger l.Logger) *CPUMetricsGatherer {
+func NewCPUMetricsGathererWithPath(path string, logger l.Logger, debug bool) *CPUMetricsGatherer {
 
 	if logger == nil {
 		logger = l.GetSimpleLogger("MT_CPU_DEBUG", "cpu")
@@ -53,20 +54,25 @@ func NewCPUMetricsGathererWithPath(path string, logger l.Logger) *CPUMetricsGath
 	return &CPUMetricsGatherer{
 		path:   path,
 		logger: logger,
+		debug: debug,
 	}
 }
 
-func NewCPUMetricsGatherer(logger l.Logger) *CPUMetricsGatherer {
+func NewCPUMetricsGatherer(logger l.Logger, config *Config) *CPUMetricsGatherer {
 	statFile := "/proc/stat"
 	if logger == nil {
-		logger = l.GetSimpleLogger("MT_CPU_DEBUG", "cpu")
+		if config.Debug {
+			logger = l.NewSimpleDebugLogger("cpu")
+		} else {
+			logger = l.GetSimpleLogger("MT_CPU_DEBUG", "cpu")
+		}
 	}
 	if runtime.GOOS == "darwin" {
 		dir, _ := os.Getwd()
 		logger.Println("DIR", dir)
 		statFile = dir + "/metric/test-data/proc/stat"
 	}
-	return NewCPUMetricsGathererWithPath(statFile, logger)
+	return NewCPUMetricsGathererWithPath(statFile, logger, config.Debug)
 }
 
 func (cpu *CPUMetricsGatherer) SetPath(path string) {
@@ -74,6 +80,10 @@ func (cpu *CPUMetricsGatherer) SetPath(path string) {
 }
 
 func (cpu *CPUMetricsGatherer) GetMetrics() ([]Metric, error) {
+
+	if cpu.debug {
+		cpu.logger.Debug("GetMetrics called")
+	}
 
 	var cpuStats *CpuStats
 	var err error

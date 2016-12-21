@@ -13,9 +13,9 @@ type Config struct {
 	Debug             bool          `hcl:"debug"`
 	Local             bool          `hcl:"local"`
 	MetricPrefix      string        `hcl:"metric_prefix"`
+	ParentNameSpace   string        `hcl:"namespace"`
 	TimePeriodSeconds time.Duration `hcl:"interval_seconds"`
 }
-
 
 func LoadConfig(filename string, logger l.Logger) (*Config, error) {
 

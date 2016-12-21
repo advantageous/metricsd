@@ -13,9 +13,7 @@ func main() {
 	configFile := flag.String("config", "/etc/metricsd.conf", "metrics config")
 	logger := l.NewSimpleLogger("main")
 
-	gatherers := []m.MetricsGatherer{m.NewCPUMetricsGatherer(nil),
-		m.NewDiskMetricsGatherer(nil),
-		m.NewFreeMetricGatherer(nil)}
+
 
 	config, err := m.LoadConfig(*configFile, logger)
 	if err != nil {
@@ -23,6 +21,10 @@ func main() {
 	}
 
 	repeaters := []m.MetricsRepeater{r.NewAwsCloudMetricRepeater(config)}
+
+	gatherers := []m.MetricsGatherer{m.NewCPUMetricsGatherer(nil, config),
+		m.NewDiskMetricsGatherer(nil),
+		m.NewFreeMetricGatherer(nil, config)}
 
 	m.RunWorker(gatherers, repeaters, nil, config.TimePeriodSeconds * time.Second)
 }

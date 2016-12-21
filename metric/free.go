@@ -10,14 +10,23 @@ import (
 
 type FreeMetricGatherer struct {
 	logger l.Logger
+	debug  bool
 }
 
-func NewFreeMetricGatherer(logger l.Logger) *FreeMetricGatherer {
+func NewFreeMetricGatherer(logger l.Logger, config *Config) *FreeMetricGatherer {
 
 	if logger == nil {
-		logger = l.GetSimpleLogger("MT_FREE_DEBUG", "free")
+		if config.Debug {
+			logger = l.NewSimpleDebugLogger("free")
+		} else {
+			logger = l.GetSimpleLogger("MT_FREE_DEBUG", "free")
+		}
+
 	}
-	return &FreeMetricGatherer{logger: logger}
+	return &FreeMetricGatherer{
+		logger: logger,
+		debug: config.Debug,
+	}
 }
 
 func (disk *FreeMetricGatherer) GetMetrics() ([]Metric, error) {

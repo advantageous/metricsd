@@ -77,7 +77,12 @@ func getRegion(client *ec2metadata.EC2Metadata, config *m.Config, session *awsSe
 			ip = findLocalIp(client)
 
 			name = findInstanceName(config.EC2InstanceId, config.AWSRegion, session)
-			config.MetricPrefix = name + "-" + strings.Replace(ip, ".", "-", -1) + "-" + az
+
+			if config.ParentNameSpace != "" {
+				config.MetricPrefix = name + "-" + strings.Replace(ip, ".", "-", -1) + "-" + az
+			} else {
+				config.MetricPrefix = config.ParentNameSpace + "/" + name + "-" + strings.Replace(ip, ".", "-", -1) + "-" + az
+			}
 			awsLogger.Infof("MetricPrefix was not set so using %s \n", config.MetricPrefix)
 		}
 
