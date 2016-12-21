@@ -1,7 +1,7 @@
 package repeater
 
 import (
-	lg "github.com/advantageous/metricsd/logger"
+	lg "github.com/advantageous/go-logback/logging"
 	m "github.com/advantageous/metricsd/metric"
 	"github.com/advantageous/metricsd/util"
 	"github.com/aws/aws-sdk-go/aws"

@@ -2,7 +2,7 @@ package metric
 
 import (
 	"fmt"
-	l "github.com/advantageous/metricsd/logger/test"
+	l "github.com/advantageous/go-logback/logging/test"
 	"os"
 	"testing"
 )
@@ -13,7 +13,7 @@ func TestCpuCounts(z *testing.T) {
 
 	dir, _ := os.Getwd()
 	fmt.Println("DIR", dir)
-	cpuG := NewCPUMetricsGathererWithPath(dir+"/test-data/proc/stat", MetricInterval{30, SECONDS}, test)
+	cpuG := NewCPUMetricsGathererWithPath(dir+"/test-data/proc/stat", test)
 
 	metrics, err := cpuG.GetMetrics()
 

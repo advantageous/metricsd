@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	l "github.com/advantageous/metricsd/logger"
+	l "github.com/advantageous/go-logback/logging"
 	"os"
 	"runtime"
 	"strings"

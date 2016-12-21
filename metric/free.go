@@ -2,7 +2,7 @@ package metric
 
 import (
 	"fmt"
-	l "github.com/advantageous/metricsd/logger"
+	l "github.com/advantageous/go-logback/logging"
 	"os/exec"
 	"runtime"
 	"strings"

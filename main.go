@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-	l "github.com/advantageous/metricsd/logger"
+	l "github.com/advantageous/go-logback/logging"
 	m "github.com/advantageous/metricsd/metric"
 	r "github.com/advantageous/metricsd/repeater"
 	"time"
@@ -10,7 +10,7 @@ import (
 
 func main() {
 
-	configFile := flag.String("host", "/etc/metricsd.conf", "metrics config")
+	configFile := flag.String("config", "/etc/metricsd.conf", "metrics config")
 	logger := l.NewSimpleLogger("main")
 
 	gatherers := []m.MetricsGatherer{m.NewCPUMetricsGatherer(nil),

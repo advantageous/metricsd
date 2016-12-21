@@ -1,7 +1,7 @@
 package metric
 
 import (
-	lg "github.com/advantageous/metricsd/logger"
+	lg "github.com/advantageous/go-logback/logging"
 	"os"
 	"os/signal"
 	"syscall"

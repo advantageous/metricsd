@@ -1,7 +1,7 @@
 package util
 
 import (
-	l "github.com/advantageous/metricsd/logger"
+	l "github.com/advantageous/go-logback/logging"
 	m "github.com/advantageous/metricsd/metric"
 	"github.com/aws/aws-sdk-go/aws"
 	awsCredentials "github.com/aws/aws-sdk-go/aws/credentials"

@@ -1,7 +1,7 @@
 package metric
 
 import (
-	l "github.com/advantageous/metricsd/logger"
+	l "github.com/advantageous/go-logback/logging"
 	"github.com/hashicorp/hcl"
 	"io/ioutil"
 	"time"
