@@ -18,12 +18,12 @@
     [
       {
         "type": "docker-tag",
-        "repository": "advantageous/golang-rsyslog-journald-repeater",
+        "repository": "advantageous/metricsd",
         "tag": "0.1"
       },
       {
         "type": "docker-tag",
-        "repository": "advantageous/golang-rsyslog-journald-repeater",
+        "repository": "advantageous/metricsd",
         "tag": "latest"
       },
       "docker-push"
