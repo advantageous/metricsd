@@ -20,40 +20,48 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(metrics []m.Metric) error {
 
 	timestamp := aws.Time(time.Now())
 
-	aDatum := func(name string) *cloudwatch.MetricDatum {
+	createDatum := func(name string, provider string) *cloudwatch.MetricDatum {
+
+		dimensions := make([]*cloudwatch.Dimension, 0, 3)
+
+		instanceIdDim := &cloudwatch.Dimension{
+			Name: aws.String("instanceId"),
+			Value: aws.String(cw.config.EC2InstanceId),
+		}
+		dimensions = append(dimensions, instanceIdDim)
+
+		if cw.config.IpAddress != "" {
+			ipDim := &cloudwatch.Dimension{
+				Name: aws.String("ip"),
+				Value: aws.String(cw.config.IpAddress),
+			}
+			dimensions = append(dimensions, ipDim)
+		}
+
+		if cw.config.Env != "" {
+			dim := &cloudwatch.Dimension{
+				Name: aws.String("Environment"),
+				Value: aws.String(cw.config.Env),
+			}
+			dimensions = append(dimensions, dim)
+		}
+
+		if provider != "" {
+			dim := &cloudwatch.Dimension{
+				Name: aws.String("Provider"),
+				Value: aws.String(provider),
+			}
+			dimensions = append(dimensions, dim)
+		}
 		return &cloudwatch.MetricDatum{
 			MetricName: aws.String(name),
 			Timestamp:  timestamp,
+			Dimensions: dimensions,
 		}
 	}
 
-
-	dimensions := make([]*cloudwatch.Dimension, 0, 3)
-
-	instanceIdDim := &cloudwatch.Dimension{
-		Name: aws.String("instanceId"),
-		Value: aws.String(cw.config.EC2InstanceId),
+	data := []*cloudwatch.MetricDatum{
 	}
-	dimensions = append(dimensions, instanceIdDim)
-
-	if cw.config.IpAddress != "" {
-		ipDim := &cloudwatch.Dimension{
-			Name: aws.String("ip"),
-			Value: aws.String(cw.config.IpAddress),
-		}
-		dimensions = append(dimensions, ipDim)
-	}
-
-	if cw.config.Env != "" {
-		dim := &cloudwatch.Dimension{
-			Name: aws.String("Environment"),
-			Value: aws.String(cw.config.Env),
-		}
-		dimensions = append(dimensions, dim)
-	}
-
-
-	data := []*cloudwatch.MetricDatum{}
 
 	var err error
 
@@ -66,7 +74,7 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(metrics []m.Metric) error {
 		switch d.GetType() {
 		case m.COUNT:
 			value := float64(d.GetValue())
-			datum := aDatum(d.GetName())
+			datum := createDatum(d.GetName(), d.GetProvider())
 			if strings.HasSuffix(d.GetName(), "Per") {
 				datum.Unit = aws.String(cloudwatch.StandardUnitCount)
 			} else {
@@ -76,7 +84,7 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(metrics []m.Metric) error {
 			data = append(data, datum)
 		case m.LEVEL:
 			value := float64(d.GetValue())
-			datum := aDatum(d.GetName())
+			datum := createDatum(d.GetName(), d.GetProvider())
 			if strings.HasSuffix(d.GetName(), "Per") {
 				datum.Unit = aws.String(cloudwatch.StandardUnitKilobytes)
 			} else {
@@ -86,7 +94,7 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(metrics []m.Metric) error {
 			data = append(data, datum)
 		case m.TIMING:
 			value := float64(d.GetValue())
-			datum := aDatum(d.GetName())
+			datum := createDatum(d.GetName(), d.GetProvider())
 			datum.Unit = aws.String(cloudwatch.StandardUnitMilliseconds)
 			datum.Value = aws.Float64(float64(value))
 			data = append(data, datum)
@@ -94,7 +102,8 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(metrics []m.Metric) error {
 		}
 
 		if index % 20 == 0 && index != 0 {
-			data = []*cloudwatch.MetricDatum{}
+			data = []*cloudwatch.MetricDatum{
+			}
 
 			if len(data) > 0 {
 				request := &cloudwatch.PutMetricDataInput{
