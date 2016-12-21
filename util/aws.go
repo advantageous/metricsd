@@ -78,7 +78,7 @@ func getRegion(client *ec2metadata.EC2Metadata, config *m.Config, session *awsSe
 
 			name = findInstanceName(config.EC2InstanceId, config.AWSRegion, session)
 
-			if config.ParentNameSpace != "" {
+			if config.ParentNameSpace == "" {
 				config.MetricPrefix = name + "-" + strings.Replace(ip, ".", "-", -1) + "-" + az
 			} else {
 				config.MetricPrefix = config.ParentNameSpace + "/" + name + "-" + strings.Replace(ip, ".", "-", -1) + "-" + az
