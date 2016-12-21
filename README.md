@@ -2,7 +2,7 @@
 
 Reads OS metrics and sends data to AWS CloudWatch Metrics.
  
- 
+Metricsd gathers OS metrics for AWS CloudWatch. You can install it as a systemd process. 
 
 Configuration
 ####  /etc/metricsd.conf 
