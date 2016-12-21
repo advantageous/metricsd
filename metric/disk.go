@@ -83,7 +83,7 @@ func (disk *DiskMetricsGatherer) GetMetrics() ([]Metric, error) {
 				metricType: LEVEL,
 				name:       "dU" + strings.ToUpper(name[5:]) + "AvailPer",
 				value:      MetricValue(calc),
-				provider: "disk",
+				provider:   "disk",
 			})
 
 		}

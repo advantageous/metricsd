@@ -21,7 +21,7 @@ func NewAWSSession(cfg *m.Config) *awsSession.Session {
 
 	if credentials != nil {
 
-		credentials:=getCredentials(metaDataClient)
+		credentials := getCredentials(metaDataClient)
 		readMeta(metaDataClient, cfg, session)
 
 		awsConfig := &aws.Config{
@@ -70,6 +70,8 @@ func readMeta(client *ec2metadata.EC2Metadata, config *m.Config, session *awsSes
 		config.AWSRegion = region
 		config.IpAddress = findLocalIp(client)
 		config.EC2InstanceId, err = client.GetMetadata("instance-id")
+
+		config.EC2InstanceNameTag = findInstanceName(config.EC2InstanceId, config.AWSRegion, session)
 		if err != nil {
 			awsLogger.Error("Unable to get instance id from aws meta client : %s %v", err.Error(), err)
 			os.Exit(4)

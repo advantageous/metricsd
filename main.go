@@ -13,8 +13,6 @@ func main() {
 	configFile := flag.String("config", "/etc/metricsd.conf", "metrics config")
 	logger := l.NewSimpleLogger("main")
 
-
-
 	config, err := m.LoadConfig(*configFile, logger)
 	if err != nil {
 		panic(err)
@@ -26,5 +24,5 @@ func main() {
 		m.NewDiskMetricsGatherer(nil),
 		m.NewFreeMetricGatherer(nil, config)}
 
-	m.RunWorker(gatherers, repeaters, nil, config.TimePeriodSeconds * time.Second)
+	m.RunWorker(gatherers, repeaters, nil, config.TimePeriodSeconds*time.Second)
 }

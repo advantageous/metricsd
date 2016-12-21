@@ -54,7 +54,7 @@ func NewCPUMetricsGathererWithPath(path string, logger l.Logger, debug bool) *CP
 	return &CPUMetricsGatherer{
 		path:   path,
 		logger: logger,
-		debug: debug,
+		debug:  debug,
 	}
 }
 
@@ -188,18 +188,18 @@ func convertToMetrics(lastTimeStats *CpuStats, nowStats *CpuStats) []Metric {
 			metrics = append(metrics, metric{COUNT, MetricValue(c.Guest), c.Name + "-guest", "cpu"})
 			metrics = append(metrics, metric{COUNT, MetricValue(c.User), c.Name + "-usr", "cpu"})
 			metrics = append(metrics, metric{COUNT, MetricValue(c.Idle), c.Name + "-idle", "cpu"})
-			metrics = append(metrics, metric{COUNT, MetricValue(c.IoWait), c.Name + "-iowait","cpu"})
-			metrics = append(metrics, metric{COUNT, MetricValue(c.Irq), c.Name + "-irq","cpu"})
-			metrics = append(metrics, metric{COUNT, MetricValue(c.GuestNice), c.Name + "-guestnice","cpu"})
-			metrics = append(metrics, metric{COUNT, MetricValue(c.Steal), c.Name + "-steal","cpu"})
-			metrics = append(metrics, metric{COUNT, MetricValue(c.Nice), c.Name + "-nice","cpu"})
-			metrics = append(metrics, metric{COUNT, MetricValue(c.System), c.Name + "-sys","cpu"})
-			metrics = append(metrics, metric{COUNT, MetricValue(c.SoftIrq), c.Name + "-softirq","cpu"})
+			metrics = append(metrics, metric{COUNT, MetricValue(c.IoWait), c.Name + "-iowait", "cpu"})
+			metrics = append(metrics, metric{COUNT, MetricValue(c.Irq), c.Name + "-irq", "cpu"})
+			metrics = append(metrics, metric{COUNT, MetricValue(c.GuestNice), c.Name + "-guestnice", "cpu"})
+			metrics = append(metrics, metric{COUNT, MetricValue(c.Steal), c.Name + "-steal", "cpu"})
+			metrics = append(metrics, metric{COUNT, MetricValue(c.Nice), c.Name + "-nice", "cpu"})
+			metrics = append(metrics, metric{COUNT, MetricValue(c.System), c.Name + "-sys", "cpu"})
+			metrics = append(metrics, metric{COUNT, MetricValue(c.SoftIrq), c.Name + "-softirq", "cpu"})
 		}
 	}
 
-	metrics = append(metrics, metric{COUNT, MetricValue(nowStats.ContextSwitchCount), "procs_running","cpu"})
-	metrics = append(metrics, metric{COUNT, MetricValue(nowStats.ContextSwitchCount), "procs_blocked","cpu"})
+	metrics = append(metrics, metric{COUNT, MetricValue(nowStats.ContextSwitchCount), "procs_running", "cpu"})
+	metrics = append(metrics, metric{COUNT, MetricValue(nowStats.ContextSwitchCount), "procs_blocked", "cpu"})
 
 	return metrics
 }

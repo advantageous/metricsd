@@ -25,14 +25,14 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(metrics []m.Metric) error {
 		dimensions := make([]*cloudwatch.Dimension, 0, 3)
 
 		instanceIdDim := &cloudwatch.Dimension{
-			Name: aws.String("instanceId"),
+			Name:  aws.String("instanceId"),
 			Value: aws.String(cw.config.EC2InstanceId),
 		}
 		dimensions = append(dimensions, instanceIdDim)
 
 		if cw.config.IpAddress != "" {
 			ipDim := &cloudwatch.Dimension{
-				Name: aws.String("ip"),
+				Name:  aws.String("ip"),
 				Value: aws.String(cw.config.IpAddress),
 			}
 			dimensions = append(dimensions, ipDim)
@@ -40,15 +40,31 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(metrics []m.Metric) error {
 
 		if cw.config.Env != "" {
 			dim := &cloudwatch.Dimension{
-				Name: aws.String("Environment"),
+				Name:  aws.String("Environment"),
 				Value: aws.String(cw.config.Env),
+			}
+			dimensions = append(dimensions, dim)
+		}
+
+		if cw.config.EC2InstanceNameTag != "" {
+			dim := &cloudwatch.Dimension{
+				Name:  aws.String("instanceName"),
+				Value: aws.String(cw.config.EC2InstanceNameTag),
+			}
+			dimensions = append(dimensions, dim)
+		}
+
+		if cw.config.ServerRole != "" {
+			dim := &cloudwatch.Dimension{
+				Name:  aws.String("serverRole"),
+				Value: aws.String(cw.config.ServerRole),
 			}
 			dimensions = append(dimensions, dim)
 		}
 
 		if provider != "" {
 			dim := &cloudwatch.Dimension{
-				Name: aws.String("Provider"),
+				Name:  aws.String("Provider"),
 				Value: aws.String(provider),
 			}
 			dimensions = append(dimensions, dim)
@@ -60,8 +76,7 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(metrics []m.Metric) error {
 		}
 	}
 
-	data := []*cloudwatch.MetricDatum{
-	}
+	data := []*cloudwatch.MetricDatum{}
 
 	var err error
 
@@ -101,9 +116,8 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(metrics []m.Metric) error {
 
 		}
 
-		if index % 20 == 0 && index != 0 {
-			data = []*cloudwatch.MetricDatum{
-			}
+		if index%20 == 0 && index != 0 {
+			data = []*cloudwatch.MetricDatum{}
 
 			if len(data) > 0 {
 				request := &cloudwatch.PutMetricDataInput{

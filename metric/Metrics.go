@@ -42,7 +42,6 @@ func (m metric) GetValue() MetricValue {
 	return m.value
 }
 
-
 func (m metric) GetProvider() string {
 	return m.provider
 }
