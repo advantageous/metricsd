@@ -5,3 +5,4 @@ test-utils/test-utils
 metrics
 
 
+/bin/packer/ec2_env.sh
