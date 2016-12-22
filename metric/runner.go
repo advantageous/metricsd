@@ -24,7 +24,7 @@ func RunWorker(gatherers []MetricsGatherer, repeaters []MetricsRepeater,
 	timer := time.NewTimer(interval)
 
 
-	configTimer := time.NewTimer(60 * time.Minute)
+	configTimer := time.NewTimer(60 * time.Second)
 
 	var config *Config
 
