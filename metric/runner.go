@@ -27,7 +27,7 @@ func RunWorker(gatherers []MetricsGatherer, repeaters []MetricsRepeater, logger 
 
 	timer := time.NewTimer(interval)
 
-	configTimer := time.NewTimer(interval * intervalConfigRefresh)
+	configTimer := time.NewTimer(intervalConfigRefresh)
 
 	var config *Config
 
@@ -64,6 +64,7 @@ func RunWorker(gatherers []MetricsGatherer, repeaters []MetricsRepeater, logger 
 						"ROLE", config.GetRole())
 				}
 			}
+			timer.Reset(intervalConfigRefresh)
 
 		}
 	}
