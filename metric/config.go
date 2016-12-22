@@ -53,6 +53,10 @@ func LoadConfigFromString(data string, logger l.Logger) (*Config, error) {
 		config.TimePeriodSeconds = 30
 	}
 
+	if config.NameSpace == "" {
+		config.NameSpace = "Linux System"
+	}
+
 	return config, nil
 
 }
