@@ -59,9 +59,9 @@ func RunWorker(gatherers []MetricsGatherer, repeaters []MetricsRepeater, logger 
 			} else {
 				config = newConfig
 				if debug {
-					logger.Info("LOADED NEW CONFIG", "ENV", config.Env,
-						"NAMESPACE", config.NameSpace,
-						"ROLE", config.ServerRole)
+					logger.Info("LOADED NEW CONFIG", "ENV", config.GetEnv(),
+						"NAMESPACE", config.GetNameSpace(),
+						"ROLE", config.GetRole())
 				}
 			}
 
