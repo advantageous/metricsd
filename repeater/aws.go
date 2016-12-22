@@ -15,7 +15,7 @@ type AwsCloudMetricRepeater struct {
 	config *m.Config
 }
 
-func (cw AwsCloudMetricRepeater) ProcessMetrics(metrics []m.Metric) error {
+func (cw AwsCloudMetricRepeater) ProcessMetrics(context m.MetricContext, metrics []m.Metric) error {
 
 	timestamp := aws.Time(time.Now())
 
@@ -23,40 +23,42 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(metrics []m.Metric) error {
 
 		dimensions := make([]*cloudwatch.Dimension, 0, 3)
 
-		instanceIdDim := &cloudwatch.Dimension{
-			Name:  aws.String("instanceId"),
-			Value: aws.String(cw.config.EC2InstanceId),
-		}
-		dimensions = append(dimensions, instanceIdDim)
-
-		if cw.config.IpAddress != "" {
-			ipDim := &cloudwatch.Dimension{
-				Name:  aws.String("ip"),
-				Value: aws.String(cw.config.IpAddress),
+		if context.SendId() {
+			instanceIdDim := &cloudwatch.Dimension{
+				Name:  aws.String("InstanceId"),
+				Value: aws.String(cw.config.EC2InstanceId),
 			}
-			dimensions = append(dimensions, ipDim)
-		}
+			dimensions = append(dimensions, instanceIdDim)
 
-		if cw.config.Env != "" {
+			if cw.config.IpAddress != "" {
+				ipDim := &cloudwatch.Dimension{
+					Name:  aws.String("IpAddress"),
+					Value: aws.String(cw.config.IpAddress),
+				}
+				dimensions = append(dimensions, ipDim)
+			}
+
+			if cw.config.EC2InstanceNameTag != "" {
+				dim := &cloudwatch.Dimension{
+					Name:  aws.String("InstanceName"),
+					Value: aws.String(cw.config.EC2InstanceNameTag),
+				}
+				dimensions = append(dimensions, dim)
+			}
+		}
+		if context.GetEnv() != "" {
 			dim := &cloudwatch.Dimension{
 				Name:  aws.String("Environment"),
-				Value: aws.String(cw.config.Env),
+				Value: aws.String(context.GetEnv()),
 			}
 			dimensions = append(dimensions, dim)
 		}
 
-		if cw.config.EC2InstanceNameTag != "" {
-			dim := &cloudwatch.Dimension{
-				Name:  aws.String("instanceName"),
-				Value: aws.String(cw.config.EC2InstanceNameTag),
-			}
-			dimensions = append(dimensions, dim)
-		}
 
-		if cw.config.ServerRole != "" {
+		if context.GetRole() != "" {
 			dim := &cloudwatch.Dimension{
-				Name:  aws.String("serverRole"),
-				Value: aws.String(cw.config.ServerRole),
+				Name:  aws.String("Role"),
+				Value: aws.String(context.GetRole()),
 			}
 			dimensions = append(dimensions, dim)
 		}
@@ -68,6 +70,7 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(metrics []m.Metric) error {
 			}
 			dimensions = append(dimensions, dim)
 		}
+
 		return &cloudwatch.MetricDatum{
 			MetricName: aws.String(name),
 			Timestamp:  timestamp,
@@ -109,7 +112,7 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(metrics []m.Metric) error {
 
 			if len(data) > 0 {
 				request := &cloudwatch.PutMetricDataInput{
-					Namespace:  aws.String(cw.config.NameSpace),
+					Namespace:  aws.String(context.GetNameSpace()),
 					MetricData: data,
 				}
 				_, err = cw.conn.PutMetricData(request)
@@ -129,7 +132,7 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(metrics []m.Metric) error {
 
 	if len(data) > 0 {
 		request := &cloudwatch.PutMetricDataInput{
-			Namespace:  aws.String(cw.config.NameSpace),
+			Namespace:  aws.String(context.GetNameSpace()),
 			MetricData: data,
 		}
 		_, err = cw.conn.PutMetricData(request)

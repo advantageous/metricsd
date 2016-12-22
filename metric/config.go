@@ -60,3 +60,57 @@ func LoadConfigFromString(data string, logger l.Logger) (*Config, error) {
 	return config, nil
 
 }
+
+
+func (config *Config) GetEnv() string {
+	return config.Env
+}
+
+
+func (config *Config) GetNameSpace() string {
+	return config.NameSpace
+}
+
+func (config *Config) GetRole() string {
+	return config.ServerRole
+}
+
+func (config *Config) SendId() bool {
+	return true
+}
+
+func (config *Config) GetNoIdContext() MetricContext {
+	return context{
+		env: config.Env,
+		namespace: config.NameSpace,
+		role: config.ServerRole,
+	}
+}
+
+
+type context struct {
+
+	env string
+	namespace string
+	role string
+}
+
+func (c context) GetEnv() string {
+	return c.env
+}
+
+
+func (c context) GetNameSpace() string {
+	return c.namespace
+}
+
+func (c context) GetRole() string {
+	return c.role
+}
+
+func (c context) SendId() bool {
+	return false
+}
+
+
+

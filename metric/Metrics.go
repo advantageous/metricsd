@@ -20,12 +20,21 @@ type Metric interface {
 	GetName() string
 }
 
+type MetricContext interface {
+	GetEnv() string
+	GetNameSpace() string
+	GetRole() string
+	SendId() bool
+}
+
+
+
 type MetricsGatherer interface {
 	GetMetrics() ([]Metric, error)
 }
 
 type MetricsRepeater interface {
-	ProcessMetrics(metrics []Metric) error
+	ProcessMetrics(context MetricContext, metrics []Metric) error
 }
 
 type metric struct {

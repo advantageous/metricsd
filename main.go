@@ -25,5 +25,5 @@ func main() {
 		m.NewDiskMetricsGatherer(nil, config),
 		m.NewFreeMetricGatherer(nil, config)}
 
-	m.RunWorker(gatherers, repeaters, nil, config.TimePeriodSeconds*time.Second)
+	m.RunWorker(gatherers, repeaters, nil, config.TimePeriodSeconds*time.Second, *configFile)
 }

@@ -14,13 +14,29 @@ func makeTerminateChannel() <-chan os.Signal {
 	return ch
 }
 
-func RunWorker(gatherers []MetricsGatherer, repeaters []MetricsRepeater, logger lg.Logger, interval time.Duration) {
+func RunWorker(gatherers []MetricsGatherer, repeaters []MetricsRepeater,
+	logger lg.Logger, interval time.Duration, configFile string) {
 
 	if logger == nil {
 		logger = lg.GetSimpleLogger("MT_METRIC_WORKER_DEBUG", "worker")
 	}
 
 	timer := time.NewTimer(interval)
+
+
+	configTimer := time.NewTimer(60 * time.Minute)
+
+	var config *Config
+
+	if newConfig, err := LoadConfig(configFile, logger); err != nil {
+		logger.Error("Error reading config", err)
+	} else {
+		config=newConfig
+	}
+
+
+
+
 
 	terminator := makeTerminateChannel()
 
@@ -35,15 +51,30 @@ func RunWorker(gatherers []MetricsGatherer, repeaters []MetricsRepeater, logger 
 
 		case <-timer.C:
 			metrics := collectMetrics(gatherers, logger)
-			processMetrics(metrics, repeaters, logger)
+			processMetrics(metrics, repeaters, config, logger)
 			timer.Reset(interval)
+
+		case <-configTimer.C:
+			if newConfig, err := LoadConfig(configFile, logger); err != nil {
+				logger.Error("Error reading config", err)
+			} else {
+				config=newConfig
+			}
 
 		}
 	}
 }
-func processMetrics(metrics []Metric, repeaters []MetricsRepeater, logger lg.Logger) {
+func processMetrics(metrics []Metric, repeaters []MetricsRepeater, context *Config, logger lg.Logger) {
 	for _, r := range repeaters {
-		if err := r.ProcessMetrics(metrics); err != nil {
+		if err := r.ProcessMetrics(context, metrics); err != nil {
+			logger.PrintError("Repeater failed", err)
+		}
+	}
+
+	noIdContext := context.GetNoIdContext()
+
+	for _, r := range repeaters {
+		if err := r.ProcessMetrics(noIdContext, metrics); err != nil {
 			logger.PrintError("Repeater failed", err)
 		}
 	}
