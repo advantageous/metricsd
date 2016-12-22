@@ -64,7 +64,7 @@ func RunWorker(gatherers []MetricsGatherer, repeaters []MetricsRepeater, logger 
 						"ROLE", config.GetRole())
 				}
 			}
-			timer.Reset(intervalConfigRefresh)
+			configTimer.Reset(intervalConfigRefresh)
 
 		}
 	}
