@@ -14,29 +14,28 @@ func makeTerminateChannel() <-chan os.Signal {
 	return ch
 }
 
-func RunWorker(gatherers []MetricsGatherer, repeaters []MetricsRepeater,
-	logger lg.Logger, interval time.Duration, configFile string) {
+func RunWorker(gatherers []MetricsGatherer, repeaters []MetricsRepeater, logger lg.Logger, interval time.Duration,
+	intervalConfigRefresh time.Duration, debug bool, configFile string) {
 
 	if logger == nil {
-		logger = lg.GetSimpleLogger("MT_METRIC_WORKER_DEBUG", "worker")
+		if debug {
+			logger = lg.NewSimpleDebugLogger("worker")
+		} else {
+			logger = lg.GetSimpleLogger("MT_METRIC_WORKER_DEBUG", "worker")
+		}
 	}
 
 	timer := time.NewTimer(interval)
 
-
-	configTimer := time.NewTimer(60 * time.Second)
+	configTimer := time.NewTimer(interval * intervalConfigRefresh)
 
 	var config *Config
 
 	if newConfig, err := LoadConfig(configFile, logger); err != nil {
 		logger.Error("Error reading config", err)
 	} else {
-		config=newConfig
+		config = newConfig
 	}
-
-
-
-
 
 	terminator := makeTerminateChannel()
 
@@ -58,7 +57,12 @@ func RunWorker(gatherers []MetricsGatherer, repeaters []MetricsRepeater,
 			if newConfig, err := LoadConfig(configFile, logger); err != nil {
 				logger.Error("Error reading config", err)
 			} else {
-				config=newConfig
+				config = newConfig
+				if debug {
+					logger.Info("LOADED NEW CONFIG", "ENV", config.Env,
+						"NAMESPACE", config.NameSpace,
+						"ROLE", config.ServerRole)
+				}
 			}
 
 		}

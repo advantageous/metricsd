@@ -18,6 +18,7 @@ type Config struct {
 	NameSpace          string        `hcl:"namespace"`
 	Env                string        `hcl:"env"`
 	TimePeriodSeconds  time.Duration `hcl:"interval_seconds"`
+	ReadConfigSeconds  time.Duration `hcl:"interval_read_config_seconds"`
 }
 
 func LoadConfig(filename string, logger l.Logger) (*Config, error) {
@@ -53,6 +54,10 @@ func LoadConfigFromString(data string, logger l.Logger) (*Config, error) {
 		config.TimePeriodSeconds = 30
 	}
 
+	if config.ReadConfigSeconds == 0 {
+		config.ReadConfigSeconds = 60
+	}
+
 	if config.NameSpace == "" {
 		config.NameSpace = "Linux System"
 	}
@@ -61,11 +66,9 @@ func LoadConfigFromString(data string, logger l.Logger) (*Config, error) {
 
 }
 
-
 func (config *Config) GetEnv() string {
 	return config.Env
 }
-
 
 func (config *Config) GetNameSpace() string {
 	return config.NameSpace
@@ -81,24 +84,21 @@ func (config *Config) SendId() bool {
 
 func (config *Config) GetNoIdContext() MetricContext {
 	return context{
-		env: config.Env,
+		env:       config.Env,
 		namespace: config.NameSpace,
-		role: config.ServerRole,
+		role:      config.ServerRole,
 	}
 }
 
-
 type context struct {
-
-	env string
+	env       string
 	namespace string
-	role string
+	role      string
 }
 
 func (c context) GetEnv() string {
 	return c.env
 }
-
 
 func (c context) GetNameSpace() string {
 	return c.namespace
@@ -111,6 +111,3 @@ func (c context) GetRole() string {
 func (c context) SendId() bool {
 	return false
 }
-
-
-

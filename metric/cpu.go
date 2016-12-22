@@ -268,8 +268,8 @@ func (cpu *CPUMetricsGatherer) parseLine(name string, value uint64, line string,
 				&t.GuestNice)
 
 			if cpu.debug {
-				cpu.logger.Printf("Name = %s,\t User=%d,\t Nice=%d,\t System=%d \n" +
-					"Idle = %d,\t IoWait = %d,\t Irq = %d,\tSftIrq=%d \n" +
+				cpu.logger.Printf("Name = %s,\t User=%d,\t Nice=%d,\t System=%d \n"+
+					"Idle = %d,\t IoWait = %d,\t Irq = %d,\tSftIrq=%d \n"+
 					"Steal = %d,\t Guest=%d,\t GuestNice=%d",
 					t.Name, t.User, t.Nice, t.System,
 					&t.Idle, &t.IoWait, &t.Irq, &t.SoftIrq,

@@ -54,7 +54,6 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(context m.MetricContext, metrics
 			dimensions = append(dimensions, dim)
 		}
 
-
 		if context.GetRole() != "" {
 			dim := &cloudwatch.Dimension{
 				Name:  aws.String("Role"),
@@ -105,7 +104,6 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(context m.MetricContext, metrics
 		}
 
 		data = append(data, datum)
-
 
 		if index%20 == 0 && index != 0 {
 			data = []*cloudwatch.MetricDatum{}

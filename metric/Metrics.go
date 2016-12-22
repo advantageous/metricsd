@@ -27,8 +27,6 @@ type MetricContext interface {
 	SendId() bool
 }
 
-
-
 type MetricsGatherer interface {
 	GetMetrics() ([]Metric, error)
 }
