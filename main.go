@@ -3,8 +3,8 @@ package main
 import (
 	"flag"
 	l "github.com/advantageous/go-logback/logging"
-	m "github.com/advantageous/metricsd/metric"
-	r "github.com/advantageous/metricsd/repeater"
+	m "github.com/cloudrable/metricsd/metric"
+	r "github.com/cloudrable/metricsd/repeater"
 	"time"
 )
 

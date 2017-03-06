@@ -18,12 +18,12 @@
     [
       {
         "type": "docker-tag",
-        "repository": "advantageous/metricsd",
+        "repository": "cloudrable/metricsd",
         "tag": "0.1"
       },
       {
         "type": "docker-tag",
-        "repository": "advantageous/metricsd",
+        "repository": "cloudrable/metricsd",
         "tag": "latest"
       },
       "docker-push"

@@ -2,7 +2,7 @@ package repeater
 
 import (
 	lg "github.com/advantageous/go-logback/logging"
-	m "github.com/advantageous/metricsd/metric"
+	m "github.com/cloudrable/metricsd/metric"
 )
 
 type LogMetricsRepeater struct {
