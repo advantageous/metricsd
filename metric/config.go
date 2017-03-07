@@ -8,20 +8,24 @@ import (
 )
 
 type Config struct {
-	AWSRegion          string        `hcl:"aws_region"`
-	ServerRole         string        `hcl:"server_role"`
-	IpAddress          string        `hcl:"ip_address"`
-	EC2InstanceId      string        `hcl:"ec2_instance_id"`
-	EC2InstanceNameTag string        `hcl:"ec2_instance_name"`
-	Debug              bool          `hcl:"debug"`
-	Local              bool          `hcl:"local"`
-	NameSpace          string        `hcl:"namespace"`
-	Env                string        `hcl:"env"`
-	TimePeriodSeconds  time.Duration `hcl:"interval_seconds"`
-	ReadConfigSeconds  time.Duration `hcl:"interval_read_config_seconds"`
-	DiskCommand  	   string        `hcl:"disk_command"`
-	DiskArgs     	   string        `hcl:"disk_args"`
-	CpuProcStat    	   string        `hcl:"proc_stat"`
+	AWSRegion			string			`hcl:"aws_region"`
+	ServerRole			string			`hcl:"server_role"`
+	IpAddress			string			`hcl:"ip_address"`
+	EC2InstanceId		string			`hcl:"ec2_instance_id"`
+	EC2InstanceNameTag	string			`hcl:"ec2_instance_name"`
+	Debug				bool			`hcl:"debug"`
+	Local				bool			`hcl:"local"`
+	NameSpace			string			`hcl:"namespace"`
+	Env					string			`hcl:"env"`
+	TimePeriodSeconds	time.Duration	`hcl:"interval_seconds"`
+	ReadConfigSeconds	time.Duration	`hcl:"interval_read_config_seconds"`
+	DiskGather			bool			`hcl:"disk_gather"`
+	DiskCommand			string			`hcl:"disk_command"`
+	DiskArgs			string			`hcl:"disk_args"`
+	CpuGather			bool			`hcl:"cpu_gather"`
+	CpuProcStat			string			`hcl:"cpu_proc_stat"`
+	FreeGather			bool			`hcl:"free_gather"`
+	FreeCommand			string			`hcl:"free_command"`
 }
 
 func LoadConfig(filename string, logger l.Logger) (*Config, error) {

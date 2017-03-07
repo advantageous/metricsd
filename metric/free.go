@@ -11,6 +11,7 @@ import (
 type FreeMetricGatherer struct {
 	logger l.Logger
 	debug  bool
+	freeCommand string
 }
 
 func NewFreeMetricGatherer(logger l.Logger, config *Config) *FreeMetricGatherer {
@@ -26,6 +27,7 @@ func NewFreeMetricGatherer(logger l.Logger, config *Config) *FreeMetricGatherer 
 	return &FreeMetricGatherer{
 		logger: logger,
 		debug:  config.Debug,
+		freeCommand: config.FreeCommand,
 	}
 }
 
@@ -33,13 +35,21 @@ func (gatherer *FreeMetricGatherer) GetMetrics() ([]Metric, error) {
 	var metrics = []Metric{}
 
 	var output string
+	command := "/usr/bin/free"
+	label := "Linux"
 
-	var command string
-	if runtime.GOOS == "linux" {
-		command = "/usr/bin/free"
+	if gatherer.freeCommand != "" {
+		command = gatherer.freeCommand
+		label = "Config"
 	} else if runtime.GOOS == "darwin" {
 		command = "/usr/local/bin/free"
+		label = "Darwin"
 	}
+
+	if gatherer.debug {
+		gatherer.logger.Println("Free gatherer initialized by:", label, "as:", command)
+	}
+
 	if out, err := exec.Command(command).Output(); err != nil {
 		return nil, err
 	} else {

@@ -79,7 +79,7 @@ func NewCPUMetricsGatherer(logger l.Logger, config *Config) *CPUMetricsGatherer 
 		label = "Darwin"
 	}
 	if config.Debug {
-		logger.Println(label, statFile)
+		logger.Println("CPU gatherer initialized by:", label, "as:", statFile)
 	}
 
 	return NewCPUMetricsGathererWithPath(statFile, logger, config.Debug)

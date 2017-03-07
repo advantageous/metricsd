@@ -82,7 +82,7 @@ func (disk *DiskMetricsGatherer) GetMetrics() ([]Metric, error) {
 	}
 
 	if disk.debug {
-		disk.logger.Println(label, command, argText)
+		disk.logger.Println(label, "Disk gatherer initialized by:", label, "as:", command, argText)
 	}
 
 	if out, err := exec.Command(command, args...).Output(); err != nil {
