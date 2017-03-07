@@ -19,6 +19,9 @@ type Config struct {
 	Env                string        `hcl:"env"`
 	TimePeriodSeconds  time.Duration `hcl:"interval_seconds"`
 	ReadConfigSeconds  time.Duration `hcl:"interval_read_config_seconds"`
+	DiskCommand  	   string        `hcl:"disk_command"`
+	DiskArgs     	   string        `hcl:"disk_args"`
+	CpuProcStat    	   string        `hcl:"proc_stat"`
 }
 
 func LoadConfig(filename string, logger l.Logger) (*Config, error) {

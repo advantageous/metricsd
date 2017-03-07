@@ -2,8 +2,8 @@ package repeater
 
 import (
 	lg "github.com/advantageous/go-logback/logging"
-	m "github.com/cloudrable/metricsd/metric"
-	"github.com/cloudrable/metricsd/util"
+	m "github.com/cloudurable/metricsd/metric"
+	"github.com/cloudurable/metricsd/util"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
 	"time"

@@ -37,6 +37,8 @@ Field 11 -- weighted # of milliseconds spent doing I/Os
 type DiskMetricsGatherer struct {
 	logger l.Logger
 	debug  bool
+	diskCommand string
+	diskArgs    string
 }
 
 func NewDiskMetricsGatherer(logger l.Logger, config *Config) *DiskMetricsGatherer {
@@ -52,6 +54,8 @@ func NewDiskMetricsGatherer(logger l.Logger, config *Config) *DiskMetricsGathere
 	return &DiskMetricsGatherer{
 		logger: logger,
 		debug:  config.Debug,
+		diskCommand: config.DiskCommand,
+		diskArgs:    config.DiskArgs,
 	}
 }
 
@@ -60,18 +64,27 @@ func (disk *DiskMetricsGatherer) GetMetrics() ([]Metric, error) {
 
 	var output string
 
-	var command string
-	var args []string
-	if runtime.GOOS == "linux" {
-		command = "/usr/bin/df"
-		args = []string{"-B", "512"}
-		if disk.debug {
-			disk.logger.Println("Linux", "/usr/bin/df -B 512")
-		}
+	command :=  "/usr/bin/df"
+	args := []string{"-B", "512"}
+	label := "Linux"
+	argText := "/usr/bin/df -B 512"
+
+	if disk.diskCommand != "" {
+		command = disk.diskCommand
+		args = strings.Split(disk.diskArgs, " ")
+		label = "Config"
+		argText = disk.diskArgs
 	} else if runtime.GOOS == "darwin" {
 		command = "/bin/df"
 		args = []string{"-b", "-l"}
+		label = "Darwin"
+		argText = "/bin/df -b -l"
 	}
+
+	if disk.debug {
+		disk.logger.Println(label, command, argText)
+	}
+
 	if out, err := exec.Command(command, args...).Output(); err != nil {
 		return nil, err
 	} else {

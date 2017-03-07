@@ -59,7 +59,6 @@ func NewCPUMetricsGathererWithPath(path string, logger l.Logger, debug bool) *CP
 }
 
 func NewCPUMetricsGatherer(logger l.Logger, config *Config) *CPUMetricsGatherer {
-	statFile := "/proc/stat"
 	if logger == nil {
 		if config.Debug {
 			logger = l.NewSimpleDebugLogger("cpu")
@@ -67,11 +66,22 @@ func NewCPUMetricsGatherer(logger l.Logger, config *Config) *CPUMetricsGatherer 
 			logger = l.GetSimpleLogger("MT_CPU_DEBUG", "cpu")
 		}
 	}
-	if runtime.GOOS == "darwin" {
+
+	statFile := "/proc/stat"
+	label := "Linux";
+
+	if config.CpuProcStat != "" {
+		statFile = config.CpuProcStat
+		label = "Config"
+	} else if runtime.GOOS == "darwin" {
 		dir, _ := os.Getwd()
-		logger.Println("DIR", dir)
 		statFile = dir + "/metric/test-data/proc/stat"
+		label = "Darwin"
 	}
+	if config.Debug {
+		logger.Println(label, statFile)
+	}
+
 	return NewCPUMetricsGathererWithPath(statFile, logger, config.Debug)
 }
 

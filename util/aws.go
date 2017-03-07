@@ -2,7 +2,7 @@ package util
 
 import (
 	l "github.com/advantageous/go-logback/logging"
-	m "github.com/cloudrable/metricsd/metric"
+	m "github.com/cloudurable/metricsd/metric"
 	"github.com/aws/aws-sdk-go/aws"
 	awsCredentials "github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
