@@ -6,6 +6,7 @@ import (
 	m "github.com/cloudurable/metricsd/metric"
 	r "github.com/cloudurable/metricsd/repeater"
 	"time"
+	"strings"
 )
 
 func main() {
@@ -20,33 +21,24 @@ func main() {
 
 	repeaters := []m.MetricsRepeater{r.NewAwsCloudMetricRepeater(config)}
 
-	if (config.Debug) {
-		logger.Println("CPU gathering is on?", config.CpuGather)
-		logger.Println("Disk space gathering is on?", config.DiskGather)
-		logger.Println("Free memory gathering is on?", config.FreeGather)
-	}
-
-	count := 0
-	if (config.CpuGather) {  count++ }
-	if (config.DiskGather) { count++ }
-	if (config.FreeGather) { count++ }
-
-	gatherers := make([]m.MetricsGatherer, count)
-
-	index := 0;
+	var gatherers = []m.MetricsGatherer{}
 	if (config.CpuGather) {
-		gatherers[index] = m.NewCPUMetricsGatherer(nil, config)
-		index++
+		gatherers = append(gatherers, m.NewCPUMetricsGatherer(nil, config))
 	}
 
 	if (config.DiskGather) {
-		gatherers[index] = m.NewDiskMetricsGatherer(nil, config)
-		index++
+		gatherers = append(gatherers, m.NewDiskMetricsGatherer(nil, config))
 	}
 
 	if (config.FreeGather) {
-		gatherers[index] = m.NewFreeMetricGatherer(nil, config)
-		index++
+		gatherers = append(gatherers, m.NewFreeMetricGatherer(nil, config))
+	}
+
+	if (config.NodeGather) {
+		nodeFunctions := strings.Split(config.NodeFunctions, m.SPACE)
+		for _,nodeFunction := range nodeFunctions {
+			gatherers = append(gatherers, m.NewNodeMetricGatherer(nil, config, nodeFunction))
+		}
 	}
 
 	m.RunWorker(gatherers, repeaters, nil, config.TimePeriodSeconds * time.Second,

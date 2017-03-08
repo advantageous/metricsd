@@ -36,60 +36,56 @@ Field 11 -- weighted # of milliseconds spent doing I/Os
 
 type DiskMetricsGatherer struct {
 	logger l.Logger
-	debug  bool
-	diskCommand string
-	diskArgs    string
+	debug bool
+	command string
+	args []string
 }
 
 func NewDiskMetricsGatherer(logger l.Logger, config *Config) *DiskMetricsGatherer {
 
-	if logger == nil {
-		if config.Debug {
-			logger = l.NewSimpleDebugLogger("disk")
-		} else {
-			logger = l.GetSimpleLogger("MT_DISK_DEBUG", "disk")
-		}
+	logger = ensureLogger(logger, config.Debug, "disk", "MT_DISK_DEBUG")
+
+	command :=  "/usr/bin/df"
+	args := []string{"-B", "512"}
+	label := LINUX_LABEL
+	argText := "/usr/bin/df -B 512"
+
+	if config.DiskCommand != EMPTY {
+		command = config.DiskCommand
+		args = strings.Split(config.DiskArgs, SPACE)
+		label = CONFIG_LABEL
+		argText = config.DiskArgs
+	} else if runtime.GOOS == GOOS_DARWIN {
+		command = "/bin/df"
+		args = []string{"-b", "-l"}
+		label = DARWIN_LABEL
+		argText = "/bin/df -b -l"
+	}
+
+	if config.Debug {
+		logger.Println("Disk gatherer initialized by:", label, "as:", command, argText)
 	}
 
 	return &DiskMetricsGatherer{
 		logger: logger,
-		debug:  config.Debug,
-		diskCommand: config.DiskCommand,
-		diskArgs:    config.DiskArgs,
+		debug: config.Debug,
+		command: command,
+		args: args,
 	}
 }
 
 func (disk *DiskMetricsGatherer) GetMetrics() ([]Metric, error) {
 	var metrics = []Metric{}
 
+
 	var output string
-
-	command :=  "/usr/bin/df"
-	args := []string{"-B", "512"}
-	label := "Linux"
-	argText := "/usr/bin/df -B 512"
-
-	if disk.diskCommand != "" {
-		command = disk.diskCommand
-		args = strings.Split(disk.diskArgs, " ")
-		label = "Config"
-		argText = disk.diskArgs
-	} else if runtime.GOOS == "darwin" {
-		command = "/bin/df"
-		args = []string{"-b", "-l"}
-		label = "Darwin"
-		argText = "/bin/df -b -l"
-	}
-
-	if disk.debug {
-		disk.logger.Println(label, "Disk gatherer initialized by:", label, "as:", command, argText)
-	}
-
-	if out, err := exec.Command(command, args...).Output(); err != nil {
+	if out, err := exec.Command(disk.command, disk.args...).Output(); err != nil {
 		return nil, err
 	} else {
 		output = string(out)
 	}
+
+	// TODO read config disk_filesystems
 
 	for _, line := range strings.Split(output, "\n") {
 		if strings.HasPrefix(line, "/dev/") {

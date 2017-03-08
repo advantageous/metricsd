@@ -15,10 +15,10 @@ type CpuTime uint64
 type CpuCount uint64
 
 type CPUMetricsGatherer struct {
-	path     string
+	path string
 	lastTime *CpuStats
-	logger   l.Logger
-	debug    bool
+	logger l.Logger
+	debug bool
 }
 
 type CpuStats struct {
@@ -48,9 +48,8 @@ type CpuTimes struct {
 
 func NewCPUMetricsGathererWithPath(path string, logger l.Logger, debug bool) *CPUMetricsGatherer {
 
-	if logger == nil {
-		logger = l.GetSimpleLogger("MT_CPU_DEBUG", "cpu")
-	}
+	logger = ensureLogger(logger, debug, "cpu", "MT_CPU_DEBUG")
+
 	return &CPUMetricsGatherer{
 		path:   path,
 		logger: logger,
@@ -59,25 +58,21 @@ func NewCPUMetricsGathererWithPath(path string, logger l.Logger, debug bool) *CP
 }
 
 func NewCPUMetricsGatherer(logger l.Logger, config *Config) *CPUMetricsGatherer {
-	if logger == nil {
-		if config.Debug {
-			logger = l.NewSimpleDebugLogger("cpu")
-		} else {
-			logger = l.GetSimpleLogger("MT_CPU_DEBUG", "cpu")
-		}
-	}
+
+	logger = ensureLogger(logger, config.Debug, "cpu", "MT_CPU_DEBUG")
 
 	statFile := "/proc/stat"
-	label := "Linux";
+	label := LINUX_LABEL
 
-	if config.CpuProcStat != "" {
+	if config.CpuProcStat != EMPTY {
 		statFile = config.CpuProcStat
-		label = "Config"
-	} else if runtime.GOOS == "darwin" {
+		label = CONFIG_LABEL
+	} else if runtime.GOOS == GOOS_DARWIN {
 		dir, _ := os.Getwd()
 		statFile = dir + "/metric/test-data/proc/stat"
-		label = "Darwin"
+		label = DARWIN_LABEL
 	}
+
 	if config.Debug {
 		logger.Println("CPU gatherer initialized by:", label, "as:", statFile)
 	}

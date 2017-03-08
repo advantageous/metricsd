@@ -6,6 +6,14 @@ type MetricIntervalType byte
 type MetricValue int64
 type MetricIntervalValue int64
 
+const EMPTY = ""
+const SPACE = " "
+
+const LINUX_LABEL = "Linux"
+const DARWIN_LABEL = "Darwin"
+const CONFIG_LABEL = "Config"
+const GOOS_DARWIN = "darwin"
+
 const (
 	COUNT MetricType = iota
 	LEVEL

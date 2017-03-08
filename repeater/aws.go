@@ -30,7 +30,7 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(context m.MetricContext, metrics
 			}
 			dimensions = append(dimensions, instanceIdDim)
 
-			if cw.config.IpAddress != "" {
+			if cw.config.IpAddress != m.EMPTY {
 				ipDim := &cloudwatch.Dimension{
 					Name:  aws.String("IpAddress"),
 					Value: aws.String(cw.config.IpAddress),
@@ -38,7 +38,7 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(context m.MetricContext, metrics
 				dimensions = append(dimensions, ipDim)
 			}
 
-			if cw.config.EC2InstanceNameTag != "" {
+			if cw.config.EC2InstanceNameTag != m.EMPTY {
 				dim := &cloudwatch.Dimension{
 					Name:  aws.String("InstanceName"),
 					Value: aws.String(cw.config.EC2InstanceNameTag),
@@ -46,7 +46,7 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(context m.MetricContext, metrics
 				dimensions = append(dimensions, dim)
 			}
 		}
-		if context.GetEnv() != "" {
+		if context.GetEnv() != m.EMPTY {
 			dim := &cloudwatch.Dimension{
 				Name:  aws.String("Environment"),
 				Value: aws.String(context.GetEnv()),
@@ -54,7 +54,7 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(context m.MetricContext, metrics
 			dimensions = append(dimensions, dim)
 		}
 
-		if context.GetRole() != "" {
+		if context.GetRole() != m.EMPTY {
 			dim := &cloudwatch.Dimension{
 				Name:  aws.String("Role"),
 				Value: aws.String(context.GetRole()),
@@ -62,7 +62,7 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(context m.MetricContext, metrics
 			dimensions = append(dimensions, dim)
 		}
 
-		if provider != "" {
+		if provider != m.EMPTY {
 			dim := &cloudwatch.Dimension{
 				Name:  aws.String("Provider"),
 				Value: aws.String(provider),

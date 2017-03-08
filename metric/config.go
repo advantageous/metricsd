@@ -26,6 +26,9 @@ type Config struct {
 	CpuProcStat			string			`hcl:"cpu_proc_stat"`
 	FreeGather			bool			`hcl:"free_gather"`
 	FreeCommand			string			`hcl:"free_command"`
+	NodeGather			bool			`hcl:"node_gather"`
+	NodeCommand			string			`hcl:"node_command"`
+	NodeFunctions		string			`hcl:"node_functions"`
 }
 
 func LoadConfig(filename string, logger l.Logger) (*Config, error) {

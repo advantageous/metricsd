@@ -11,46 +11,40 @@ import (
 type FreeMetricGatherer struct {
 	logger l.Logger
 	debug  bool
-	freeCommand string
+	command string
 }
 
 func NewFreeMetricGatherer(logger l.Logger, config *Config) *FreeMetricGatherer {
 
-	if logger == nil {
-		if config.Debug {
-			logger = l.NewSimpleDebugLogger("free")
-		} else {
-			logger = l.GetSimpleLogger("MT_FREE_DEBUG", "free")
-		}
+	logger = ensureLogger(logger, config.Debug, "free", "MT_FREE_DEBUG")
 
+	command := "/usr/bin/free"
+	label := LINUX_LABEL
+
+	if config.FreeCommand != EMPTY {
+		command = config.FreeCommand
+		label = CONFIG_LABEL
+	} else if runtime.GOOS == GOOS_DARWIN {
+		command = "/usr/local/bin/free"
+		label = DARWIN_LABEL
 	}
+
+	if config.Debug {
+		logger.Println("Free gatherer initialized by:", label, "as:", command)
+	}
+
 	return &FreeMetricGatherer{
 		logger: logger,
 		debug:  config.Debug,
-		freeCommand: config.FreeCommand,
+		command: command,
 	}
 }
 
 func (gatherer *FreeMetricGatherer) GetMetrics() ([]Metric, error) {
 	var metrics = []Metric{}
-
 	var output string
-	command := "/usr/bin/free"
-	label := "Linux"
 
-	if gatherer.freeCommand != "" {
-		command = gatherer.freeCommand
-		label = "Config"
-	} else if runtime.GOOS == "darwin" {
-		command = "/usr/local/bin/free"
-		label = "Darwin"
-	}
-
-	if gatherer.debug {
-		gatherer.logger.Println("Free gatherer initialized by:", label, "as:", command)
-	}
-
-	if out, err := exec.Command(command).Output(); err != nil {
+	if out, err := exec.Command(gatherer.command).Output(); err != nil {
 		return nil, err
 	} else {
 		output = string(out)
@@ -92,7 +86,7 @@ func (gatherer *FreeMetricGatherer) GetMetrics() ([]Metric, error) {
 	fmt.Sscanf(line2, "%s %d %d %d", &mem, &total, &used, &free)
 
 	if free == 0 && used == 0 && total == 0 {
-
+		// do nothing
 	} else {
 		metrics = append(metrics, metric{LEVEL, MetricValue(free), "mSwpFreeLvl", "ram"})
 		metrics = append(metrics, metric{LEVEL, MetricValue(used), "mSwpUsedLvl", "ram"})
