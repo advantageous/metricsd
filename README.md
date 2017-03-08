@@ -216,9 +216,12 @@ If swapping is enabled (which is unlikely), then you will get the above with `mS
  * DRAINING = 6
  * DRAINED = 7
  * OTHER = 99
+
 * `nsRrAttempted` - Read Repair Attempted
 * `nsRrBlocking` - Read Repair Mismatch (Blocking)
 * `nsRrBackground` - Read Repair Mismatch (Background)
+
+All message counts can be >= 0, or n/a (-125) or error (-127)
 * `nsLargeMsgsActive` - Large messages Active
 * `nsLargeMsgsPending` - Large messages Pending
 * `nsLargeMsgsCompleted` - Large messages Completed
