@@ -11,9 +11,9 @@ import (
 func ensureLogger(logger l.Logger, debug bool, name string, flag string) l.Logger {
 	if logger == nil {
 		if debug {
-			logger = l.NewSimpleDebugLogger("cpu")
+			logger = l.NewSimpleDebugLogger(name)
 		} else {
-			logger = l.GetSimpleLogger("MT_CPU_DEBUG", "cpu")
+			logger = l.GetSimpleLogger(flag, name)
 		}
 	}
 	return logger

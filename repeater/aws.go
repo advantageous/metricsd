@@ -83,24 +83,21 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(context m.MetricContext, metrics
 
 	for index, d := range metrics {
 
-		if cw.config.Debug {
-			cw.logger.Printf("%s %d %d %s", d.GetName(), d.GetType(), d.GetValue(), d.GetProvider())
-		}
 		value := float64(d.GetValue())
 		datum := createDatum(d.GetName(), d.GetProvider())
 		datum.Value = aws.Float64(float64(value))
 
+		datumUnit := cloudwatch.StandardUnitCount
 		switch d.GetType() {
-		case m.COUNT:
-			datum.Unit = aws.String(cloudwatch.StandardUnitCount)
-		case m.LEVEL:
-			datum.Unit = aws.String(cloudwatch.StandardUnitKilobytes)
-		case m.LEVEL_PERCENT:
-			datum.Unit = aws.String(cloudwatch.StandardUnitPercent)
-		case m.TIMING:
-			datum.Unit = aws.String(cloudwatch.StandardUnitMilliseconds)
-		default:
-			datum.Unit = aws.String(cloudwatch.StandardUnitCount)
+		case m.LEVEL:			datumUnit = cloudwatch.StandardUnitKilobytes
+		case m.LEVEL_PERCENT: 	datumUnit = cloudwatch.StandardUnitPercent
+		case m.TIMING: 			datumUnit = cloudwatch.StandardUnitMilliseconds
+		case m.CUSTOM_UNIT:		datumUnit = d.GetCustomUnit()
+		}
+		datum.Unit = aws.String(datumUnit)
+
+		if cw.config.Debug {
+			cw.logger.Printf("%s %d %d %s %s", d.GetName(), d.GetType(), d.GetValue(), datumUnit, d.GetProvider())
 		}
 
 		data = append(data, datum)

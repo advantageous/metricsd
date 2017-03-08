@@ -87,8 +87,10 @@ func (gatherer *NodeMetricGatherer) getlogginglevels() ([]Metric, error) {
 	//org.apache.cassandra                                   DEBUG
 
 	lines := strings.Split(output, "\n")
-	for i := 1; i < len(lines); i++ {
+	end := len(lines) - 1
+	for i := 2; i < end; i++ {
 		gatherer.logger.Println("!!!", lines[i])
+
 		split := strings.Split(lines[i], SPACE)
 		name := "cassandra:" + split[0];
 		logLevelString := split[len(split)-1]
@@ -101,7 +103,7 @@ func (gatherer *NodeMetricGatherer) getlogginglevels() ([]Metric, error) {
 			case "INFO":	logLevel = INFO
 			case "WARN":	logLevel = WARN
 		}
-		metrics = append(metrics, metric{LEVEL, MetricValue(logLevel), name, "nodetool"})
+		metrics = append(metrics, metric{CUSTOM_UNIT, MetricValue(logLevel), name, "nodetool", logLevelString})
 	}
 
 	return metrics, nil

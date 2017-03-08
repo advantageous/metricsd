@@ -19,6 +19,7 @@ const (
 	LEVEL
 	TIMING
 	LEVEL_PERCENT
+	CUSTOM_UNIT
 )
 
 type Metric interface {
@@ -26,6 +27,7 @@ type Metric interface {
 	GetType() MetricType
 	GetValue() MetricValue
 	GetName() string
+	GetCustomUnit() string
 }
 
 type MetricContext interface {
@@ -44,10 +46,11 @@ type MetricsRepeater interface {
 }
 
 type metric struct {
-	metricType MetricType
-	value      MetricValue
-	name       string
-	provider   string
+	metricType	MetricType
+	value		MetricValue
+	name		string
+	provider	string
+	customUnit	string
 }
 
 func (m metric) GetType() MetricType {
@@ -64,4 +67,8 @@ func (m metric) GetProvider() string {
 
 func (m metric) GetName() string {
 	return m.name
+}
+
+func (m metric) GetCustomUnit() string {
+	return m.customUnit
 }
