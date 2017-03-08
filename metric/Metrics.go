@@ -6,20 +6,42 @@ type MetricIntervalType byte
 type MetricValue int64
 type MetricIntervalValue int64
 
-const EMPTY = ""
-const SPACE = " "
+const (
+	EMPTY = ""
+	SPACE = " "
+	NEWLINE = "\n"
+	GOOS_DARWIN = "darwin"
+)
 
-const LINUX_LABEL = "Linux"
-const DARWIN_LABEL = "Darwin"
-const CONFIG_LABEL = "Config"
-const GOOS_DARWIN = "darwin"
+const (
+	LINUX_LABEL = "Linux"
+	DARWIN_LABEL = "Darwin"
+	CONFIG_LABEL = "Config"
+)
+
+const (
+	PROVIDER_CPU  = "cpu"
+	PROVIDER_DISK = "disk"
+	PROVIDER_RAM  = "ram"
+	PROVIDER_FREE = "free"
+	PROVIDER_NODE = "node"
+)
+
+const (
+	FLAG_CPU  = "MT_CPU_DEBUG"
+	FLAG_DISK = "MT_DISK_DEBUG"
+	FLAG_FREE = "MT_FREE_DEBUG"
+	FLAG_NODE = "MT_NODE_DEBUG"
+)
 
 const (
 	COUNT MetricType = iota
 	LEVEL
-	TIMING
 	LEVEL_PERCENT
-	CUSTOM_UNIT
+	TIMING_MS
+	SIZE_B
+	SIZE_MB
+	NO_UNIT
 )
 
 type Metric interface {
@@ -27,7 +49,6 @@ type Metric interface {
 	GetType() MetricType
 	GetValue() MetricValue
 	GetName() string
-	GetCustomUnit() string
 }
 
 type MetricContext interface {
@@ -50,7 +71,6 @@ type metric struct {
 	value		MetricValue
 	name		string
 	provider	string
-	customUnit	string
 }
 
 func (m metric) GetType() MetricType {
@@ -67,8 +87,4 @@ func (m metric) GetProvider() string {
 
 func (m metric) GetName() string {
 	return m.name
-}
-
-func (m metric) GetCustomUnit() string {
-	return m.customUnit
 }

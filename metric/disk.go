@@ -3,7 +3,6 @@ package metric
 import (
 	"fmt"
 	l "github.com/advantageous/go-logback/logging"
-	"os/exec"
 	"runtime"
 	"strings"
 )
@@ -43,23 +42,25 @@ type DiskMetricsGatherer struct {
 
 func NewDiskMetricsGatherer(logger l.Logger, config *Config) *DiskMetricsGatherer {
 
-	logger = ensureLogger(logger, config.Debug, "disk", "MT_DISK_DEBUG")
+	logger = ensureLogger(logger, config.Debug, PROVIDER_DISK, FLAG_DISK)
 
 	command :=  "/usr/bin/df"
 	args := []string{"-B", "512"}
 	label := LINUX_LABEL
-	argText := "/usr/bin/df -B 512"
+	argText := "-B 512"
 
 	if config.DiskCommand != EMPTY {
 		command = config.DiskCommand
-		args = strings.Split(config.DiskArgs, SPACE)
+		if (config.DiskArgs != EMPTY) {
+			args = strings.Split(config.DiskArgs, SPACE)
+		}
 		label = CONFIG_LABEL
 		argText = config.DiskArgs
 	} else if runtime.GOOS == GOOS_DARWIN {
 		command = "/bin/df"
 		args = []string{"-b", "-l"}
 		label = DARWIN_LABEL
-		argText = "/bin/df -b -l"
+		argText = "-b -l"
 	}
 
 	if config.Debug {
@@ -75,19 +76,17 @@ func NewDiskMetricsGatherer(logger l.Logger, config *Config) *DiskMetricsGathere
 }
 
 func (disk *DiskMetricsGatherer) GetMetrics() ([]Metric, error) {
-	var metrics = []Metric{}
 
-
-	var output string
-	if out, err := exec.Command(disk.command, disk.args...).Output(); err != nil {
+	output, err := execCommand(disk.command, disk.args...)
+	if err != nil {
 		return nil, err
-	} else {
-		output = string(out)
 	}
+
+	var metrics = []Metric{}
 
 	// TODO read config disk_filesystems
 
-	for _, line := range strings.Split(output, "\n") {
+	for _, line := range strings.Split(output, NEWLINE) {
 		if strings.HasPrefix(line, "/dev/") {
 
 			var name string
@@ -109,7 +108,7 @@ func (disk *DiskMetricsGatherer) GetMetrics() ([]Metric, error) {
 				metricType: LEVEL_PERCENT,
 				name:       "dUVol" + name[5:] + "AvailPer",
 				value:      MetricValue(calc),
-				provider:   "disk",
+				provider:   PROVIDER_DISK,
 			})
 
 		}

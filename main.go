@@ -34,10 +34,13 @@ func main() {
 		gatherers = append(gatherers, m.NewFreeMetricGatherer(nil, config))
 	}
 
-	if (config.NodeGather) {
-		nodeFunctions := strings.Split(config.NodeFunctions, m.SPACE)
-		for _,nodeFunction := range nodeFunctions {
-			gatherers = append(gatherers, m.NewNodeMetricGatherer(nil, config, nodeFunction))
+	if (config.NodetoolGather) {
+		nodetoolFunctions := strings.Split(config.NodetoolFunctions, m.SPACE)
+		for _,nodeFunction := range nodetoolFunctions {
+			if m.NodeFunctionSupported(nodeFunction) {
+				gatherers = append(gatherers, m.NewNodeMetricGatherer(nil, config, nodeFunction))
+			}
+
 		}
 	}
 

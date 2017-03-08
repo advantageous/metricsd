@@ -48,7 +48,7 @@ type CpuTimes struct {
 
 func NewCPUMetricsGathererWithPath(path string, logger l.Logger, debug bool) *CPUMetricsGatherer {
 
-	logger = ensureLogger(logger, debug, "cpu", "MT_CPU_DEBUG")
+	logger = ensureLogger(logger, debug, PROVIDER_CPU, FLAG_CPU)
 
 	return &CPUMetricsGatherer{
 		path:   path,
@@ -59,7 +59,7 @@ func NewCPUMetricsGathererWithPath(path string, logger l.Logger, debug bool) *CP
 
 func NewCPUMetricsGatherer(logger l.Logger, config *Config) *CPUMetricsGatherer {
 
-	logger = ensureLogger(logger, config.Debug, "cpu", "MT_CPU_DEBUG")
+	logger = ensureLogger(logger, config.Debug, PROVIDER_CPU, FLAG_CPU)
 
 	statFile := "/proc/stat"
 	label := LINUX_LABEL
@@ -74,7 +74,7 @@ func NewCPUMetricsGatherer(logger l.Logger, config *Config) *CPUMetricsGatherer 
 	}
 
 	if config.Debug {
-		logger.Println("CPU gatherer initialized by:", label, "as:", statFile)
+		logger.Println("PROVIDER_CPU gatherer initialized by:", label, "as:", statFile)
 	}
 
 	return NewCPUMetricsGathererWithPath(statFile, logger, config.Debug)
@@ -111,82 +111,82 @@ func convertToMetrics(lastTimeStats *CpuStats, nowStats *CpuStats) []Metric {
 
 		softInterruptCount := nowStats.SoftInterruptCount - lastTimeStats.SoftInterruptCount
 		if softInterruptCount > 0 {
-			metrics = append(metrics, metric{COUNT, MetricValue(softInterruptCount), "softIrqCnt", "cpu", EMPTY})
+			metrics = append(metrics, metric{COUNT, MetricValue(softInterruptCount), "softIrqCnt", PROVIDER_CPU})
 		}
 
 		interruptCount := nowStats.InterruptCount - lastTimeStats.InterruptCount
 		if interruptCount > 0 {
-			metrics = append(metrics, metric{COUNT, MetricValue(interruptCount), "intrCnt", "cpu", EMPTY})
+			metrics = append(metrics, metric{COUNT, MetricValue(interruptCount), "intrCnt", PROVIDER_CPU})
 		}
 
 		contextSwitchCount := nowStats.ContextSwitchCount - lastTimeStats.ContextSwitchCount
 		if contextSwitchCount > 0 {
-			metrics = append(metrics, metric{COUNT, MetricValue(contextSwitchCount), "ctxtCnt", "cpu", EMPTY})
+			metrics = append(metrics, metric{COUNT, MetricValue(contextSwitchCount), "ctxtCnt", PROVIDER_CPU})
 		}
 
 		processCount := nowStats.ProcessCount - lastTimeStats.ProcessCount
 		if processCount > 0 {
-			metrics = append(metrics, metric{COUNT, MetricValue(processCount), "processesStrtCnt", "cpu", EMPTY})
+			metrics = append(metrics, metric{COUNT, MetricValue(processCount), "processesStrtCnt", PROVIDER_CPU})
 		}
 
 		for index, c := range nowStats.CpuTimeList {
 
 			guest := c.Guest - lastTimeStats.CpuTimeList[index].Guest
 			if guest > 0 {
-				metrics = append(metrics, metric{COUNT, MetricValue(guest), c.Name + "GuestJif", "cpu", EMPTY})
+				metrics = append(metrics, metric{COUNT, MetricValue(guest), c.Name + "GuestJif", PROVIDER_CPU})
 			}
 
 			user := c.User - lastTimeStats.CpuTimeList[index].User
 			if user > 0 {
-				metrics = append(metrics, metric{COUNT, MetricValue(user), c.Name + "UsrJif", "cpu", EMPTY})
+				metrics = append(metrics, metric{COUNT, MetricValue(user), c.Name + "UsrJif", PROVIDER_CPU})
 			}
 
 			idle := c.Idle - lastTimeStats.CpuTimeList[index].Idle
 			if idle > 0 {
-				metrics = append(metrics, metric{COUNT, MetricValue(idle), c.Name + "IdleJif", "cpu", EMPTY})
+				metrics = append(metrics, metric{COUNT, MetricValue(idle), c.Name + "IdleJif", PROVIDER_CPU})
 			}
 
 			IoWait := c.IoWait - lastTimeStats.CpuTimeList[index].IoWait
 			if IoWait > 0 {
-				metrics = append(metrics, metric{COUNT, MetricValue(IoWait), c.Name + "IowaitJif", "cpu", EMPTY})
+				metrics = append(metrics, metric{COUNT, MetricValue(IoWait), c.Name + "IowaitJif", PROVIDER_CPU})
 			}
 
 			Irq := c.Irq - lastTimeStats.CpuTimeList[index].Irq
 			if Irq > 0 {
-				metrics = append(metrics, metric{COUNT, MetricValue(Irq), c.Name + "IrqJif", "cpu", EMPTY})
+				metrics = append(metrics, metric{COUNT, MetricValue(Irq), c.Name + "IrqJif", PROVIDER_CPU})
 			}
 
 			GuestNice := c.GuestNice - lastTimeStats.CpuTimeList[index].GuestNice
 			if GuestNice > 0 {
-				metrics = append(metrics, metric{COUNT, MetricValue(GuestNice), c.Name + "GuestniceJif", "cpu", EMPTY})
+				metrics = append(metrics, metric{COUNT, MetricValue(GuestNice), c.Name + "GuestniceJif", PROVIDER_CPU})
 			}
 
 			Steal := c.Steal - lastTimeStats.CpuTimeList[index].Steal
 			if Steal > 0 {
-				metrics = append(metrics, metric{COUNT, MetricValue(Steal), c.Name + "StealJif", "cpu", EMPTY})
+				metrics = append(metrics, metric{COUNT, MetricValue(Steal), c.Name + "StealJif", PROVIDER_CPU})
 			}
 
 			Nice := c.Nice - lastTimeStats.CpuTimeList[index].Nice
 			if Nice > 0 {
-				metrics = append(metrics, metric{COUNT, MetricValue(Nice), c.Name + "NiceJif", "cpu", EMPTY})
+				metrics = append(metrics, metric{COUNT, MetricValue(Nice), c.Name + "NiceJif", PROVIDER_CPU})
 			}
 
 			System := c.System - lastTimeStats.CpuTimeList[index].System
 			if System > 0 {
-				metrics = append(metrics, metric{COUNT, MetricValue(System), c.Name + "SysJif", "cpu", EMPTY})
+				metrics = append(metrics, metric{COUNT, MetricValue(System), c.Name + "SysJif", PROVIDER_CPU})
 			}
 
 			SoftIrq := c.SoftIrq - lastTimeStats.CpuTimeList[index].SoftIrq
 			if SoftIrq > 0 {
-				metrics = append(metrics, metric{COUNT, MetricValue(SoftIrq), c.Name + "SoftIrqJif", "cpu", EMPTY})
+				metrics = append(metrics, metric{COUNT, MetricValue(SoftIrq), c.Name + "SoftIrqJif", PROVIDER_CPU})
 			}
 
 		}
 
 	}
 
-	metrics = append(metrics, metric{COUNT, MetricValue(nowStats.ProcessRunningCount), "procsRunning", "cpu", EMPTY})
-	metrics = append(metrics, metric{COUNT, MetricValue(nowStats.ProcessBlockCount), "procsBlocked", "cpu", EMPTY})
+	metrics = append(metrics, metric{COUNT, MetricValue(nowStats.ProcessRunningCount), "procsRunning", PROVIDER_CPU})
+	metrics = append(metrics, metric{COUNT, MetricValue(nowStats.ProcessBlockCount), "procsBlocked", PROVIDER_CPU})
 
 	return metrics
 }
@@ -262,7 +262,7 @@ func (cpu *CPUMetricsGatherer) parseLine(name string, value uint64, line string,
 	case "softirq":
 		stats.SoftInterruptCount = CpuCount(value)
 	default:
-		if strings.HasPrefix(name, "cpu") {
+		if strings.HasPrefix(name, PROVIDER_CPU) {
 			t := CpuTimes{}
 			t.Name = name
 			t.User = CpuTime(value)

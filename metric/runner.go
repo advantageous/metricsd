@@ -69,6 +69,7 @@ func RunWorker(gatherers []MetricsGatherer, repeaters []MetricsRepeater, logger 
 		}
 	}
 }
+
 func processMetrics(metrics []Metric, repeaters []MetricsRepeater, context *Config, logger lg.Logger) {
 	for _, r := range repeaters {
 		if err := r.ProcessMetrics(context, metrics); err != nil {

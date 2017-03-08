@@ -9,39 +9,99 @@ Configuration
 ```conf
 
 
+# ------------------------------------------------------------
 # AWS Region         string        `hcl:"aws_region"`
 # If not set, uses aws current region for this instance.
 # Used for testing only.
+# ------------------------------------------------------------
 # aws_region = "us-west-1"
 
+# ------------------------------------------------------------
 # EC2InstanceId     string        `hcl:"ec2_instance_id"`
 # If not set, uses aws instance id for this instance
 # Used for testing only.
+# ------------------------------------------------------------
 # ec2_instance_id = "i-my-fake-instanceid"
 
+# ------------------------------------------------------------
 # Debug             bool          `hcl:"debug"`
 # Used for testing and debugging
+# ------------------------------------------------------------
 debug = false
 
+# ------------------------------------------------------------
 # Local             bool          `hcl:"local"`
 # Used to ingore local ec2 meta-data, used for development only.
+# ------------------------------------------------------------
 # local = true
 
+# ------------------------------------------------------------
 # TimePeriodSeconds time.Duration `hcl:"interval_seconds"`
 # Defaults to 30 seconds, how often metrics are collected.
+# ------------------------------------------------------------
 interval_seconds = 10
 
+# ------------------------------------------------------------
 # Used to specify the environment: prod, dev, qa, staging, etc.
 # This gets used as a dimension that is sent to cloudwatch. 
+# ------------------------------------------------------------
 env="dev"
 
+# ------------------------------------------------------------
 # Used to specify the top level namespace in cloudwatch.
+# ------------------------------------------------------------
 namespace="Cassandra Cluster"
 
+# ------------------------------------------------------------
 # Used to specify the role of the AMI instance.
 # Gets used as a dimension.
 # e.g., dcos-master, consul-master, dcos-agent, cassandra-node, etc.
+# ------------------------------------------------------------
 server_role="dcos-master"
+
+# ------------------------------------------------------------
+# used to specify Disk gatherer properties and if it runs
+#
+# default disk_command: /usr/bin/df
+# darwin disk_command:  /bin/df
+# default disk_args:    -B 512
+#
+# disk_args is only checked if disk_command is provided
+# ------------------------------------------------------------
+disk_gather = true
+disk_command = "df"
+disk_args = "-B 512"
+
+# ------------------------------------------------------------
+# used to specify Cpu gatherer properties and if it runs
+#
+# default cpu_proc_stat: /proc/stat
+# darwin cpu_proc_stat:  /metric/test-data/proc/stat
+# ------------------------------------------------------------
+cpu_gather = true
+#cpu_proc_stat = "/proc/stat"
+
+# ------------------------------------------------------------
+# used to specify Free Ram gatherer properties and if it runs
+#
+# default free_command: /usr/bin/free
+# darwin free_command:  /usr/local/bin/free
+# ------------------------------------------------------------
+free_gather = true
+#free_command = "/usr/bin/free"
+
+# ------------------------------------------------------------
+# used to specify Nodetool gatherer properties and if it runs
+#
+# default nodetool_command: /usr/bin/nodetool
+# darwin nodetool_command:  /usr/local/bin/nodetool
+#
+# specify nodetool_functions with space delimted string
+# all nodetool_functions: "cfstats compactionstats gcstats netstats tpstats getlogginglevels"
+# ------------------------------------------------------------
+nodetool_gather = true
+#nodetool_command = "/usr/bin/nodetool"
+nodetool_functions = "gcstats"
 
 
 ``` 
@@ -135,3 +195,39 @@ The best doc is a working example.
 
 If swapping is enabled (which is unlikely), then you will get the above with `mSwpX` instead of `mX`.
 
+
+### Nodetool gcstats
+* `gcInterval` - Interval (ms)
+* `gcMaxElapsed` - Max GC Elapsed (ms)
+* `gcTotalElapsed` - Total GC Elapsed (ms)
+* `gcStdevElapsed` - Stdev GC Elapsed (ms)
+* `gcReclaimed` - GC Reclaimed (MB)
+* `gcCollections` - Collections
+* `gcDirectMemoryBytes` - Direct Memory Bytes
+
+### Nodetool netstats
+* `nsMode` - mode of the node
+ * STARTING = 0
+ * NORMAL = 1
+ * JOINING = 2
+ * LEAVING = 3
+ * DECOMMISSIONED = 4
+ * MOVING = 5
+ * DRAINING = 6
+ * DRAINED = 7
+ * OTHER = 99
+* `nsRrAttempted` - Read Repair Attempted
+* `nsRrBlocking` - Read Repair Mismatch (Blocking)
+* `nsRrBackground` - Read Repair Mismatch (Background)
+* `nsLargeMsgsActive` - Large messages Active
+* `nsLargeMsgsPending` - Large messages Pending
+* `nsLargeMsgsCompleted` - Large messages Completed
+* `nsLargeMsgsDropped` - Large messages Dropped
+* `nsSmallMsgsActive` - Small messages Active
+* `nsSmallMsgsPending` - Small messages Pending
+* `nsSmallMsgsCompleted` - Small messages Completed
+* `nsSmallMsgsDropped` - Small messages Dropped
+* `nsGossipMsgsActive` - Gossip messages Active
+* `nsGossipMsgsPending` - Gossip messages Pending
+* `nsGossipMsgsCompleted` - Gossip messages Completed
+* `nsGossipMsgsDropped` - Gossip messages Dropped

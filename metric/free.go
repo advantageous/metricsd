@@ -3,7 +3,6 @@ package metric
 import (
 	"fmt"
 	l "github.com/advantageous/go-logback/logging"
-	"os/exec"
 	"runtime"
 	"strings"
 )
@@ -16,7 +15,7 @@ type FreeMetricGatherer struct {
 
 func NewFreeMetricGatherer(logger l.Logger, config *Config) *FreeMetricGatherer {
 
-	logger = ensureLogger(logger, config.Debug, "free", "MT_FREE_DEBUG")
+	logger = ensureLogger(logger, config.Debug, PROVIDER_FREE, FLAG_FREE)
 
 	command := "/usr/bin/free"
 	label := LINUX_LABEL
@@ -41,16 +40,14 @@ func NewFreeMetricGatherer(logger l.Logger, config *Config) *FreeMetricGatherer 
 }
 
 func (gatherer *FreeMetricGatherer) GetMetrics() ([]Metric, error) {
-	var metrics = []Metric{}
-	var output string
-
-	if out, err := exec.Command(gatherer.command).Output(); err != nil {
+	output, err := execCommand(gatherer.command)
+	if err != nil {
 		return nil, err
-	} else {
-		output = string(out)
 	}
 
-	lines := strings.Split(output, "\n")
+	var metrics = []Metric{}
+
+	lines := strings.Split(output, NEWLINE)
 	line1 := lines[1]
 	line2 := lines[2]
 
@@ -69,34 +66,34 @@ func (gatherer *FreeMetricGatherer) GetMetrics() ([]Metric, error) {
 			" shared %d , buffer %d, available %d\n", mem, total, used, free, shared, buffer, available)
 	}
 
-	metrics = append(metrics, metric{LEVEL, MetricValue(free), "mFreeLvl", "ram", EMPTY})
-	metrics = append(metrics, metric{LEVEL, MetricValue(used), "mUsedLvl", "ram", EMPTY})
-	metrics = append(metrics, metric{LEVEL, MetricValue(shared), "mSharedLvl", "ram", EMPTY})
-	metrics = append(metrics, metric{LEVEL, MetricValue(buffer), "mBufLvl", "ram", EMPTY})
-	metrics = append(metrics, metric{LEVEL, MetricValue(available), "mAvailableLvl", "ram", EMPTY})
+	metrics = append(metrics, metric{LEVEL, MetricValue(free), "mFreeLvl", PROVIDER_RAM})
+	metrics = append(metrics, metric{LEVEL, MetricValue(used), "mUsedLvl", PROVIDER_RAM})
+	metrics = append(metrics, metric{LEVEL, MetricValue(shared), "mSharedLvl", PROVIDER_RAM})
+	metrics = append(metrics, metric{LEVEL, MetricValue(buffer), "mBufLvl", PROVIDER_RAM})
+	metrics = append(metrics, metric{LEVEL, MetricValue(available), "mAvailableLvl", PROVIDER_RAM})
 
 	totalF := float64(total)
 
 	freePercent := (float64(free) / totalF) * 100.0
-	metrics = append(metrics, metric{LEVEL_PERCENT, MetricValue(int64(freePercent)), "mFreePer", "ram", EMPTY})
+	metrics = append(metrics, metric{LEVEL_PERCENT, MetricValue(int64(freePercent)), "mFreePer", PROVIDER_RAM})
 
 	usedPercent := (float64(used) / totalF) * 100.0
-	metrics = append(metrics, metric{LEVEL_PERCENT, MetricValue(int64(usedPercent)), "mUsedPer", "ram", EMPTY})
+	metrics = append(metrics, metric{LEVEL_PERCENT, MetricValue(int64(usedPercent)), "mUsedPer", PROVIDER_RAM})
 
 	fmt.Sscanf(line2, "%s %d %d %d", &mem, &total, &used, &free)
 
 	if free == 0 && used == 0 && total == 0 {
 		// do nothing
 	} else {
-		metrics = append(metrics, metric{LEVEL, MetricValue(free), "mSwpFreeLvl", "ram", EMPTY})
-		metrics = append(metrics, metric{LEVEL, MetricValue(used), "mSwpUsedLvl", "ram", EMPTY})
-		metrics = append(metrics, metric{LEVEL, MetricValue(shared), "mSwpSharedLvl", "ram", EMPTY})
+		metrics = append(metrics, metric{LEVEL, MetricValue(free), "mSwpFreeLvl", PROVIDER_RAM})
+		metrics = append(metrics, metric{LEVEL, MetricValue(used), "mSwpUsedLvl", PROVIDER_RAM})
+		metrics = append(metrics, metric{LEVEL, MetricValue(shared), "mSwpSharedLvl", PROVIDER_RAM})
 
 		totalF = float64(total)
 		freePercent = (float64(free) / totalF) * 100.0
-		metrics = append(metrics, metric{LEVEL_PERCENT, MetricValue(int64(freePercent)), "mSwpFreePer", "ram", EMPTY})
+		metrics = append(metrics, metric{LEVEL_PERCENT, MetricValue(int64(freePercent)), "mSwpFreePer", PROVIDER_RAM})
 		usedPercent = (float64(used) / totalF) * 100.0
-		metrics = append(metrics, metric{LEVEL_PERCENT, MetricValue(int64(usedPercent)), "mSwpUsedPer", "ram", EMPTY})
+		metrics = append(metrics, metric{LEVEL_PERCENT, MetricValue(int64(usedPercent)), "mSwpUsedPer", PROVIDER_RAM})
 	}
 
 	return metrics, nil

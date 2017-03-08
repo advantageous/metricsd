@@ -14,21 +14,26 @@ type Config struct {
 	EC2InstanceId		string			`hcl:"ec2_instance_id"`
 	EC2InstanceNameTag	string			`hcl:"ec2_instance_name"`
 	Debug				bool			`hcl:"debug"`
-	Local				bool			`hcl:"local"`
-	NameSpace			string			`hcl:"namespace"`
-	Env					string			`hcl:"env"`
-	TimePeriodSeconds	time.Duration	`hcl:"interval_seconds"`
-	ReadConfigSeconds	time.Duration	`hcl:"interval_read_config_seconds"`
-	DiskGather			bool			`hcl:"disk_gather"`
-	DiskCommand			string			`hcl:"disk_command"`
-	DiskArgs			string			`hcl:"disk_args"`
-	CpuGather			bool			`hcl:"cpu_gather"`
-	CpuProcStat			string			`hcl:"cpu_proc_stat"`
-	FreeGather			bool			`hcl:"free_gather"`
-	FreeCommand			string			`hcl:"free_command"`
-	NodeGather			bool			`hcl:"node_gather"`
-	NodeCommand			string			`hcl:"node_command"`
-	NodeFunctions		string			`hcl:"node_functions"`
+	Local             	bool			`hcl:"local"`
+	NameSpace         	string			`hcl:"namespace"`
+	Env               	string			`hcl:"env"`
+
+	TimePeriodSeconds 	time.Duration	`hcl:"interval_seconds"`
+	ReadConfigSeconds 	time.Duration	`hcl:"interval_read_config_seconds"`
+
+	DiskGather        	bool			`hcl:"disk_gather"`
+	DiskCommand       	string			`hcl:"disk_command"`
+	DiskArgs          	string			`hcl:"disk_args"`
+
+	CpuGather         	bool			`hcl:"cpu_gather"`
+	CpuProcStat       	string			`hcl:"cpu_proc_stat"`
+
+	FreeGather        	bool			`hcl:"free_gather"`
+	FreeCommand       	string			`hcl:"free_command"`
+
+	NodetoolGather    	bool			`hcl:"nodetool_gather"`
+	NodetoolCommand   	string			`hcl:"nodetool_command"`
+	NodetoolFunctions 	string			`hcl:"nodetool_functions"`
 }
 
 func LoadConfig(filename string, logger l.Logger) (*Config, error) {
@@ -38,6 +43,8 @@ func LoadConfig(filename string, logger l.Logger) (*Config, error) {
 	}
 
 	logger.Printf("Loading config %s", filename)
+
+	var err error
 
 	configBytes, err := ioutil.ReadFile(filename)
 	if err != nil {

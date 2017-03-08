@@ -15,6 +15,8 @@ type AwsCloudMetricRepeater struct {
 	config *m.Config
 }
 
+const debugFormat = "{\"provider\": \"%s\", \"name\": \"%s\", \"type\": %d, \"value\": %d, \"unit\": \"%s\"}"
+
 func (cw AwsCloudMetricRepeater) ProcessMetrics(context m.MetricContext, metrics []m.Metric) error {
 
 	timestamp := aws.Time(time.Now())
@@ -87,17 +89,22 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(context m.MetricContext, metrics
 		datum := createDatum(d.GetName(), d.GetProvider())
 		datum.Value = aws.Float64(float64(value))
 
-		datumUnit := cloudwatch.StandardUnitCount
+		datumUnit := m.EMPTY
 		switch d.GetType() {
+		case m.COUNT:			datumUnit = cloudwatch.StandardUnitCount
 		case m.LEVEL:			datumUnit = cloudwatch.StandardUnitKilobytes
 		case m.LEVEL_PERCENT: 	datumUnit = cloudwatch.StandardUnitPercent
-		case m.TIMING: 			datumUnit = cloudwatch.StandardUnitMilliseconds
-		case m.CUSTOM_UNIT:		datumUnit = d.GetCustomUnit()
+		case m.TIMING_MS: 		datumUnit = cloudwatch.StandardUnitMilliseconds
+		case m.SIZE_B: 			datumUnit = cloudwatch.StandardUnitBytes
+		case m.SIZE_MB: 		datumUnit = cloudwatch.StandardUnitMegabytes
 		}
-		datum.Unit = aws.String(datumUnit)
+
+		if (datumUnit != m.EMPTY) {
+			datum.Unit = aws.String(datumUnit)
+		}
 
 		if cw.config.Debug {
-			cw.logger.Printf("%s %d %d %s %s", d.GetName(), d.GetType(), d.GetValue(), datumUnit, d.GetProvider())
+			cw.logger.Printf(debugFormat, d.GetProvider(), d.GetName(), d.GetType(), d.GetValue(), datumUnit)
 		}
 
 		data = append(data, datum)
