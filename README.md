@@ -75,7 +75,7 @@ disk_command = "df"
 # used to specify Cpu gatherer properties and if it runs
 #
 # default cpu_proc_stat: /proc/stat
-# darwin cpu_proc_stat:  /home/rickhigh/gospace/src/github.com/cloudurable/metricsd/metric/test-data/proc/stat
+# darwin cpu_proc_stat:  /home/rickhigh/gospace/src/github.com/cloudurable/metricsd/test/test-data/proc/stat
 # ------------------------------------------------------------
 cpu_gather = true
 #cpu_proc_stat = "/proc/stat"

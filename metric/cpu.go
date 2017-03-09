@@ -6,7 +6,6 @@ import (
 	"fmt"
 	l "github.com/advantageous/go-logback/logging"
 	"os"
-	"runtime"
 	"strings"
 )
 

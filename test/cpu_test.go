@@ -1,8 +1,9 @@
-package metric
+package test
 
 import (
 	"fmt"
 	l "github.com/advantageous/go-logback/logging/test"
+	m "github.com/cloudurable/metricsd/metric"
 	"os"
 	"testing"
 )
@@ -13,11 +14,11 @@ func TestCpuCounts(z *testing.T) {
 
 	dir, _ := os.Getwd()
 	fmt.Println("DIR", dir)
-	cpuG := NewCPUMetricsGathererWithPath(dir+"/test-data/proc/stat", nil, true)
 
+	cpuG := m.NewCPUMetricsGathererWithPath(dir+"/test-data/proc/stat", nil, true)
 	metrics, err := cpuG.GetMetrics()
 
-	cpuG.path = dir + "/test-data/proc/stat2"
+	cpuG = m.NewCPUMetricsGathererWithPath(dir+"/test-data/proc/stat2", nil, true)
 	metrics, err = cpuG.GetMetrics()
 
 	if err != nil {

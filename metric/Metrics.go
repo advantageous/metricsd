@@ -59,6 +59,7 @@ type MetricContext interface {
 
 type MetricsGatherer interface {
 	GetMetrics() ([]Metric, error)
+	//GetIdentity(string)
 }
 
 type MetricsRepeater interface {

@@ -3,7 +3,6 @@ package metric
 import (
 	"fmt"
 	l "github.com/advantageous/go-logback/logging"
-	"runtime"
 	"strings"
 )
 
