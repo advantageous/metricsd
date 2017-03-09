@@ -7,8 +7,6 @@ Metricsd gathers OS metrics for AWS CloudWatch. You can install it as a systemd 
 Configuration
 ####  /etc/metricsd.conf 
 ```conf
-
-
 # ------------------------------------------------------------
 # AWS Region         string        `hcl:"aws_region"`
 # If not set, uses aws current region for this instance.
@@ -64,19 +62,20 @@ server_role="dcos-master"
 #
 # default disk_command: /usr/bin/df
 # darwin disk_command:  /bin/df
-# default disk_args:    -B 512
 #
-# disk_args is only checked if disk_command is provided
+# default disk_includes:    "/dev/*"               includes all FileSystems startring with /dev/
+# example specific include: "/dev/sda5"            includes only /dev/sda5
+# example multiple include: "/dev/sda5 /other/*"   includes /dev/sda5 and all starting with /other/* evaluated in order in list
 # ------------------------------------------------------------
 disk_gather = true
 disk_command = "df"
-disk_args = "-B 512"
-
+#disk_includes = "/dev/*"
+#disk_includes =
 # ------------------------------------------------------------
 # used to specify Cpu gatherer properties and if it runs
 #
 # default cpu_proc_stat: /proc/stat
-# darwin cpu_proc_stat:  /metric/test-data/proc/stat
+# darwin cpu_proc_stat:  /home/rickhigh/gospace/src/github.com/cloudurable/metricsd/metric/test-data/proc/stat
 # ------------------------------------------------------------
 cpu_gather = true
 #cpu_proc_stat = "/proc/stat"
@@ -102,9 +101,7 @@ free_gather = true
 nodetool_gather = true
 #nodetool_command = "/usr/bin/nodetool"
 nodetool_functions = "gcstats"
-
-
-``` 
+```
 
 
 ## Installing as a service
@@ -222,15 +219,15 @@ If swapping is enabled (which is unlikely), then you will get the above with `mS
 * `nsRrBackground` - Read Repair Mismatch (Background)
 
 All message counts can be >= 0, or n/a (-125) or error (-127)
-* `nsLargeMsgsActive` - Large messages Active
-* `nsLargeMsgsPending` - Large messages Pending
-* `nsLargeMsgsCompleted` - Large messages Completed
-* `nsLargeMsgsDropped` - Large messages Dropped
-* `nsSmallMsgsActive` - Small messages Active
-* `nsSmallMsgsPending` - Small messages Pending
-* `nsSmallMsgsCompleted` - Small messages Completed
-* `nsSmallMsgsDropped` - Small messages Dropped
-* `nsGossipMsgsActive` - Gossip messages Active
-* `nsGossipMsgsPending` - Gossip messages Pending
-* `nsGossipMsgsCompleted` - Gossip messages Completed
-* `nsGossipMsgsDropped` - Gossip messages Dropped
+* `nsPoolLargeMsgsActive` - Large messages Active
+* `nsPoolLargeMsgsPending` - Large messages Pending
+* `nsPoolLargeMsgsCompleted` - Large messages Completed
+* `nsPoolLargeMsgsDropped` - Large messages Dropped
+* `nsPoolSmallMsgsActive` - Small messages Active
+* `nsPoolSmallMsgsPending` - Small messages Pending
+* `nsPoolSmallMsgsCompleted` - Small messages Completed
+* `nsPoolSmallMsgsDropped` - Small messages Dropped
+* `nsPoolGossipMsgsActive` - Gossip messages Active
+* `nsPoolGossipMsgsPending` - Gossip messages Pending
+* `nsPoolGossipMsgsCompleted` - Gossip messages Completed
+* `nsPoolGossipMsgsDropped` - Gossip messages Dropped

@@ -23,7 +23,7 @@ type Config struct {
 
 	DiskGather        	bool			`hcl:"disk_gather"`
 	DiskCommand       	string			`hcl:"disk_command"`
-	DiskArgs          	string			`hcl:"disk_args"`
+	DiskIncludes		string			`hcl:"disk_includes"`
 
 	CpuGather         	bool			`hcl:"cpu_gather"`
 	CpuProcStat       	string			`hcl:"cpu_proc_stat"`

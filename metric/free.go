@@ -18,14 +18,11 @@ func NewFreeMetricGatherer(logger l.Logger, config *Config) *FreeMetricGatherer 
 	logger = ensureLogger(logger, config.Debug, PROVIDER_FREE, FLAG_FREE)
 
 	command := "/usr/bin/free"
-	label := LINUX_LABEL
+	label := DEFAULT_LABEL
 
 	if config.FreeCommand != EMPTY {
 		command = config.FreeCommand
 		label = CONFIG_LABEL
-	} else if runtime.GOOS == GOOS_DARWIN {
-		command = "/usr/local/bin/free"
-		label = DARWIN_LABEL
 	}
 
 	if config.Debug {

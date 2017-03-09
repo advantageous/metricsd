@@ -62,15 +62,11 @@ func NewCPUMetricsGatherer(logger l.Logger, config *Config) *CPUMetricsGatherer 
 	logger = ensureLogger(logger, config.Debug, PROVIDER_CPU, FLAG_CPU)
 
 	statFile := "/proc/stat"
-	label := LINUX_LABEL
+	label := DEFAULT_LABEL
 
 	if config.CpuProcStat != EMPTY {
 		statFile = config.CpuProcStat
 		label = CONFIG_LABEL
-	} else if runtime.GOOS == GOOS_DARWIN {
-		dir, _ := os.Getwd()
-		statFile = dir + "/metric/test-data/proc/stat"
-		label = DARWIN_LABEL
 	}
 
 	if config.Debug {

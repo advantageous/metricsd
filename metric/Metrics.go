@@ -10,13 +10,12 @@ const (
 	EMPTY = ""
 	SPACE = " "
 	NEWLINE = "\n"
-	GOOS_DARWIN = "darwin"
+	UNDER = "_"
 )
 
 const (
-	LINUX_LABEL = "Linux"
-	DARWIN_LABEL = "Darwin"
-	CONFIG_LABEL = "Config"
+	DEFAULT_LABEL = "Default"
+	CONFIG_LABEL  = "Config"
 )
 
 const (

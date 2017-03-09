@@ -26,6 +26,13 @@ func execCommand(name string, arg ...string) (string, error) {
 	}
 }
 
+func dump(logger l.Logger, arr []string, label string) {
+	for _,s := range arr {
+		logger.Debug(label + " -->" + s + "<--")
+	}
+
+}
+
 func toInt64(i string, dflt int64) int64 {
 	i64, err := strconv.ParseInt(i, 10, 0)
 	if err != nil {
@@ -34,20 +41,8 @@ func toInt64(i string, dflt int64) int64 {
 	return i64
 }
 
-func splitValuesOnly(text string) []string {
-	var results = []string{}
-	split := strings.Split(text, SPACE)
-	for _,d := range split {
-		if (d != EMPTY) { // because the split puts an EMPTY in the array for every extra space
-			results = append(results, d)
-		}
-	}
-
-	return results;
-}
-
-func parseForColumn(text string, columnIndex int) string {
-	temp := splitValuesOnly(text)
+func fieldByIndex(text string, columnIndex int) string {
+	temp := strings.Fields(text)
 	if len(temp) > columnIndex {
 		return temp[columnIndex]
 	}

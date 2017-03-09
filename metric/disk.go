@@ -3,7 +3,6 @@ package metric
 import (
 	"fmt"
 	l "github.com/advantageous/go-logback/logging"
-	"runtime"
 	"strings"
 )
 
@@ -37,7 +36,12 @@ type DiskMetricsGatherer struct {
 	logger l.Logger
 	debug bool
 	command string
-	args []string
+	includes []diskInclude
+}
+
+type diskInclude struct {
+	starts bool
+	value string
 }
 
 func NewDiskMetricsGatherer(logger l.Logger, config *Config) *DiskMetricsGatherer {
@@ -45,75 +49,105 @@ func NewDiskMetricsGatherer(logger l.Logger, config *Config) *DiskMetricsGathere
 	logger = ensureLogger(logger, config.Debug, PROVIDER_DISK, FLAG_DISK)
 
 	command :=  "/usr/bin/df"
-	args := []string{"-B", "512"}
-	label := LINUX_LABEL
-	argText := "-B 512"
+	label := DEFAULT_LABEL
 
 	if config.DiskCommand != EMPTY {
 		command = config.DiskCommand
-		if (config.DiskArgs != EMPTY) {
-			args = strings.Split(config.DiskArgs, SPACE)
-		}
 		label = CONFIG_LABEL
-		argText = config.DiskArgs
-	} else if runtime.GOOS == GOOS_DARWIN {
-		command = "/bin/df"
-		args = []string{"-b", "-l"}
-		label = DARWIN_LABEL
-		argText = "-b -l"
+	}
+
+	var includes = []diskInclude{}
+	var includesLabel string
+	var includesString string
+	if config.DiskIncludes != EMPTY {
+		includesLabel = CONFIG_LABEL
+		includesString = config.DiskIncludes
+		for _,inc := range strings.Split(includesString, SPACE) {
+			if strings.HasSuffix(inc, "*") {
+				includes = append(includes, diskInclude{true, inc[:len(inc)-1]})
+			} else {
+				includes = append(includes, diskInclude{false, inc})
+			}
+		}
+	} else {
+		includesLabel = DEFAULT_LABEL
+		includesString = "/dev/*"
+		includes = append(includes, diskInclude{true, "/dev/"})
 	}
 
 	if config.Debug {
-		logger.Println("Disk gatherer initialized by:", label, "as:", command, argText)
+		logger.Println("Disk gatherer initialized by:", label, "as:", command, "with includes by:", includesLabel, "of:", includesString)
 	}
 
 	return &DiskMetricsGatherer{
 		logger: logger,
 		debug: config.Debug,
 		command: command,
-		args: args,
+		includes: includes,
 	}
 }
 
 func (disk *DiskMetricsGatherer) GetMetrics() ([]Metric, error) {
 
-	output, err := execCommand(disk.command, disk.args...)
+	output, err := execCommand(disk.command, "-k", "-l") // k for 1K, l for local only
 	if err != nil {
 		return nil, err
 	}
 
+	// Filesystem     1K-blocks    Used Available Use% Mounted on
+	// udev             4019524       0   4019524   0% /dev
+	// tmpfs             808148    9700    798448   2% /run
+	// /dev/sda5       88339720 9280388  74548868  12% /
+	// tmpfs            4040720  122236   3918484   4% /dev/shm
+	// tmpfs               5120       4      5116   1% /run/lock
+	// tmpfs            4040720       0   4040720   0% /sys/fs/cgroup
+	// tmpfs             808148     120    808028   1% /run/user/1000
+
 	var metrics = []Metric{}
-
-	// TODO read config disk_filesystems
-
+	first := true // skip first line
 	for _, line := range strings.Split(output, NEWLINE) {
-		if strings.HasPrefix(line, "/dev/") {
-
-			var name string
-			var total, used, available uint64
-			fmt.Sscanf(line, "%s %d %d %d", &name, &total, &used, &available)
-			var totalF, availableF float64
-
-			totalF = float64(total)
-			availableF = float64(available)
-
-			var calc = availableF / totalF * 100.0
-
-			if disk.debug {
-				disk.logger.Printf("name %s total %d used %d available %d calc %2.2f\n",
-					name, total, used, available, calc)
-			}
-
-			metrics = append(metrics, metric{
-				metricType: LEVEL_PERCENT,
-				name:       "dUVol" + name[5:] + "AvailPer",
-				value:      MetricValue(calc),
-				provider:   PROVIDER_DISK,
-			})
-
+		if first {
+			first = false
+		} else if disk.includeDisk(line) {
+			metrics = disk.appendDu(metrics, line)
 		}
 	}
 
 	return metrics, nil
 
+}
+
+func (disk *DiskMetricsGatherer) includeDisk(line string) bool {
+	fsname := fieldByIndex(line, 0);
+	for _,include := range disk.includes {
+		if include.starts {
+			if strings.HasPrefix(fsname, include.value) {
+				return true;
+			}
+		} else {
+			if fsname == include.value {
+				return true;
+			}
+		}
+	}
+	return false
+}
+
+func (disk *DiskMetricsGatherer) appendDu(metrics []Metric, line string) []Metric {
+	var name string
+	var total, used, available uint64
+	fmt.Sscanf(line, "%s %d %d %d", &name, &total, &used, &available)
+
+	var totalF = float64(total)
+	var availableF = float64(available)
+
+	var calc = availableF / totalF * 100.0
+
+	if disk.debug {
+		disk.logger.Printf("name %s total %d used %d available %d calc %2.2f\n", name, total, used, available, calc)
+	}
+
+	metrics = append(metrics, metric{LEVEL_PERCENT, MetricValue(calc),  "dUVolAvailPct:" + name, PROVIDER_DISK})
+
+	return metrics
 }
