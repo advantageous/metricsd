@@ -63,7 +63,7 @@ server_role="dcos-master"
 # default disk_command: /usr/bin/df
 # darwin disk_command:  /bin/df
 #
-# default disk_includes:    "/dev/*"               includes all FileSystems startring with /dev/
+# default disk_includes:    "/dev/*"               includes all FileSystems starting with /dev/
 # example specific include: "/dev/sda5"            includes only /dev/sda5
 # example multiple include: "/dev/sda5 /other/*"   includes /dev/sda5 and all starting with /other/* evaluated in order in list
 # ------------------------------------------------------------
