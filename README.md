@@ -70,6 +70,7 @@ server_role="dcos-master"
 disk_gather = true
 disk_command = "df"
 #disk_includes = "/dev/*"
+
 # ------------------------------------------------------------
 # used to specify Cpu gatherer properties and if it runs
 #
