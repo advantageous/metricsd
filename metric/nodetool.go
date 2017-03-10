@@ -190,20 +190,20 @@ func appendNsMode(metrics []Metric, line string) []Metric {
 	case "draining":		value = value_mode_draining
 	case "drained":			value = value_mode_drained
 	}
-	return append(metrics, metric{NO_UNIT, MetricValue(value), "nsMode", PROVIDER_NODETOOL})
+	return append(metrics, Metric{NO_UNIT, MetricValue(value), "nsMode", PROVIDER_NODETOOL})
 }
 
 func appendNsReadRepair(metrics []Metric, line string, columnIndex int, name string) []Metric {
 	metricValue := MetricValue( ToInt64(FieldByIndex(line, columnIndex), value_error) )
-	return append(metrics, metric{COUNT, metricValue, name, PROVIDER_NODETOOL})
+	return append(metrics, Metric{COUNT, metricValue, name, PROVIDER_NODETOOL})
 }
 
 func appendNsPool(metrics []Metric, line string, prefix string) []Metric {
 	valuesOnly := strings.Fields(line)
-	metrics = append(metrics, metric{COUNT, numericMetricValue(valuesOnly[2]), prefix + "Active", PROVIDER_NODETOOL})
-	metrics = append(metrics, metric{COUNT, numericMetricValue(valuesOnly[3]), prefix + "Pending", PROVIDER_NODETOOL})
-	metrics = append(metrics, metric{COUNT, numericMetricValue(valuesOnly[4]), prefix + "Completed", PROVIDER_NODETOOL})
-	return append(metrics, metric{COUNT, numericMetricValue(valuesOnly[5]), prefix + "Dropped", PROVIDER_NODETOOL})
+	metrics = append(metrics, Metric{COUNT, numericMetricValue(valuesOnly[2]), prefix + "Active", PROVIDER_NODETOOL})
+	metrics = append(metrics, Metric{COUNT, numericMetricValue(valuesOnly[3]), prefix + "Pending", PROVIDER_NODETOOL})
+	metrics = append(metrics, Metric{COUNT, numericMetricValue(valuesOnly[4]), prefix + "Completed", PROVIDER_NODETOOL})
+	return append(metrics, Metric{COUNT, numericMetricValue(valuesOnly[5]), prefix + "Dropped", PROVIDER_NODETOOL})
 }
 
 func (gatherer *NodetoolMetricGatherer) tpstats() ([]Metric, error) {
@@ -264,17 +264,17 @@ func appendTpMessageType(metrics []Metric, line string) []Metric {
 			name = name + part[0:1] + strings.ToLower(part[1:])
 		}
 	}
-	return append(metrics, metric{COUNT, numericMetricValue(valuesOnly[1]), name, PROVIDER_NODETOOL})
+	return append(metrics, Metric{COUNT, numericMetricValue(valuesOnly[1]), name, PROVIDER_NODETOOL})
 }
 
 func appendTpPool(metrics []Metric, line string) []Metric {
 	valuesOnly := strings.Fields(line)
 	prefix := "tpPool" + valuesOnly[0]
-	metrics = append(metrics, metric{COUNT, numericMetricValue(valuesOnly[1]), prefix + "Active", PROVIDER_NODETOOL})
-	metrics = append(metrics, metric{COUNT, numericMetricValue(valuesOnly[2]), prefix + "Pending", PROVIDER_NODETOOL})
-	metrics = append(metrics, metric{COUNT, numericMetricValue(valuesOnly[3]), prefix + "Completed", PROVIDER_NODETOOL})
-	metrics = append(metrics, metric{COUNT, numericMetricValue(valuesOnly[4]), prefix + "Blocked", PROVIDER_NODETOOL})
-	return append(metrics, metric{COUNT, numericMetricValue(valuesOnly[5]), prefix + "AllTimeBlocked", PROVIDER_NODETOOL})
+	metrics = append(metrics, Metric{COUNT, numericMetricValue(valuesOnly[1]), prefix + "Active", PROVIDER_NODETOOL})
+	metrics = append(metrics, Metric{COUNT, numericMetricValue(valuesOnly[2]), prefix + "Pending", PROVIDER_NODETOOL})
+	metrics = append(metrics, Metric{COUNT, numericMetricValue(valuesOnly[3]), prefix + "Completed", PROVIDER_NODETOOL})
+	metrics = append(metrics, Metric{COUNT, numericMetricValue(valuesOnly[4]), prefix + "Blocked", PROVIDER_NODETOOL})
+	return append(metrics, Metric{COUNT, numericMetricValue(valuesOnly[5]), prefix + "AllTimeBlocked", PROVIDER_NODETOOL})
 }
 
 func (gatherer *NodetoolMetricGatherer) gcstats() ([]Metric, error) {
@@ -291,13 +291,13 @@ func (gatherer *NodetoolMetricGatherer) gcstats() ([]Metric, error) {
 	values := strings.Fields(lines[1])
 
 	var metrics = []Metric{}
-	metrics = append(metrics, metric{TIMING_MS, numericMetricValue(values[0]), "gcInterval", PROVIDER_NODETOOL})
-	metrics = append(metrics, metric{TIMING_MS, numericMetricValue(values[1]), "gcMaxElapsed", PROVIDER_NODETOOL})
-	metrics = append(metrics, metric{TIMING_MS, numericMetricValue(values[2]), "gcTotalElapsed", PROVIDER_NODETOOL})
-	metrics = append(metrics, metric{TIMING_MS, numericMetricValue(values[3]), "gcStdevElapsed", PROVIDER_NODETOOL})
-	metrics = append(metrics, metric{SIZE_MB, numericMetricValue(values[4]), "gcReclaimed", PROVIDER_NODETOOL})
-	metrics = append(metrics, metric{COUNT, numericMetricValue(values[5]), "gcCollections", PROVIDER_NODETOOL})
-	metrics = append(metrics, metric{SIZE_B, numericMetricValue(values[6]), "gcDirectMemoryBytes", PROVIDER_NODETOOL})
+	metrics = append(metrics, Metric{TIMING_MS, numericMetricValue(values[0]), "gcInterval", PROVIDER_NODETOOL})
+	metrics = append(metrics, Metric{TIMING_MS, numericMetricValue(values[1]), "gcMaxElapsed", PROVIDER_NODETOOL})
+	metrics = append(metrics, Metric{TIMING_MS, numericMetricValue(values[2]), "gcTotalElapsed", PROVIDER_NODETOOL})
+	metrics = append(metrics, Metric{TIMING_MS, numericMetricValue(values[3]), "gcStdevElapsed", PROVIDER_NODETOOL})
+	metrics = append(metrics, Metric{SIZE_MB, numericMetricValue(values[4]), "gcReclaimed", PROVIDER_NODETOOL})
+	metrics = append(metrics, Metric{COUNT, numericMetricValue(values[5]), "gcCollections", PROVIDER_NODETOOL})
+	metrics = append(metrics, Metric{SIZE_B, numericMetricValue(values[6]), "gcDirectMemoryBytes", PROVIDER_NODETOOL})
 
 	return metrics, nil
 }
@@ -334,7 +334,7 @@ func (gatherer *NodetoolMetricGatherer) getlogginglevels() ([]Metric, error) {
 			case "info":	value = value_level_info
 			case "warn":	value = value_level_warn
 			}
-			metrics = append(metrics, metric{NO_UNIT, MetricValue(value), name, PROVIDER_NODETOOL})
+			metrics = append(metrics, Metric{NO_UNIT, MetricValue(value), name, PROVIDER_NODETOOL})
 		}
 	}
 

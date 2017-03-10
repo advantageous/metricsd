@@ -57,13 +57,6 @@ const (
 	RELOAD_EJECT
 )
 
-type Metric interface {
-	GetProvider() string
-	GetType() MetricType
-	GetValue() MetricValue
-	GetName() string
-}
-
 type MetricContext interface {
 	GetEnv() string
 	GetNameSpace() string
@@ -80,25 +73,9 @@ type MetricsRepeater interface {
 	ProcessMetrics(context MetricContext, metrics []Metric) error
 }
 
-type metric struct {
-	metricType	MetricType
-	value		MetricValue
-	name		string
-	provider	string
-}
-
-func (m metric) GetType() MetricType {
-	return m.metricType
-}
-
-func (m metric) GetValue() MetricValue {
-	return m.value
-}
-
-func (m metric) GetProvider() string {
-	return m.provider
-}
-
-func (m metric) GetName() string {
-	return m.name
+type Metric struct {
+	MetricType MetricType
+	Value      MetricValue
+	Name       string
+	Provider   string
 }

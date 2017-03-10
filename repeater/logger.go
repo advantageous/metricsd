@@ -11,7 +11,7 @@ type LogMetricsRepeater struct {
 
 func (lr LogMetricsRepeater) ProcessMetrics(metrics []m.Metric) error {
 	for _, m := range metrics {
-		lr.logger.Printf("%s %d %d", m.GetName(), m.GetType(), m.GetValue())
+		lr.logger.Printf("%s %d %d", m.Name, m.MetricType, m.Value)
 	}
 	return nil
 }

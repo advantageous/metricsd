@@ -161,7 +161,7 @@ func (disk *DiskMetricsGatherer) appendDu(metrics []Metric, line string) []Metri
 		disk.logger.Printf("name %s total %d used %d available %d calc %2.2f\n", name, total, used, available, calc)
 	}
 
-	metrics = append(metrics, metric{LEVEL_PERCENT, MetricValue(calc),  "dUVolAvailPct:" + name, PROVIDER_DISK})
+	metrics = append(metrics, Metric{LEVEL_PERCENT, MetricValue(calc),  "dUVolAvailPct:" + name, PROVIDER_DISK})
 
 	return metrics
 }

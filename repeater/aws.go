@@ -85,12 +85,12 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(context m.MetricContext, metrics
 
 	for index, d := range metrics {
 
-		value := float64(d.GetValue())
-		datum := createDatum(d.GetName(), d.GetProvider())
+		value := float64(d.Value)
+		datum := createDatum(d.Name, d.Provider)
 		datum.Value = aws.Float64(float64(value))
 
 		datumUnit := m.EMPTY
-		switch d.GetType() {
+		switch d.MetricType {
 		case m.COUNT:			datumUnit = cloudwatch.StandardUnitCount
 		case m.LEVEL:			datumUnit = cloudwatch.StandardUnitKilobytes
 		case m.LEVEL_PERCENT: 	datumUnit = cloudwatch.StandardUnitPercent
@@ -104,7 +104,7 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(context m.MetricContext, metrics
 		}
 
 		if cw.config.Debug {
-			cw.logger.Printf(debugFormat, d.GetProvider(), d.GetName(), d.GetType(), d.GetValue(), datumUnit)
+			cw.logger.Printf(debugFormat, d.Provider, d.Name, d.MetricType, d.Value, datumUnit)
 		}
 
 		data = append(data, datum)

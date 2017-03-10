@@ -75,34 +75,34 @@ func (gatherer *FreeMetricGatherer) GetMetrics() ([]Metric, error) {
 			" shared %d , buffer %d, available %d\n", mem, total, used, free, shared, buffer, available)
 	}
 
-	metrics = append(metrics, metric{LEVEL, MetricValue(free), "mFreeLvl", PROVIDER_RAM})
-	metrics = append(metrics, metric{LEVEL, MetricValue(used), "mUsedLvl", PROVIDER_RAM})
-	metrics = append(metrics, metric{LEVEL, MetricValue(shared), "mSharedLvl", PROVIDER_RAM})
-	metrics = append(metrics, metric{LEVEL, MetricValue(buffer), "mBufLvl", PROVIDER_RAM})
-	metrics = append(metrics, metric{LEVEL, MetricValue(available), "mAvailableLvl", PROVIDER_RAM})
+	metrics = append(metrics, Metric{LEVEL, MetricValue(free), "mFreeLvl", PROVIDER_RAM})
+	metrics = append(metrics, Metric{LEVEL, MetricValue(used), "mUsedLvl", PROVIDER_RAM})
+	metrics = append(metrics, Metric{LEVEL, MetricValue(shared), "mSharedLvl", PROVIDER_RAM})
+	metrics = append(metrics, Metric{LEVEL, MetricValue(buffer), "mBufLvl", PROVIDER_RAM})
+	metrics = append(metrics, Metric{LEVEL, MetricValue(available), "mAvailableLvl", PROVIDER_RAM})
 
 	totalF := float64(total)
 
 	freePercent := (float64(free) / totalF) * 100.0
-	metrics = append(metrics, metric{LEVEL_PERCENT, MetricValue(int64(freePercent)), "mFreePer", PROVIDER_RAM})
+	metrics = append(metrics, Metric{LEVEL_PERCENT, MetricValue(int64(freePercent)), "mFreePer", PROVIDER_RAM})
 
 	usedPercent := (float64(used) / totalF) * 100.0
-	metrics = append(metrics, metric{LEVEL_PERCENT, MetricValue(int64(usedPercent)), "mUsedPer", PROVIDER_RAM})
+	metrics = append(metrics, Metric{LEVEL_PERCENT, MetricValue(int64(usedPercent)), "mUsedPer", PROVIDER_RAM})
 
 	fmt.Sscanf(line2, "%s %d %d %d", &mem, &total, &used, &free)
 
 	if free == 0 && used == 0 && total == 0 {
 		// do nothing
 	} else {
-		metrics = append(metrics, metric{LEVEL, MetricValue(free), "mSwpFreeLvl", PROVIDER_RAM})
-		metrics = append(metrics, metric{LEVEL, MetricValue(used), "mSwpUsedLvl", PROVIDER_RAM})
-		metrics = append(metrics, metric{LEVEL, MetricValue(shared), "mSwpSharedLvl", PROVIDER_RAM})
+		metrics = append(metrics, Metric{LEVEL, MetricValue(free), "mSwpFreeLvl", PROVIDER_RAM})
+		metrics = append(metrics, Metric{LEVEL, MetricValue(used), "mSwpUsedLvl", PROVIDER_RAM})
+		metrics = append(metrics, Metric{LEVEL, MetricValue(shared), "mSwpSharedLvl", PROVIDER_RAM})
 
 		totalF = float64(total)
 		freePercent = (float64(free) / totalF) * 100.0
-		metrics = append(metrics, metric{LEVEL_PERCENT, MetricValue(int64(freePercent)), "mSwpFreePer", PROVIDER_RAM})
+		metrics = append(metrics, Metric{LEVEL_PERCENT, MetricValue(int64(freePercent)), "mSwpFreePer", PROVIDER_RAM})
 		usedPercent = (float64(used) / totalF) * 100.0
-		metrics = append(metrics, metric{LEVEL_PERCENT, MetricValue(int64(usedPercent)), "mSwpUsedPer", PROVIDER_RAM})
+		metrics = append(metrics, Metric{LEVEL_PERCENT, MetricValue(int64(usedPercent)), "mSwpUsedPer", PROVIDER_RAM})
 	}
 
 	return metrics, nil
