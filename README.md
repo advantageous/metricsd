@@ -37,7 +37,7 @@ debug = false
 # TimePeriodSeconds time.Duration `hcl:"interval_seconds"`
 # Defaults to 30 seconds, how often metrics are collected.
 # ------------------------------------------------------------
-interval_seconds = 10
+interval_seconds = 30
 
 # ------------------------------------------------------------
 # Used to specify the environment: prod, dev, qa, staging, etc.

@@ -6,11 +6,19 @@ type MetricIntervalType byte
 type MetricValue int64
 type MetricIntervalValue int64
 
+type ReloadResult byte
+
 const (
-	EMPTY = ""
-	SPACE = " "
-	NEWLINE = "\n"
-	UNDER = "_"
+	EMPTY             = ""
+	SPACE             = " "
+	NEWLINE           = "\n"
+	UNDER             = "_"
+	DOT               = "."
+	QUOTE             = "\""
+	COMMA             = ","
+	QUOTE_COLON       = "\" : "
+	QUOTE_COLON_QUOTE = "\" : \""
+	QUOTE_COMMA       = "\","
 )
 
 const (
@@ -19,11 +27,11 @@ const (
 )
 
 const (
-	PROVIDER_CPU  = "cpu"
-	PROVIDER_DISK = "disk"
-	PROVIDER_RAM  = "ram"
-	PROVIDER_FREE = "free"
-	PROVIDER_NODE = "node"
+	PROVIDER_CPU      = "cpu"
+	PROVIDER_DISK     = "disk"
+	PROVIDER_RAM      = "ram"
+	PROVIDER_FREE     = "free"
+	PROVIDER_NODETOOL = "nodetool"
 )
 
 const (
@@ -43,6 +51,12 @@ const (
 	NO_UNIT
 )
 
+const (
+	RELOAD_SUCCESS ReloadResult = iota
+	RELOAD_FAILURE
+	RELOAD_EJECT
+)
+
 type Metric interface {
 	GetProvider() string
 	GetType() MetricType
@@ -59,7 +73,7 @@ type MetricContext interface {
 
 type MetricsGatherer interface {
 	GetMetrics() ([]Metric, error)
-	//GetIdentity(string)
+	Reload(config *Config) (ReloadResult)
 }
 
 type MetricsRepeater interface {

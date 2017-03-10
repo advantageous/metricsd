@@ -15,10 +15,12 @@ func TestCpuCounts(z *testing.T) {
 	dir, _ := os.Getwd()
 	fmt.Println("DIR", dir)
 
-	cpuG := m.NewCPUMetricsGathererWithPath(dir+"/test-data/proc/stat", nil, true)
+	config := m.Config{ Debug: true, CpuProcStat: dir + "/test-data/proc/stat", };
+	cpuG := m.NewCPUMetricsGatherer(nil, &config)
 	metrics, err := cpuG.GetMetrics()
 
-	cpuG = m.NewCPUMetricsGathererWithPath(dir+"/test-data/proc/stat2", nil, true)
+	config = m.Config{ Debug: true, CpuProcStat: dir + "/test-data/proc/stat2", };
+	cpuG = m.NewCPUMetricsGatherer(nil, &config)
 	metrics, err = cpuG.GetMetrics()
 
 	if err != nil {

@@ -46,8 +46,20 @@ type diskInclude struct {
 
 func NewDiskMetricsGatherer(logger l.Logger, config *Config) *DiskMetricsGatherer {
 
-	logger = ensureLogger(logger, config.Debug, PROVIDER_DISK, FLAG_DISK)
+	if (!config.DiskGather) { return nil } // don't return anything if not turned on
 
+	logger = EnsureLogger(logger, config.Debug, PROVIDER_DISK, FLAG_DISK)
+	command, includes := readDiskConfig(config, logger)
+
+	return &DiskMetricsGatherer{
+		logger: logger,
+		debug: config.Debug,
+		command: command,
+		includes: includes,
+	}
+}
+
+func readDiskConfig(config *Config, logger l.Logger) (string, []diskInclude) {
 	command :=  "/usr/bin/df"
 	label := DEFAULT_LABEL
 
@@ -79,17 +91,19 @@ func NewDiskMetricsGatherer(logger l.Logger, config *Config) *DiskMetricsGathere
 		logger.Println("Disk gatherer initialized by:", label, "as:", command, "with includes by:", includesLabel, "of:", includesString)
 	}
 
-	return &DiskMetricsGatherer{
-		logger: logger,
-		debug: config.Debug,
-		command: command,
-		includes: includes,
-	}
+	return command, includes;
+}
+
+func (cpu *DiskMetricsGatherer) Reload(config *Config) (ReloadResult) {
+	if (!config.DiskGather) { return RELOAD_EJECT }  // eject if not turned on
+
+	cpu.command, cpu.includes = readDiskConfig(config, cpu.logger);
+	return RELOAD_SUCCESS
 }
 
 func (disk *DiskMetricsGatherer) GetMetrics() ([]Metric, error) {
 
-	output, err := execCommand(disk.command, "-k", "-l") // k for 1K, l for local only
+	output, err := ExecCommand(disk.command, "-k", "-l") // k for 1K, l for local only
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +132,7 @@ func (disk *DiskMetricsGatherer) GetMetrics() ([]Metric, error) {
 }
 
 func (disk *DiskMetricsGatherer) includeDisk(line string) bool {
-	fsname := fieldByIndex(line, 0);
+	fsname := FieldByIndex(line, 0);
 	for _,include := range disk.includes {
 		if include.starts {
 			if strings.HasPrefix(fsname, include.value) {

@@ -14,10 +14,10 @@ type CpuTime uint64
 type CpuCount uint64
 
 type CPUMetricsGatherer struct {
-	path string
-	lastTime *CpuStats
-	logger l.Logger
-	debug bool
+	procStatPath string
+	lastTime     *CpuStats
+	logger       l.Logger
+	debug        bool
 }
 
 type CpuStats struct {
@@ -45,38 +45,39 @@ type CpuTimes struct {
 	GuestNice CpuTime
 }
 
-func NewCPUMetricsGathererWithPath(path string, logger l.Logger, debug bool) *CPUMetricsGatherer {
-
-	logger = ensureLogger(logger, debug, PROVIDER_CPU, FLAG_CPU)
-
-	return &CPUMetricsGatherer{
-		path:   path,
-		logger: logger,
-		debug:  debug,
-	}
-}
-
 func NewCPUMetricsGatherer(logger l.Logger, config *Config) *CPUMetricsGatherer {
 
-	logger = ensureLogger(logger, config.Debug, PROVIDER_CPU, FLAG_CPU)
+	if (!config.CpuGather) { return nil } // don't return anything if not turned on
 
-	statFile := "/proc/stat"
-	label := DEFAULT_LABEL
+	logger = EnsureLogger(logger, config.Debug, PROVIDER_CPU, FLAG_CPU)
+	procStatPath := readCpuConfig(config, logger)
 
-	if config.CpuProcStat != EMPTY {
-		statFile = config.CpuProcStat
-		label = CONFIG_LABEL
+	return &CPUMetricsGatherer{
+		procStatPath: procStatPath,
+		logger:       logger,
+		debug:        config.Debug,
 	}
-
-	if config.Debug {
-		logger.Println("PROVIDER_CPU gatherer initialized by:", label, "as:", statFile)
-	}
-
-	return NewCPUMetricsGathererWithPath(statFile, logger, config.Debug)
 }
 
-func (cpu *CPUMetricsGatherer) SetPath(path string) {
-	cpu.path = path
+func readCpuConfig(config *Config, logger l.Logger) (string) {
+	procStatPath := "/proc/stat"
+	label := DEFAULT_LABEL
+	if config.CpuProcStat != EMPTY {
+		procStatPath = config.CpuProcStat
+		label = CONFIG_LABEL
+	}
+	if config.Debug {
+		logger.Println("PROVIDER_CPU gatherer initialized by:", label, "as:", procStatPath)
+	}
+
+	return procStatPath
+}
+
+func (cpu *CPUMetricsGatherer) Reload(config *Config) (ReloadResult) {
+	if (!config.CpuGather) { return RELOAD_EJECT }  // eject if not turned on
+
+	cpu.procStatPath = readCpuConfig(config, cpu.logger);
+	return RELOAD_SUCCESS
 }
 
 func (cpu *CPUMetricsGatherer) GetMetrics() ([]Metric, error) {
@@ -94,7 +95,9 @@ func (cpu *CPUMetricsGatherer) GetMetrics() ([]Metric, error) {
 
 	metrics := convertToMetrics(cpu.lastTime, cpuStats)
 	cpu.lastTime = cpuStats
-	cpu.logger.Debugf("%+v \n", cpuStats)
+	if (cpu.debug) {
+		cpu.logger.Debugf("%+v \n", cpuStats)
+	}
 	return metrics, nil
 
 }
@@ -187,7 +190,7 @@ func convertToMetrics(lastTimeStats *CpuStats, nowStats *CpuStats) []Metric {
 }
 
 func (cpu *CPUMetricsGatherer) readCpuStats() (*CpuStats, error) {
-	org, err := os.Open(cpu.path)
+	org, err := os.Open(cpu.procStatPath)
 
 	fd := bufio.NewReader(org)
 
@@ -236,10 +239,10 @@ func (cpu *CPUMetricsGatherer) readCpuStats() (*CpuStats, error) {
 
 func (cpu *CPUMetricsGatherer) parseLine(name string, value uint64, line string, stats *CpuStats) error {
 
-	if cpu.debug {
-		cpu.logger.Println("LINE", line)
-		cpu.logger.Println(name, value)
-	}
+	//if cpu.debug {
+	//	cpu.logger.Println("LINE", line)
+	//	cpu.logger.Println(name, value)
+	//}
 
 	switch name {
 	case "ctxt":

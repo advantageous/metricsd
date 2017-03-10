@@ -14,41 +14,32 @@ func makeTerminateChannel() <-chan os.Signal {
 	return ch
 }
 
-func RunWorker(gatherers []MetricsGatherer, repeaters []MetricsRepeater, logger lg.Logger, interval time.Duration,
-	intervalConfigRefresh time.Duration, debug bool, configFile string) {
+func RunWorker(repeaters []MetricsRepeater, logger lg.Logger, config *Config,  configFile string) {
+	logger = EnsureLogger(logger, config.Debug, "worker", "MT_METRIC_WORKER_DEBUG")
 
-	if logger == nil {
-		if debug {
-			logger = lg.NewSimpleDebugLogger("worker")
-		} else {
-			logger = lg.GetSimpleLogger("MT_METRIC_WORKER_DEBUG", "worker")
-		}
-	}
+	logger.Info("Config file INIT", ConfigJsonString(config))
+	interval, intervalConfigRefresh, debug := readRunConfig(config);
 
 	timer := time.NewTimer(interval)
-
-	configTimer := time.NewTimer(intervalConfigRefresh)
-
-	var config *Config
-
-	if newConfig, err := LoadConfig(configFile, logger); err != nil {
-		logger.Error("Error reading config", err)
-	} else {
-		config = newConfig
-	}
+	configTimer := time.NewTimer(10) // intervalConfigRefresh)
 
 	terminator := makeTerminateChannel()
 
+	var gatherers = LoadGatherers(config)
+	var configChanged bool = false
+
 	for {
-
 		select {
-
 		case <-terminator:
 			logger.Info("Exiting")
 			os.Exit(0)
-			break
+			break // ask rick, I think this is redundant in go
 
 		case <-timer.C:
+			if configChanged {
+				gatherers = LoadGatherers(config)
+			}
+
 			metrics := collectMetrics(gatherers, logger)
 			processMetrics(metrics, repeaters, config, logger)
 			timer.Reset(interval)
@@ -57,17 +48,27 @@ func RunWorker(gatherers []MetricsGatherer, repeaters []MetricsRepeater, logger 
 			if newConfig, err := LoadConfig(configFile, logger); err != nil {
 				logger.Error("Error reading config", err)
 			} else {
-				config = newConfig
-				if debug {
-					logger.Info("LOADED NEW CONFIG_LABEL", "ENV", config.GetEnv(),
-						"NAMESPACE", config.GetNameSpace(),
-						"ROLE", config.GetRole())
+				configChanged = !ConfigEquals(config, newConfig)
+				if configChanged {
+					config = newConfig
+					interval, intervalConfigRefresh, debug = readRunConfig(config);
+					logger.Info("Config file CHANGED", ConfigJsonString(config))
+				} else {
+					if debug {
+						logger.Info("Config file SAME")
+					}
 				}
 			}
 			configTimer.Reset(intervalConfigRefresh)
 
 		}
 	}
+}
+
+func readRunConfig(config * Config) (time.Duration, time.Duration, bool){
+	return 	config.TimePeriodSeconds * time.Second,
+	 		config.ReadConfigSeconds * time.Second,
+			config.Debug
 }
 
 func processMetrics(metrics []Metric, repeaters []MetricsRepeater, context *Config, logger lg.Logger) {

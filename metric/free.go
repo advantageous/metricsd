@@ -14,8 +14,19 @@ type FreeMetricGatherer struct {
 
 func NewFreeMetricGatherer(logger l.Logger, config *Config) *FreeMetricGatherer {
 
-	logger = ensureLogger(logger, config.Debug, PROVIDER_FREE, FLAG_FREE)
+	if (!config.FreeGather) { return nil } // don't return anything if not turned on
 
+	logger = EnsureLogger(logger, config.Debug, PROVIDER_FREE, FLAG_FREE)
+	command := readFreeConfig(config, logger)
+
+	return &FreeMetricGatherer{
+		logger: logger,
+		debug:  config.Debug,
+		command: command,
+	}
+}
+
+func readFreeConfig(config *Config, logger l.Logger) (string) {
 	command := "/usr/bin/free"
 	label := DEFAULT_LABEL
 
@@ -27,16 +38,18 @@ func NewFreeMetricGatherer(logger l.Logger, config *Config) *FreeMetricGatherer 
 	if config.Debug {
 		logger.Println("Free gatherer initialized by:", label, "as:", command)
 	}
+	return command
+}
 
-	return &FreeMetricGatherer{
-		logger: logger,
-		debug:  config.Debug,
-		command: command,
-	}
+func (gatherer *FreeMetricGatherer) Reload(config *Config) (ReloadResult) {
+	if (!config.FreeGather) { return RELOAD_EJECT }  // eject if not turned on
+
+	gatherer.command = readFreeConfig(config, gatherer.logger)
+	return RELOAD_SUCCESS
 }
 
 func (gatherer *FreeMetricGatherer) GetMetrics() ([]Metric, error) {
-	output, err := execCommand(gatherer.command)
+	output, err := ExecCommand(gatherer.command)
 	if err != nil {
 		return nil, err
 	}

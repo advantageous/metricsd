@@ -5,8 +5,6 @@ import (
 	l "github.com/advantageous/go-logback/logging"
 	m "github.com/cloudurable/metricsd/metric"
 	r "github.com/cloudurable/metricsd/repeater"
-	"time"
-	"strings"
 )
 
 func main() {
@@ -19,31 +17,8 @@ func main() {
 		panic(err)
 	}
 
-	repeaters := []m.MetricsRepeater{r.NewAwsCloudMetricRepeater(config)}
+	var repeaters = []m.MetricsRepeater{r.NewAwsCloudMetricRepeater(config)}
+	repeaters = []m.MetricsRepeater{}
 
-	var gatherers = []m.MetricsGatherer{}
-	if (config.CpuGather) {
-		gatherers = append(gatherers, m.NewCPUMetricsGatherer(nil, config))
-	}
-
-	if (config.DiskGather) {
-		gatherers = append(gatherers, m.NewDiskMetricsGatherer(nil, config))
-	}
-
-	if (config.FreeGather) {
-		gatherers = append(gatherers, m.NewFreeMetricGatherer(nil, config))
-	}
-
-	if (config.NodetoolGather) {
-		nodetoolFunctions := strings.Split(config.NodetoolFunctions, m.SPACE)
-		for _,nodeFunction := range nodetoolFunctions {
-			if m.NodetoolFunctionSupported(nodeFunction) {
-				gatherers = append(gatherers, m.NewNodetoolMetricGatherer(nil, config, nodeFunction))
-			}
-
-		}
-	}
-
-	m.RunWorker(gatherers, repeaters, nil, config.TimePeriodSeconds * time.Second,
-		config.ReadConfigSeconds * time.Second, config.Debug, *configFile)
+	m.RunWorker(repeaters, nil, config, *configFile)
 }
