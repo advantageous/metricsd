@@ -1,12 +1,4 @@
-package metric
-
-type MetricType byte
-type MetricIntervalType byte
-
-type MetricValue int64
-type MetricIntervalValue int64
-
-type ReloadResult byte
+package common
 
 const (
 	EMPTY             = ""
@@ -19,6 +11,8 @@ const (
 	QUOTE_COLON       = "\" : "
 	QUOTE_COLON_QUOTE = "\" : \""
 	QUOTE_COMMA       = "\","
+	OPEN_BRACE       = "["
+	CLOSE_BRACE       = "]"
 )
 
 const (
@@ -29,9 +23,15 @@ const (
 const (
 	PROVIDER_CPU      = "cpu"
 	PROVIDER_DISK     = "disk"
-	PROVIDER_RAM      = "ram"
 	PROVIDER_FREE     = "free"
 	PROVIDER_NODETOOL = "nodetool"
+
+	PROVIDER_RAM      = "ram"
+)
+
+const (
+	REPEATER_AWS    = "aws"
+	REPEATER_LOGGER = "logger"
 )
 
 const (
@@ -50,32 +50,3 @@ const (
 	SIZE_MB
 	NO_UNIT
 )
-
-const (
-	RELOAD_SUCCESS ReloadResult = iota
-	RELOAD_FAILURE
-	RELOAD_EJECT
-)
-
-type MetricContext interface {
-	GetEnv() string
-	GetNameSpace() string
-	GetRole() string
-	SendId() bool
-}
-
-type MetricsGatherer interface {
-	GetMetrics() ([]Metric, error)
-	Reload(config *Config) (ReloadResult)
-}
-
-type MetricsRepeater interface {
-	ProcessMetrics(context MetricContext, metrics []Metric) error
-}
-
-type Metric struct {
-	MetricType MetricType
-	Value      MetricValue
-	Name       string
-	Provider   string
-}

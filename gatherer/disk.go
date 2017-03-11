@@ -3,6 +3,7 @@ package metric
 import (
 	"fmt"
 	l "github.com/advantageous/go-logback/logging"
+	c "github.com/cloudurable/metricsd/common"
 	"strings"
 )
 
@@ -44,11 +45,9 @@ type diskInclude struct {
 	value string
 }
 
-func NewDiskMetricsGatherer(logger l.Logger, config *Config) *DiskMetricsGatherer {
+func NewDiskMetricsGatherer(logger l.Logger, config *c.Config) *DiskMetricsGatherer {
 
-	if (!config.DiskGather) { return nil } // don't return anything if not turned on
-
-	logger = EnsureLogger(logger, config.Debug, PROVIDER_DISK, FLAG_DISK)
+	logger = c.EnsureLogger(logger, config.Debug, c.PROVIDER_DISK, c.FLAG_DISK)
 	command, includes := readDiskConfig(config, logger)
 
 	return &DiskMetricsGatherer{
@@ -59,22 +58,22 @@ func NewDiskMetricsGatherer(logger l.Logger, config *Config) *DiskMetricsGathere
 	}
 }
 
-func readDiskConfig(config *Config, logger l.Logger) (string, []diskInclude) {
+func readDiskConfig(config *c.Config, logger l.Logger) (string, []diskInclude) {
 	command :=  "/usr/bin/df"
-	label := DEFAULT_LABEL
+	label := c.DEFAULT_LABEL
 
-	if config.DiskCommand != EMPTY {
+	if config.DiskCommand != c.EMPTY {
 		command = config.DiskCommand
-		label = CONFIG_LABEL
+		label = c.CONFIG_LABEL
 	}
 
 	var includes = []diskInclude{}
 	var includesLabel string
 	var includesString string
-	if config.DiskIncludes != EMPTY {
-		includesLabel = CONFIG_LABEL
+	if config.DiskIncludes != c.EMPTY {
+		includesLabel = c.CONFIG_LABEL
 		includesString = config.DiskIncludes
-		for _,inc := range strings.Split(includesString, SPACE) {
+		for _,inc := range strings.Split(includesString, c.SPACE) {
 			if strings.HasSuffix(inc, "*") {
 				includes = append(includes, diskInclude{true, inc[:len(inc)-1]})
 			} else {
@@ -82,7 +81,7 @@ func readDiskConfig(config *Config, logger l.Logger) (string, []diskInclude) {
 			}
 		}
 	} else {
-		includesLabel = DEFAULT_LABEL
+		includesLabel = c.DEFAULT_LABEL
 		includesString = "/dev/*"
 		includes = append(includes, diskInclude{true, "/dev/"})
 	}
@@ -94,16 +93,9 @@ func readDiskConfig(config *Config, logger l.Logger) (string, []diskInclude) {
 	return command, includes;
 }
 
-func (cpu *DiskMetricsGatherer) Reload(config *Config) (ReloadResult) {
-	if (!config.DiskGather) { return RELOAD_EJECT }  // eject if not turned on
+func (disk *DiskMetricsGatherer) GetMetrics() ([]c.Metric, error) {
 
-	cpu.command, cpu.includes = readDiskConfig(config, cpu.logger);
-	return RELOAD_SUCCESS
-}
-
-func (disk *DiskMetricsGatherer) GetMetrics() ([]Metric, error) {
-
-	output, err := ExecCommand(disk.command, "-k", "-l") // k for 1K, l for local only
+	output, err := c.ExecCommand(disk.command, "-k", "-l") // k for 1K, l for local only
 	if err != nil {
 		return nil, err
 	}
@@ -117,9 +109,9 @@ func (disk *DiskMetricsGatherer) GetMetrics() ([]Metric, error) {
 	// tmpfs            4040720       0   4040720   0% /sys/fs/cgroup
 	// tmpfs             808148     120    808028   1% /run/user/1000
 
-	var metrics = []Metric{}
+	var metrics = []c.Metric{}
 	first := true // skip first line
-	for _, line := range strings.Split(output, NEWLINE) {
+	for _, line := range strings.Split(output, c.NEWLINE) {
 		if first {
 			first = false
 		} else if disk.includeDisk(line) {
@@ -132,7 +124,7 @@ func (disk *DiskMetricsGatherer) GetMetrics() ([]Metric, error) {
 }
 
 func (disk *DiskMetricsGatherer) includeDisk(line string) bool {
-	fsname := FieldByIndex(line, 0);
+	fsname := c.FieldByIndex(line, 0);
 	for _,include := range disk.includes {
 		if include.starts {
 			if strings.HasPrefix(fsname, include.value) {
@@ -147,7 +139,7 @@ func (disk *DiskMetricsGatherer) includeDisk(line string) bool {
 	return false
 }
 
-func (disk *DiskMetricsGatherer) appendDu(metrics []Metric, line string) []Metric {
+func (disk *DiskMetricsGatherer) appendDu(metrics []c.Metric, line string) []c.Metric {
 	var name string
 	var total, used, available uint64
 	fmt.Sscanf(line, "%s %d %d %d", &name, &total, &used, &available)
@@ -161,7 +153,7 @@ func (disk *DiskMetricsGatherer) appendDu(metrics []Metric, line string) []Metri
 		disk.logger.Printf("name %s total %d used %d available %d calc %2.2f\n", name, total, used, available, calc)
 	}
 
-	metrics = append(metrics, Metric{LEVEL_PERCENT, MetricValue(calc),  "dUVolAvailPct:" + name, PROVIDER_DISK})
+	metrics = append(metrics, c.Metric{c.LEVEL_PERCENT, c.MetricValue(calc),  "dUVolAvailPct:" + name, c.PROVIDER_DISK})
 
 	return metrics
 }

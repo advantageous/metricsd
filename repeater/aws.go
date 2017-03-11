@@ -2,8 +2,7 @@ package repeater
 
 import (
 	lg "github.com/advantageous/go-logback/logging"
-	m "github.com/cloudurable/metricsd/metric"
-	"github.com/cloudurable/metricsd/util"
+	c "github.com/cloudurable/metricsd/common"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
 	"time"
@@ -12,12 +11,12 @@ import (
 type AwsCloudMetricRepeater struct {
 	logger lg.Logger
 	conn   *cloudwatch.CloudWatch
-	config *m.Config
+	config *c.Config
 }
 
 const debugFormat = "{\"provider\": \"%s\", \"name\": \"%s\", \"type\": %d, \"value\": %d, \"unit\": \"%s\"}"
 
-func (cw AwsCloudMetricRepeater) ProcessMetrics(context m.MetricContext, metrics []m.Metric) error {
+func (cw AwsCloudMetricRepeater) ProcessMetrics(context c.MetricContext, metrics []c.Metric) error {
 
 	timestamp := aws.Time(time.Now())
 
@@ -32,7 +31,7 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(context m.MetricContext, metrics
 			}
 			dimensions = append(dimensions, instanceIdDim)
 
-			if cw.config.IpAddress != m.EMPTY {
+			if cw.config.IpAddress != c.EMPTY {
 				ipDim := &cloudwatch.Dimension{
 					Name:  aws.String("IpAddress"),
 					Value: aws.String(cw.config.IpAddress),
@@ -40,7 +39,7 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(context m.MetricContext, metrics
 				dimensions = append(dimensions, ipDim)
 			}
 
-			if cw.config.EC2InstanceNameTag != m.EMPTY {
+			if cw.config.EC2InstanceNameTag != c.EMPTY {
 				dim := &cloudwatch.Dimension{
 					Name:  aws.String("InstanceName"),
 					Value: aws.String(cw.config.EC2InstanceNameTag),
@@ -48,7 +47,7 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(context m.MetricContext, metrics
 				dimensions = append(dimensions, dim)
 			}
 		}
-		if context.GetEnv() != m.EMPTY {
+		if context.GetEnv() != c.EMPTY {
 			dim := &cloudwatch.Dimension{
 				Name:  aws.String("Environment"),
 				Value: aws.String(context.GetEnv()),
@@ -56,7 +55,7 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(context m.MetricContext, metrics
 			dimensions = append(dimensions, dim)
 		}
 
-		if context.GetRole() != m.EMPTY {
+		if context.GetRole() != c.EMPTY {
 			dim := &cloudwatch.Dimension{
 				Name:  aws.String("Role"),
 				Value: aws.String(context.GetRole()),
@@ -64,7 +63,7 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(context m.MetricContext, metrics
 			dimensions = append(dimensions, dim)
 		}
 
-		if provider != m.EMPTY {
+		if provider != c.EMPTY {
 			dim := &cloudwatch.Dimension{
 				Name:  aws.String("Provider"),
 				Value: aws.String(provider),
@@ -89,17 +88,17 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(context m.MetricContext, metrics
 		datum := createDatum(d.Name, d.Provider)
 		datum.Value = aws.Float64(float64(value))
 
-		datumUnit := m.EMPTY
+		datumUnit := c.EMPTY
 		switch d.MetricType {
-		case m.COUNT:			datumUnit = cloudwatch.StandardUnitCount
-		case m.LEVEL:			datumUnit = cloudwatch.StandardUnitKilobytes
-		case m.LEVEL_PERCENT: 	datumUnit = cloudwatch.StandardUnitPercent
-		case m.TIMING_MS: 		datumUnit = cloudwatch.StandardUnitMilliseconds
-		case m.SIZE_B: 			datumUnit = cloudwatch.StandardUnitBytes
-		case m.SIZE_MB: 		datumUnit = cloudwatch.StandardUnitMegabytes
+		case c.COUNT:			datumUnit = cloudwatch.StandardUnitCount
+		case c.LEVEL:			datumUnit = cloudwatch.StandardUnitKilobytes
+		case c.LEVEL_PERCENT: 	datumUnit = cloudwatch.StandardUnitPercent
+		case c.TIMING_MS: 		datumUnit = cloudwatch.StandardUnitMilliseconds
+		case c.SIZE_B: 			datumUnit = cloudwatch.StandardUnitBytes
+		case c.SIZE_MB: 		datumUnit = cloudwatch.StandardUnitMegabytes
 		}
 
-		if (datumUnit != m.EMPTY) {
+		if (datumUnit != c.EMPTY) {
 			datum.Unit = aws.String(datumUnit)
 		}
 
@@ -143,8 +142,8 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(context m.MetricContext, metrics
 	return err
 }
 
-func NewAwsCloudMetricRepeater(config *m.Config) AwsCloudMetricRepeater {
-	session := util.NewAWSSession(config)
+func NewAwsCloudMetricRepeater(config *c.Config) *AwsCloudMetricRepeater {
+	session := NewAWSSession(config)
 	logger := lg.NewSimpleLogger("log-repeater")
-	return AwsCloudMetricRepeater{logger, cloudwatch.New(session), config}
+	return &AwsCloudMetricRepeater{logger, cloudwatch.New(session), config}
 }

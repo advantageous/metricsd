@@ -1,4 +1,4 @@
-package metric
+package common
 
 import (
 	l "github.com/advantageous/go-logback/logging"
@@ -50,6 +50,21 @@ func FieldByIndex(text string, columnIndex int) string {
 	return EMPTY
 }
 
+func StringArraysEqual(sa1 []string, sa2 []string) bool {
+	saLen := len(sa1)
+	if (saLen != len(sa2)) {
+		return false
+	}
+
+	for i := 0; i < saLen; i++ {
+		if (sa1[i] != sa2[i]) {
+			return false
+		}
+	}
+
+	return true
+}
+
 func BoolToString(b bool) string {
 	return strconv.FormatBool(b)
 }
@@ -77,4 +92,20 @@ func Jbool(name string, v bool, last bool) string {
 		return QUOTE + name + QUOTE_COLON + BoolToString(v)
 	}
 	return QUOTE + name + QUOTE_COLON + BoolToString(v) + COMMA
+}
+
+func Jstrarr(name string, v []string, last bool) string {
+	temp := EMPTY
+	lastStr := COMMA
+	if last {
+		lastStr = EMPTY
+	}
+
+	lastIndex := len(v) - 1
+	for i := 0; i < lastIndex; i++ {
+		temp = temp + QUOTE + v[i] + QUOTE_COMMA
+	}
+	temp = temp + QUOTE + v[lastIndex] + QUOTE
+
+	return QUOTE + name + QUOTE_COLON+ SPACE + OPEN_BRACE + temp + CLOSE_BRACE + lastStr
 }

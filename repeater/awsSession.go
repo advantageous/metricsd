@@ -1,8 +1,8 @@
-package util
+package repeater
 
 import (
 	l "github.com/advantageous/go-logback/logging"
-	m "github.com/cloudurable/metricsd/metric"
+	c "github.com/cloudurable/metricsd/common"
 	"github.com/aws/aws-sdk-go/aws"
 	awsCredentials "github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
@@ -14,7 +14,7 @@ import (
 
 var awsLogger = l.NewSimpleLogger("aws")
 
-func NewAWSSession(cfg *m.Config) *awsSession.Session {
+func NewAWSSession(cfg *c.Config) *awsSession.Session {
 
 	metaDataClient, session := getClient(cfg)
 	credentials := getCredentials(metaDataClient)
@@ -40,7 +40,7 @@ func NewAWSSession(cfg *m.Config) *awsSession.Session {
 	}
 }
 
-func getClient(config *m.Config) (*ec2metadata.EC2Metadata, *awsSession.Session) {
+func getClient(config *c.Config) (*ec2metadata.EC2Metadata, *awsSession.Session) {
 	if !config.Local {
 		awsLogger.Debug("Config NOT set to local using meta-data client to find local")
 		var session = awsSession.New(&aws.Config{})
@@ -59,7 +59,7 @@ type configAwsPart struct {
 	EC2InstanceNameTag string
 }
 
-func readMeta(client *ec2metadata.EC2Metadata, config *m.Config, session *awsSession.Session) (configAwsPart) {
+func readMeta(client *ec2metadata.EC2Metadata, config *c.Config, session *awsSession.Session) (configAwsPart) {
 
 	configAwsPart := configAwsPart{
 		config.AWSRegion,

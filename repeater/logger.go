@@ -2,21 +2,21 @@ package repeater
 
 import (
 	lg "github.com/advantageous/go-logback/logging"
-	m "github.com/cloudurable/metricsd/metric"
+	c "github.com/cloudurable/metricsd/common"
 )
 
 type LogMetricsRepeater struct {
 	logger lg.Logger
 }
 
-func (lr LogMetricsRepeater) ProcessMetrics(metrics []m.Metric) error {
+func (lr LogMetricsRepeater) ProcessMetrics(context c.MetricContext, metrics []c.Metric) error {
 	for _, m := range metrics {
 		lr.logger.Printf("%s %d %d", m.Name, m.MetricType, m.Value)
 	}
 	return nil
 }
 
-func NewLogMetricsRepeater() LogMetricsRepeater {
+func NewLogMetricsRepeater() *LogMetricsRepeater {
 	logger := lg.NewSimpleLogger("log-repeater")
-	return LogMetricsRepeater{logger}
+	return &LogMetricsRepeater{logger}
 }

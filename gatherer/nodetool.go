@@ -2,6 +2,7 @@ package metric
 
 import (
 	l "github.com/advantageous/go-logback/logging"
+	c "github.com/cloudurable/metricsd/common"
 	"strings"
 )
 
@@ -65,22 +66,20 @@ func nodetoolFunctionSupported(nodeFunction string) bool {
 	return false;
 }
 
-func NewNodetoolMetricGatherers(logger l.Logger, config *Config) []*NodetoolMetricGatherer {
+func NewNodetoolMetricGatherers(logger l.Logger, config *c.Config) []*NodetoolMetricGatherer {
 	gatherers := []*NodetoolMetricGatherer{}
 
-	if (config.NodetoolGather) {
-		nodetoolFunctions := strings.Split(config.NodetoolFunctions, SPACE)
-		for _, nodeFunction := range nodetoolFunctions {
-			if nodetoolFunctionSupported(nodeFunction) {
-				gatherers = append(gatherers, newNodetoolMetricGatherer(logger, config, nodeFunction))
-			}
+	for _, nodeFunction := range config.NodetoolFunctions {
+		if nodetoolFunctionSupported(nodeFunction) {
+			gatherers = append(gatherers, newNodetoolMetricGatherer(logger, config, nodeFunction))
 		}
 	}
+
 	return gatherers
 }
 
-func newNodetoolMetricGatherer(logger l.Logger, config *Config, nodeFunction string) *NodetoolMetricGatherer {
-	logger = EnsureLogger(logger, config.Debug, PROVIDER_NODETOOL, FLAG_NODE)
+func newNodetoolMetricGatherer(logger l.Logger, config *c.Config, nodeFunction string) *NodetoolMetricGatherer {
+	logger = c.EnsureLogger(logger, config.Debug, c.PROVIDER_NODETOOL, c.FLAG_NODE)
 	command := readNodetoolConfig(config, logger, nodeFunction)
 
 	return &NodetoolMetricGatherer{
@@ -91,13 +90,13 @@ func newNodetoolMetricGatherer(logger l.Logger, config *Config, nodeFunction str
 	}
 }
 
-func readNodetoolConfig(config *Config, logger l.Logger, nodeFunction string) (string) {
+func readNodetoolConfig(config *c.Config, logger l.Logger, nodeFunction string) (string) {
 	command := "/usr/bin/nodetool"
-	label := DEFAULT_LABEL
+	label := c.DEFAULT_LABEL
 
-	if config.NodetoolCommand != EMPTY {
+	if config.NodetoolCommand != c.EMPTY {
 		command = config.NodetoolCommand
-		label = CONFIG_LABEL
+		label = c.CONFIG_LABEL
 	}
 
 	if config.Debug {
@@ -107,9 +106,8 @@ func readNodetoolConfig(config *Config, logger l.Logger, nodeFunction string) (s
 	return command
 }
 
-func isNodeFunctionRequested(config *Config, inNodeFunction string) (bool) {
-	nodetoolFunctions := strings.Split(config.NodetoolFunctions, SPACE)
-	for _, nodeFunction := range nodetoolFunctions {
+func isNodeFunctionRequested(config *c.Config, inNodeFunction string) (bool) {
+	for _, nodeFunction := range config.NodetoolFunctions {
 		if nodeFunction == inNodeFunction {
 			return true
 		}
@@ -117,18 +115,9 @@ func isNodeFunctionRequested(config *Config, inNodeFunction string) (bool) {
 	return false
 }
 
-func (gatherer *NodetoolMetricGatherer) Reload(config *Config) (ReloadResult) {
-	if (!config.NodetoolGather || !isNodeFunctionRequested(config, gatherer.nodeFunction)) {
-		return RELOAD_EJECT
-	}  // eject if not turned on, or the nodeFunction was removed from the list
+func (gatherer *NodetoolMetricGatherer) GetMetrics() ([]c.Metric, error) {
 
-	gatherer.command = readNodetoolConfig(config, gatherer.logger, gatherer.nodeFunction)
-	return RELOAD_SUCCESS
-}
-
-func (gatherer *NodetoolMetricGatherer) GetMetrics() ([]Metric, error) {
-
-	var metrics = []Metric{}
+	var metrics = []c.Metric{}
 	var err error = nil
 
 	switch gatherer.nodeFunction {
@@ -145,8 +134,8 @@ func (gatherer *NodetoolMetricGatherer) GetMetrics() ([]Metric, error) {
 	return metrics, err
 }
 
-func (gatherer *NodetoolMetricGatherer) netstats() ([]Metric, error) {
-	output, err := ExecCommand(gatherer.command, function_net_stats)
+func (gatherer *NodetoolMetricGatherer) netstats() ([]c.Metric, error) {
+	output, err := c.ExecCommand(gatherer.command, function_net_stats)
 	if err != nil {
 		return nil, err
 	}
@@ -163,9 +152,9 @@ func (gatherer *NodetoolMetricGatherer) netstats() ([]Metric, error) {
 	// [8] // Small messages                  n/a         0              2         0
 	// [9] // Gossip messages                 n/a         0              0         0
 
-	lines := strings.Split(output, NEWLINE)
+	lines := strings.Split(output, c.NEWLINE)
 
-	var metrics = appendNsMode([]Metric{}, lines[0])
+	var metrics = appendNsMode([]c.Metric{}, lines[0])
 
 	metrics = appendNsReadRepair(metrics, lines[3], 1, "nsRrAttempted")
 	metrics = appendNsReadRepair(metrics, lines[4], 2, "nsRrBlocking")
@@ -178,9 +167,9 @@ func (gatherer *NodetoolMetricGatherer) netstats() ([]Metric, error) {
 	return metrics, nil
 }
 
-func appendNsMode(metrics []Metric, line string) []Metric {
+func appendNsMode(metrics []c.Metric, line string) []c.Metric {
 	value := value_mode_other
-	switch strings.ToLower(FieldByIndex(line, 1)) {
+	switch strings.ToLower(c.FieldByIndex(line, 1)) {
 	case "starting":		value = value_mode_starting
 	case "normal":			value = value_mode_normal
 	case "joining":			value = value_mode_joining
@@ -190,24 +179,24 @@ func appendNsMode(metrics []Metric, line string) []Metric {
 	case "draining":		value = value_mode_draining
 	case "drained":			value = value_mode_drained
 	}
-	return append(metrics, Metric{NO_UNIT, MetricValue(value), "nsMode", PROVIDER_NODETOOL})
+	return append(metrics, c.Metric{c.NO_UNIT, c.MetricValue(value), "nsMode", c.PROVIDER_NODETOOL})
 }
 
-func appendNsReadRepair(metrics []Metric, line string, columnIndex int, name string) []Metric {
-	metricValue := MetricValue( ToInt64(FieldByIndex(line, columnIndex), value_error) )
-	return append(metrics, Metric{COUNT, metricValue, name, PROVIDER_NODETOOL})
+func appendNsReadRepair(metrics []c.Metric, line string, columnIndex int, name string) []c.Metric {
+	metricValue := c.MetricValue( c.ToInt64(c.FieldByIndex(line, columnIndex), value_error) )
+	return append(metrics, c.Metric{c.COUNT, metricValue, name, c.PROVIDER_NODETOOL})
 }
 
-func appendNsPool(metrics []Metric, line string, prefix string) []Metric {
+func appendNsPool(metrics []c.Metric, line string, prefix string) []c.Metric {
 	valuesOnly := strings.Fields(line)
-	metrics = append(metrics, Metric{COUNT, numericMetricValue(valuesOnly[2]), prefix + "Active", PROVIDER_NODETOOL})
-	metrics = append(metrics, Metric{COUNT, numericMetricValue(valuesOnly[3]), prefix + "Pending", PROVIDER_NODETOOL})
-	metrics = append(metrics, Metric{COUNT, numericMetricValue(valuesOnly[4]), prefix + "Completed", PROVIDER_NODETOOL})
-	return append(metrics, Metric{COUNT, numericMetricValue(valuesOnly[5]), prefix + "Dropped", PROVIDER_NODETOOL})
+	metrics = append(metrics, c.Metric{c.COUNT, numericMetricValue(valuesOnly[2]), prefix + "Active", c.PROVIDER_NODETOOL})
+	metrics = append(metrics, c.Metric{c.COUNT, numericMetricValue(valuesOnly[3]), prefix + "Pending", c.PROVIDER_NODETOOL})
+	metrics = append(metrics, c.Metric{c.COUNT, numericMetricValue(valuesOnly[4]), prefix + "Completed", c.PROVIDER_NODETOOL})
+	return append(metrics, c.Metric{c.COUNT, numericMetricValue(valuesOnly[5]), prefix + "Dropped", c.PROVIDER_NODETOOL})
 }
 
-func (gatherer *NodetoolMetricGatherer) tpstats() ([]Metric, error) {
-	output, err := ExecCommand(gatherer.command, function_tp_stats)
+func (gatherer *NodetoolMetricGatherer) tpstats() ([]c.Metric, error) {
+	output, err := c.ExecCommand(gatherer.command, function_tp_stats)
 	if err != nil {
 		return nil, err
 	}
@@ -232,21 +221,21 @@ func (gatherer *NodetoolMetricGatherer) tpstats() ([]Metric, error) {
 	//PAGED_RANGE                  0
 	//READ_REPAIR                  0
 
-	var metrics = []Metric{}
+	var metrics = []c.Metric{}
 
-	lines := strings.Split(output, NEWLINE)
+	lines := strings.Split(output, c.NEWLINE)
 	state := 0
 	for _,line := range lines {
 		if (state == 0 || state == 2) {
 			state++ // skip the line
 		} else if state == 1 {
-			if line != EMPTY {
+			if line != c.EMPTY {
 				metrics = appendTpPool(metrics, line)
 			} else {
 				state = 2
 			}
 		} else if state == 3 {
-			if line != EMPTY {
+			if line != c.EMPTY {
 				metrics = appendTpMessageType(metrics, line)
 			}
 		}
@@ -255,30 +244,30 @@ func (gatherer *NodetoolMetricGatherer) tpstats() ([]Metric, error) {
 	return metrics, nil
 }
 
-func appendTpMessageType(metrics []Metric, line string) []Metric {
+func appendTpMessageType(metrics []c.Metric, line string) []c.Metric {
 	valuesOnly := strings.Fields(line)
-	parts := strings.Split(valuesOnly[0], UNDER)
+	parts := strings.Split(valuesOnly[0], c.UNDER)
 	name := "tpMsgType"
 	for _,part := range parts {
-		if part != EMPTY {
+		if part != c.EMPTY {
 			name = name + part[0:1] + strings.ToLower(part[1:])
 		}
 	}
-	return append(metrics, Metric{COUNT, numericMetricValue(valuesOnly[1]), name, PROVIDER_NODETOOL})
+	return append(metrics, c.Metric{c.COUNT, numericMetricValue(valuesOnly[1]), name, c.PROVIDER_NODETOOL})
 }
 
-func appendTpPool(metrics []Metric, line string) []Metric {
+func appendTpPool(metrics []c.Metric, line string) []c.Metric {
 	valuesOnly := strings.Fields(line)
 	prefix := "tpPool" + valuesOnly[0]
-	metrics = append(metrics, Metric{COUNT, numericMetricValue(valuesOnly[1]), prefix + "Active", PROVIDER_NODETOOL})
-	metrics = append(metrics, Metric{COUNT, numericMetricValue(valuesOnly[2]), prefix + "Pending", PROVIDER_NODETOOL})
-	metrics = append(metrics, Metric{COUNT, numericMetricValue(valuesOnly[3]), prefix + "Completed", PROVIDER_NODETOOL})
-	metrics = append(metrics, Metric{COUNT, numericMetricValue(valuesOnly[4]), prefix + "Blocked", PROVIDER_NODETOOL})
-	return append(metrics, Metric{COUNT, numericMetricValue(valuesOnly[5]), prefix + "AllTimeBlocked", PROVIDER_NODETOOL})
+	metrics = append(metrics, c.Metric{c.COUNT, numericMetricValue(valuesOnly[1]), prefix + "Active", c.PROVIDER_NODETOOL})
+	metrics = append(metrics, c.Metric{c.COUNT, numericMetricValue(valuesOnly[2]), prefix + "Pending", c.PROVIDER_NODETOOL})
+	metrics = append(metrics, c.Metric{c.COUNT, numericMetricValue(valuesOnly[3]), prefix + "Completed", c.PROVIDER_NODETOOL})
+	metrics = append(metrics, c.Metric{c.COUNT, numericMetricValue(valuesOnly[4]), prefix + "Blocked", c.PROVIDER_NODETOOL})
+	return append(metrics, c.Metric{c.COUNT, numericMetricValue(valuesOnly[5]), prefix + "AllTimeBlocked", c.PROVIDER_NODETOOL})
 }
 
-func (gatherer *NodetoolMetricGatherer) gcstats() ([]Metric, error) {
-	output, err := ExecCommand(gatherer.command, function_gc_stats)
+func (gatherer *NodetoolMetricGatherer) gcstats() ([]c.Metric, error) {
+	output, err := c.ExecCommand(gatherer.command, function_gc_stats)
 	if err != nil {
 		return nil, err
 	}
@@ -287,23 +276,23 @@ func (gatherer *NodetoolMetricGatherer) gcstats() ([]Metric, error) {
 	//Interval (ms) Max GC Elapsed (ms)Total GC Elapsed (ms)Stdev GC Elapsed (ms)   GC Reclaimed (MB)         Collections      Direct Memory Bytes
 	//3491665                   0                   0                 NaN                   0                   0                       -1
 
-	lines := strings.Split(output, NEWLINE)
+	lines := strings.Split(output, c.NEWLINE)
 	values := strings.Fields(lines[1])
 
-	var metrics = []Metric{}
-	metrics = append(metrics, Metric{TIMING_MS, numericMetricValue(values[0]), "gcInterval", PROVIDER_NODETOOL})
-	metrics = append(metrics, Metric{TIMING_MS, numericMetricValue(values[1]), "gcMaxElapsed", PROVIDER_NODETOOL})
-	metrics = append(metrics, Metric{TIMING_MS, numericMetricValue(values[2]), "gcTotalElapsed", PROVIDER_NODETOOL})
-	metrics = append(metrics, Metric{TIMING_MS, numericMetricValue(values[3]), "gcStdevElapsed", PROVIDER_NODETOOL})
-	metrics = append(metrics, Metric{SIZE_MB, numericMetricValue(values[4]), "gcReclaimed", PROVIDER_NODETOOL})
-	metrics = append(metrics, Metric{COUNT, numericMetricValue(values[5]), "gcCollections", PROVIDER_NODETOOL})
-	metrics = append(metrics, Metric{SIZE_B, numericMetricValue(values[6]), "gcDirectMemoryBytes", PROVIDER_NODETOOL})
+	var metrics = []c.Metric{}
+	metrics = append(metrics, c.Metric{c.TIMING_MS, numericMetricValue(values[0]), "gcInterval", c.PROVIDER_NODETOOL})
+	metrics = append(metrics, c.Metric{c.TIMING_MS, numericMetricValue(values[1]), "gcMaxElapsed", c.PROVIDER_NODETOOL})
+	metrics = append(metrics, c.Metric{c.TIMING_MS, numericMetricValue(values[2]), "gcTotalElapsed", c.PROVIDER_NODETOOL})
+	metrics = append(metrics, c.Metric{c.TIMING_MS, numericMetricValue(values[3]), "gcStdevElapsed", c.PROVIDER_NODETOOL})
+	metrics = append(metrics, c.Metric{c.SIZE_MB, numericMetricValue(values[4]), "gcReclaimed", c.PROVIDER_NODETOOL})
+	metrics = append(metrics, c.Metric{c.COUNT, numericMetricValue(values[5]), "gcCollections", c.PROVIDER_NODETOOL})
+	metrics = append(metrics, c.Metric{c.SIZE_B, numericMetricValue(values[6]), "gcDirectMemoryBytes", c.PROVIDER_NODETOOL})
 
 	return metrics, nil
 }
 
-func (gatherer *NodetoolMetricGatherer) getlogginglevels() ([]Metric, error) {
-	output, err := ExecCommand(gatherer.command, function_get_logging_levels)
+func (gatherer *NodetoolMetricGatherer) getlogginglevels() ([]c.Metric, error) {
+	output, err := c.ExecCommand(gatherer.command, function_get_logging_levels)
 	if err != nil {
 		return nil, err
 	}
@@ -315,14 +304,14 @@ func (gatherer *NodetoolMetricGatherer) getlogginglevels() ([]Metric, error) {
 	// com.thinkaurelius.thrift                               ERROR
 	// org.apache.cassandra                                   DEBUG
 
-	var metrics = []Metric{}
-	lines := strings.Split(output, NEWLINE)
+	var metrics = []c.Metric{}
+	lines := strings.Split(output, c.NEWLINE)
 	end := len(lines) - 1
 	for i := 0; i < end; i++ {
 		line := lines[i]
 
 		if line != "" && !strings.Contains(line, "Logger Name") {
-			split := strings.Split(line, SPACE)
+			split := strings.Split(line, c.SPACE)
 			name := "loggingLevel:" + split[0];
 			logLevelString := strings.ToLower(split[len(split)-1])
 			value := value_level_off;
@@ -334,21 +323,21 @@ func (gatherer *NodetoolMetricGatherer) getlogginglevels() ([]Metric, error) {
 			case "info":	value = value_level_info
 			case "warn":	value = value_level_warn
 			}
-			metrics = append(metrics, Metric{NO_UNIT, MetricValue(value), name, PROVIDER_NODETOOL})
+			metrics = append(metrics, c.Metric{c.NO_UNIT, c.MetricValue(value), name, c.PROVIDER_NODETOOL})
 		}
 	}
 
 	return metrics, nil
 }
 
-func numericMetricValue(value string) MetricValue {
+func numericMetricValue(value string) c.MetricValue {
 	if value == in_value_na {
-		return MetricValue(value_na)
+		return c.MetricValue(value_na)
 	}
 
 	if value == in_value_nan {
-		return MetricValue(value_nan)
+		return c.MetricValue(value_nan)
 	}
 
-	return MetricValue(ToInt64(value, value_error))
+	return c.MetricValue(c.ToInt64(value, value_error))
 }

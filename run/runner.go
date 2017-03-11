@@ -1,11 +1,13 @@
-package metric
+package run
 
 import (
-	lg "github.com/advantageous/go-logback/logging"
+	l "github.com/advantageous/go-logback/logging"
+	c "github.com/cloudurable/metricsd/common"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+	"flag"
 )
 
 func makeTerminateChannel() <-chan os.Signal {
@@ -14,10 +16,24 @@ func makeTerminateChannel() <-chan os.Signal {
 	return ch
 }
 
-func RunWorker(repeaters []MetricsRepeater, logger lg.Logger, config *Config,  configFile string) {
-	logger = EnsureLogger(logger, config.Debug, "worker", "MT_METRIC_WORKER_DEBUG")
 
-	logger.Info("Config file INIT", ConfigJsonString(config))
+func Main() {
+
+	configFile := flag.String("config", "/etc/metricsd.conf", "metrics config")
+	logger := l.NewSimpleLogger("main")
+
+	config, err := c.LoadConfig(*configFile, logger)
+	if err != nil {
+		panic(err)
+	}
+
+	RunWorker(nil, config, *configFile)
+}
+
+func RunWorker(logger l.Logger, config *c.Config,  configFile string) {
+	logger = c.EnsureLogger(logger, config.Debug, "worker", "MT_METRIC_WORKER_DEBUG")
+
+	logger.Info("Config file INIT", c.ConfigJsonString(config))
 	interval, intervalConfigRefresh, debug := readRunConfig(config);
 
 	timer := time.NewTimer(interval)
@@ -26,6 +42,7 @@ func RunWorker(repeaters []MetricsRepeater, logger lg.Logger, config *Config,  c
 	terminator := makeTerminateChannel()
 
 	var gatherers = LoadGatherers(config)
+	var repeaters = LoadRepeaters(config)
 	var configChanged bool = false
 
 	for {
@@ -38,6 +55,7 @@ func RunWorker(repeaters []MetricsRepeater, logger lg.Logger, config *Config,  c
 		case <-timer.C:
 			if configChanged {
 				gatherers = LoadGatherers(config)
+				repeaters = LoadRepeaters(config)
 			}
 
 			metrics := collectMetrics(gatherers, logger)
@@ -45,14 +63,14 @@ func RunWorker(repeaters []MetricsRepeater, logger lg.Logger, config *Config,  c
 			timer.Reset(interval)
 
 		case <-configTimer.C:
-			if newConfig, err := LoadConfig(configFile, logger); err != nil {
+			if newConfig, err := c.LoadConfig(configFile, logger); err != nil {
 				logger.Error("Error reading config", err)
 			} else {
-				configChanged = !ConfigEquals(config, newConfig)
+				configChanged = !c.ConfigEquals(config, newConfig)
 				if configChanged {
 					config = newConfig
 					interval, intervalConfigRefresh, debug = readRunConfig(config);
-					logger.Info("Config file CHANGED", ConfigJsonString(config))
+					logger.Info("Config file CHANGED", c.ConfigJsonString(config))
 				} else {
 					if debug {
 						logger.Info("Config file SAME")
@@ -65,13 +83,13 @@ func RunWorker(repeaters []MetricsRepeater, logger lg.Logger, config *Config,  c
 	}
 }
 
-func readRunConfig(config * Config) (time.Duration, time.Duration, bool){
+func readRunConfig(config *c.Config) (time.Duration, time.Duration, bool){
 	return 	config.TimePeriodSeconds * time.Second,
 	 		config.ReadConfigSeconds * time.Second,
 			config.Debug
 }
 
-func processMetrics(metrics []Metric, repeaters []MetricsRepeater, context *Config, logger lg.Logger) {
+func processMetrics(metrics []c.Metric, repeaters []c.MetricsRepeater, context *c.Config, logger l.Logger) {
 	for _, r := range repeaters {
 		if err := r.ProcessMetrics(context, metrics); err != nil {
 			logger.PrintError("Repeater failed", err)
@@ -87,9 +105,9 @@ func processMetrics(metrics []Metric, repeaters []MetricsRepeater, context *Conf
 	}
 }
 
-func collectMetrics(gatherers []MetricsGatherer, logger lg.Logger) []Metric {
+func collectMetrics(gatherers []c.MetricsGatherer, logger l.Logger) []c.Metric {
 
-	metrics := []Metric{}
+	metrics := []c.Metric{}
 
 	for _, g := range gatherers {
 		m, err := g.GetMetrics()
