@@ -43,7 +43,7 @@ server_role = "dcos-master"
 #     disk cpu free nodetool
 # ------------------------------------------------------------
 repeaters = ["aws"]
-gatherers = ["disk", "nodetool"]
+gatherers = ["disk", "cpu", "free", "nodetool"]
 
 # ------------------------------------------------------------
 # aws_Region string
@@ -69,13 +69,22 @@ namespace="Cassandra Cluster"
 # disk_file_systems []string
 #     What FileSystems to include. defaults to /dev/*
 #
-# disk_fields []string     : what sf fields to output
-#     fields: source fstype itotal iused iavail ipcent size used avail pcent file target
-#     default:
+# disk_fields []string
+#     what fields to output
+#     fields: total        - number of 1K bytes on the disk
+#             used         - number of 1K bytes used on the disk
+#             available    - number of 1K bytes available on the disk
+#             usedpct      - percentage of bytes used on the disk (calculated)
+#             availablepct - percentage of bytes available on the disk (calculated)
+#             capacitypct  - percentage of bytes available on the disk (reported)
+#             mount        - where FileSystem is mounted
+#     default: ["availablepct"]
 # ------------------------------------------------------------
 #disk_command = "/usr/mybin/df"
 #disk_file_systems = ["/dev/*", "udev"]
-#disk_fields
+#disk_fields = ["total", "used", "available", "usedpct", "availablepct", "mount"]
+
+1024-blocks    Used Available Capacity Mounted on
 
 # ------------------------------------------------------------
 # cpu_proc_stat string

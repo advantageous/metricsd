@@ -4,7 +4,7 @@ import (
 	"fmt"
 	l "github.com/advantageous/go-logback/logging/test"
 	c "github.com/cloudurable/metricsd/common"
-	m "github.com/cloudurable/metricsd/metric"
+	g "github.com/cloudurable/metricsd/gatherer"
 	"os"
 	"testing"
 )
@@ -16,12 +16,12 @@ func TestCpuCounts(z *testing.T) {
 	dir, _ := os.Getwd()
 	fmt.Println("DIR", dir)
 
-	config := c.Config{ Debug: true, CpuProcStat: dir + "/test-data/proc/stat", };
-	cpuG := m.NewCPUMetricsGatherer(nil, &config)
+	config := c.Config{ Debug: true, CpuProcStat: dir + "/test-data/proc/stat", }
+	cpuG := g.NewCPUMetricsGatherer(nil, &config)
 	metrics, err := cpuG.GetMetrics()
 
-	config = c.Config{ Debug: true, CpuProcStat: dir + "/test-data/proc/stat2", };
-	cpuG = m.NewCPUMetricsGatherer(nil, &config)
+	config = c.Config{ Debug: true, CpuProcStat: dir + "/test-data/proc/stat2", }
+	cpuG = g.NewCPUMetricsGatherer(nil, &config)
 	metrics, err = cpuG.GetMetrics()
 
 	if err != nil {

@@ -11,13 +11,13 @@ func LoadRepeaters(config *c.Config) ([]c.MetricsRepeater) {
 	for _,provider := range config.Repeaters {
 		switch provider {
 		case c.REPEATER_AWS:
-			repeater := NewAwsCloudMetricRepeater(config);
+			repeater := NewAwsCloudMetricRepeater(config)
 			if repeater != nil {
 				repeaters = append(repeaters, repeater)
 			}
 
 		case c.REPEATER_LOGGER:
-			repeater := NewLogMetricsRepeater();
+			repeater := NewLogMetricsRepeater()
 			if repeater != nil {
 				repeaters = append(repeaters, repeater)
 			}

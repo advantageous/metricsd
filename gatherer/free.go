@@ -46,6 +46,10 @@ func (gatherer *FreeMetricGatherer) GetMetrics() ([]c.Metric, error) {
 		return nil, err
 	}
 
+	//	            total        used        free      shared  buff/cache   available
+	//Mem:        8081400     6177200      404096      566316     1500104      959436
+	//Swap:       8296444       23424     8273020
+
 	var metrics = []c.Metric{}
 
 	lines := strings.Split(output, c.NEWLINE)
@@ -58,37 +62,37 @@ func (gatherer *FreeMetricGatherer) GetMetrics() ([]c.Metric, error) {
 	var shared uint64
 	var buffer uint64
 	var available uint64
-	var mem string
+	var name string
 
-	fmt.Sscanf(line1, "%s %d %d %d %d %d %d", &mem, &total, &used, &free, &shared, &buffer, &available)
+	fmt.Sscanf(line1, "%s %d %d %d %d %d %d", &name, &total, &used, &free, &shared, &buffer, &available)
 
 	if gatherer.debug {
-		gatherer.logger.Printf("name %s total %d, used %d, free %d,"+
-			" shared %d , buffer %d, available %d\n", mem, total, used, free, shared, buffer, available)
+		gatherer.logger.Printf("name %s  total %d  used %d  free %d  shared %d  buffer %d  available %d",
+			                    name,    total,    used,    free,    shared,    buffer,    available)
 	}
 
-	metrics = append(metrics, c.Metric{c.LEVEL, c.MetricValue(free), "mFreeLvl", c.PROVIDER_RAM})
-	metrics = append(metrics, c.Metric{c.LEVEL, c.MetricValue(used), "mUsedLvl", c.PROVIDER_RAM})
-	metrics = append(metrics, c.Metric{c.LEVEL, c.MetricValue(shared), "mSharedLvl", c.PROVIDER_RAM})
-	metrics = append(metrics, c.Metric{c.LEVEL, c.MetricValue(buffer), "mBufLvl", c.PROVIDER_RAM})
-	metrics = append(metrics, c.Metric{c.LEVEL, c.MetricValue(available), "mAvailableLvl", c.PROVIDER_RAM})
+	metrics = append(metrics, c.Metric{c.SIZE_K, c.MetricValue(free), "mFreeLvl", c.PROVIDER_RAM})
+	metrics = append(metrics, c.Metric{c.SIZE_K, c.MetricValue(used), "mUsedLvl", c.PROVIDER_RAM})
+	metrics = append(metrics, c.Metric{c.SIZE_K, c.MetricValue(shared), "mSharedLvl", c.PROVIDER_RAM})
+	metrics = append(metrics, c.Metric{c.SIZE_K, c.MetricValue(buffer), "mBufLvl", c.PROVIDER_RAM})
+	metrics = append(metrics, c.Metric{c.SIZE_K, c.MetricValue(available), "mAvailableLvl", c.PROVIDER_RAM})
 
 	totalF := float64(total)
 
-	freePercent := (float64(free) / totalF) * 100.0
+	freePercent := c.Percent(float64(free), totalF)
 	metrics = append(metrics, c.Metric{c.LEVEL_PERCENT, c.MetricValue(int64(freePercent)), "mFreePer", c.PROVIDER_RAM})
 
-	usedPercent := (float64(used) / totalF) * 100.0
+	usedPercent := c.Percent(float64(used), totalF)
 	metrics = append(metrics, c.Metric{c.LEVEL_PERCENT, c.MetricValue(int64(usedPercent)), "mUsedPer", c.PROVIDER_RAM})
 
-	fmt.Sscanf(line2, "%s %d %d %d", &mem, &total, &used, &free)
+	fmt.Sscanf(line2, "%s %d %d %d", &name, &total, &used, &free)
 
 	if free == 0 && used == 0 && total == 0 {
 		// do nothing
 	} else {
-		metrics = append(metrics, c.Metric{c.LEVEL, c.MetricValue(free), "mSwpFreeLvl", c.PROVIDER_RAM})
-		metrics = append(metrics, c.Metric{c.LEVEL, c.MetricValue(used), "mSwpUsedLvl", c.PROVIDER_RAM})
-		metrics = append(metrics, c.Metric{c.LEVEL, c.MetricValue(shared), "mSwpSharedLvl", c.PROVIDER_RAM})
+		metrics = append(metrics, c.Metric{c.SIZE_K, c.MetricValue(free), "mSwpFreeLvl", c.PROVIDER_RAM})
+		metrics = append(metrics, c.Metric{c.SIZE_K, c.MetricValue(used), "mSwpUsedLvl", c.PROVIDER_RAM})
+		metrics = append(metrics, c.Metric{c.SIZE_K, c.MetricValue(shared), "mSwpSharedLvl", c.PROVIDER_RAM})
 
 		totalF = float64(total)
 		freePercent = (float64(free) / totalF) * 100.0

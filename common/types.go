@@ -19,6 +19,8 @@ type MetricsGatherer interface {
 
 type MetricsRepeater interface {
 	ProcessMetrics(context MetricContext, metrics []Metric) error
+	RepeatForContext() bool
+	RepeatForNoIdContext() bool
 }
 
 type Metric struct {

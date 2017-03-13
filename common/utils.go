@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"math"
 )
 
 func GetLogger(debug bool, name string, flag string) l.Logger {
@@ -79,30 +80,30 @@ func DurationToString(dur time.Duration) string {
 
 func Jstr(name string, v string, last bool) string {
 	if last {
-		return QUOTE + name + QUOTE_COLON_QUOTE + v + QUOTE
+		return QUOTE + name + QUOTE_COLON_SPACE_QUOTE + v + QUOTE
 	}
-	return QUOTE + name + QUOTE_COLON_QUOTE + v + QUOTE_COMMA
+	return QUOTE + name + QUOTE_COLON_SPACE_QUOTE + v + QUOTE_COMMA_SPACE
 }
 
 func Jdur(name string, v time.Duration, last bool) string {
 	if last {
-		return QUOTE + name + QUOTE_COLON + DurationToString(v)
+		return QUOTE + name + QUOTE_COLON_SPACE + DurationToString(v)
 	}
-	return QUOTE + name + QUOTE_COLON + DurationToString(v) + COMMA
+	return QUOTE + name + QUOTE_COLON_SPACE + DurationToString(v) + COMMA_SPACE
 }
 
 func Jbool(name string, v bool, last bool) string {
 	if last {
-		return QUOTE + name + QUOTE_COLON + BoolToString(v)
+		return QUOTE + name + QUOTE_COLON_SPACE + BoolToString(v)
 	}
-	return QUOTE + name + QUOTE_COLON + BoolToString(v) + COMMA
+	return QUOTE + name + QUOTE_COLON_SPACE + BoolToString(v) + COMMA_SPACE
 }
 
 func Junquoted(name string, v string, last bool) string {
 	if last {
-		return QUOTE + name + QUOTE_COLON + v
+		return QUOTE + name + QUOTE_COLON_SPACE + v
 	}
-	return QUOTE + name + QUOTE_COLON + v + COMMA
+	return QUOTE + name + QUOTE_COLON_SPACE + v + COMMA_SPACE
 }
 
 func Jstrarr(name string, v []string, last bool) string {
@@ -118,9 +119,34 @@ func Jstrarr(name string, v []string, last bool) string {
 
 	lastIndex := len(v) - 1
 	for i := 0; i < lastIndex; i++ {
-		temp = temp + QUOTE + v[i] + QUOTE_COMMA
+		temp = temp + QUOTE + v[i] + QUOTE_COMMA_SPACE
 	}
 	temp = temp + QUOTE + v[lastIndex] + QUOTE
 
-	return QUOTE + name + QUOTE_COLON+ SPACE + OPEN_BRACE + temp + CLOSE_BRACE + lastStr
+	return QUOTE + name + QUOTE_COLON_SPACE + OPEN_BRACE + temp + CLOSE_BRACE + lastStr
+}
+
+func ArrayToString(a []string) string {
+	result := OPEN_BRACE
+	for _, s := range a {
+		if (result == OPEN_BRACE) {
+			result = result + QUOTE + s + QUOTE
+		} else {
+			result = result + COMMA + SPACE + QUOTE + s + QUOTE
+		}
+	}
+	return result + CLOSE_BRACE
+}
+
+func Round(f float64) int64 {
+	t := math.Trunc(f)
+	x := math.Trunc( (f - t) * 100 )
+	if x < 50 {
+		return int64(t)
+	}
+	return  int64(t) + 1
+}
+
+func Percent(top float64, bot float64) float64 {
+	return top * 100 / bot
 }

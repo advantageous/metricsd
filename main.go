@@ -27,7 +27,7 @@ func main() {
 	logger.Info("Config file INIT", c.ConfigJsonString(config))
 
 	// begin the work
-	interval, intervalConfigRefresh, debug := readRunConfig(config);
+	interval, intervalConfigRefresh, debug := readRunConfig(config)
 
 	timer := time.NewTimer(interval)
 	configTimer := time.NewTimer(intervalConfigRefresh)
@@ -60,7 +60,7 @@ func main() {
 				load = !c.ConfigEquals(config, newConfig)
 				if load {
 					config = newConfig
-					interval, intervalConfigRefresh, debug = readRunConfig(config);
+					interval, intervalConfigRefresh, debug = readRunConfig(config)
 					logger.Info("Config file CHANGED", c.ConfigJsonString(config))
 				} else {
 					if debug {
@@ -87,16 +87,20 @@ func readRunConfig(config *c.Config) (time.Duration, time.Duration, bool){
 
 func processMetrics(metrics []c.Metric, repeaters []c.MetricsRepeater, context *c.Config, logger l.Logger) {
 	for _, r := range repeaters {
-		if err := r.ProcessMetrics(context, metrics); err != nil {
-			logger.PrintError("Repeater failed", err)
+		if r.RepeatForContext() {
+			if err := r.ProcessMetrics(context, metrics); err != nil {
+				logger.PrintError("Repeater failed", err)
+			}
 		}
 	}
 
 	noIdContext := context.GetNoIdContext()
 
 	for _, r := range repeaters {
-		if err := r.ProcessMetrics(noIdContext, metrics); err != nil {
-			logger.PrintError("Repeater failed", err)
+		if r.RepeatForNoIdContext() {
+			if err := r.ProcessMetrics(noIdContext, metrics); err != nil {
+				logger.PrintError("Repeater failed", err)
+			}
 		}
 	}
 }

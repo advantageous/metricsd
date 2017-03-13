@@ -16,7 +16,9 @@ func (lr LogMetricsRepeater) ProcessMetrics(context c.MetricContext, metrics []c
 	return nil
 }
 
+func (lr LogMetricsRepeater) RepeatForContext() bool { return false; }
+func (lr LogMetricsRepeater) RepeatForNoIdContext() bool { return true; }
+
 func NewLogMetricsRepeater() *LogMetricsRepeater {
-	logger := lg.NewSimpleLogger("log-repeater")
-	return &LogMetricsRepeater{logger}
+	return &LogMetricsRepeater{ lg.NewSimpleLogger("log-repeater")	}
 }

@@ -16,6 +16,9 @@ type AwsCloudMetricRepeater struct {
 
 const debugFormat = "{\"provider\": \"%s\", \"name\": \"%s\", \"type\": %d, \"value\": %d, \"unit\": \"%s\"}"
 
+func (lr AwsCloudMetricRepeater) RepeatForContext() bool { return true; }
+func (lr AwsCloudMetricRepeater) RepeatForNoIdContext() bool { return true; }
+
 func (cw AwsCloudMetricRepeater) ProcessMetrics(context c.MetricContext, metrics []c.Metric) error {
 
 	timestamp := aws.Time(time.Now())
@@ -91,10 +94,10 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(context c.MetricContext, metrics
 		datumUnit := c.EMPTY
 		switch d.MetricType {
 		case c.COUNT:			datumUnit = cloudwatch.StandardUnitCount
-		case c.LEVEL:			datumUnit = cloudwatch.StandardUnitKilobytes
 		case c.LEVEL_PERCENT: 	datumUnit = cloudwatch.StandardUnitPercent
 		case c.TIMING_MS: 		datumUnit = cloudwatch.StandardUnitMilliseconds
 		case c.SIZE_B: 			datumUnit = cloudwatch.StandardUnitBytes
+		case c.SIZE_K:			datumUnit = cloudwatch.StandardUnitKilobytes
 		case c.SIZE_MB: 		datumUnit = cloudwatch.StandardUnitMegabytes
 		}
 
@@ -144,6 +147,6 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(context c.MetricContext, metrics
 
 func NewAwsCloudMetricRepeater(config *c.Config) *AwsCloudMetricRepeater {
 	session := NewAWSSession(config)
-	logger := lg.NewSimpleLogger("log-repeater")
+	logger := lg.NewSimpleLogger("aws-repeater")
 	return &AwsCloudMetricRepeater{logger, cloudwatch.New(session), config}
 }

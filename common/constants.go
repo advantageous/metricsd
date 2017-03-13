@@ -1,18 +1,19 @@
 package common
 
 const (
-	EMPTY             = ""
-	SPACE             = " "
-	NEWLINE           = "\n"
-	UNDER             = "_"
-	DOT               = "."
-	QUOTE             = "\""
-	COMMA             = ","
-	QUOTE_COLON       = "\" : "
-	QUOTE_COLON_QUOTE = "\" : \""
-	QUOTE_COMMA       = "\","
-	OPEN_BRACE       = "["
-	CLOSE_BRACE       = "]"
+	EMPTY                   = ""
+	SPACE                   = " "
+	NEWLINE                 = "\n"
+	UNDER                   = "_"
+	DOT                     = "."
+	QUOTE                   = "\""
+	COMMA                   = ","
+	COMMA_SPACE             = ", "
+	QUOTE_COLON_SPACE       = "\": "
+	QUOTE_COLON_SPACE_QUOTE = "\": \""
+	QUOTE_COMMA_SPACE       = "\", "
+	OPEN_BRACE              = "["
+	CLOSE_BRACE             = "]"
 )
 
 const (
@@ -43,10 +44,10 @@ const (
 
 const (
 	COUNT MetricType = iota
-	LEVEL
 	LEVEL_PERCENT
 	TIMING_MS
 	SIZE_B
 	SIZE_MB
+	SIZE_K
 	NO_UNIT
 )

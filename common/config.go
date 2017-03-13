@@ -25,7 +25,8 @@ type Config struct {
 	NameSpace         	string			`hcl:"namespace"`
 
 	DiskCommand       	string			`hcl:"disk_command"`
-	DiskFileSystems		[]string		`hcl:"disk_file_systems"`
+	DiskFileSystems     []string		`hcl:"disk_file_systems"`
+	DiskFields          []string		`hcl:"disk_fields"`
 
 	CpuProcStat       	string			`hcl:"cpu_proc_stat"`
 
@@ -152,6 +153,7 @@ func ConfigEquals(c1 *Config, c2 *Config) (bool) {
 		c1.NodetoolCommand       == c2.NodetoolCommand &&
 
 		StringArraysEqual(c1.DiskFileSystems, c2.DiskFileSystems) &&
+		StringArraysEqual(c1.DiskFields, c2.DiskFields) &&
 		StringArraysEqual(c1.NodetoolFunctions, c2.NodetoolFunctions)
 }
 
@@ -176,9 +178,14 @@ func ConfigJsonString(cfg *Config) (string) {
 
 		Jstr("DiskCommand", cfg.DiskCommand, false) +
 		Jstrarr("DiskFileSystems", cfg.DiskFileSystems, false) +
+		Jstrarr("DiskFields", cfg.DiskFields, false) +
+
 		Jstr("CpuProcStat", cfg.CpuProcStat, false) +
+
 		Jstr("FreeCommand", cfg.FreeCommand, false) +
+
 		Jstr("NodetoolCommand", cfg.NodetoolCommand, false) +
+
 		Jstrarr("NodetoolFunctions", cfg.NodetoolFunctions, true) +
 		"}"
 }

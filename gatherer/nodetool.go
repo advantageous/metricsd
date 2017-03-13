@@ -18,10 +18,10 @@ func nodetoolFunctionSupported(nodeFunction string) bool {
 	lower := strings.ToLower(nodeFunction)
 	for _,supported := range nt.NodetoolAllSupportedFunctions {
 		if supported == lower {
-			return true;
+			return true
 		}
 	}
-	return false;
+	return false
 }
 
 func NewNodetoolMetricGatherers(logger l.Logger, config *c.Config) []*NodetoolMetricGatherer {
