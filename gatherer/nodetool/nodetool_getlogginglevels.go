@@ -1,12 +1,12 @@
-package gatherer
+package nodetool
 
 import (
 	"strings"
 	c "github.com/cloudurable/metricsd/common"
 )
 
-func getlogginglevels(nodetoolCommand string) ([]c.Metric, error) {
-	output, err := c.ExecCommand(nodetoolCommand, function_get_logging_levels)
+func Getlogginglevels(nodetoolCommand string) ([]c.Metric, error) {
+	output, err := c.ExecCommand(nodetoolCommand, NodetoolFunction__getlogginglevels)
 	if err != nil {
 		return nil, err
 	}

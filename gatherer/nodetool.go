@@ -3,51 +3,9 @@ package gatherer
 import (
 	l "github.com/advantageous/go-logback/logging"
 	c "github.com/cloudurable/metricsd/common"
+	nt "github.com/cloudurable/metricsd/gatherer/nodetool"
 	"strings"
 )
-
-const (
-	value_level_all   = 0
-	value_level_debug = 1
-	value_level_info  = 2
-	value_level_warn  = 3
-	value_level_error = 4
-	value_level_fatal = 5
-	value_level_off   = 127
-
-	value_na    = -125
-	value_nan   = -126
-	value_error = -127
-
-	value_mode_starting = 0
-	value_mode_normal = 1
-	value_mode_joining = 2
-	value_mode_leaving = 3
-	value_mode_decommissioned = 4
-	value_mode_moving = 5
-	value_mode_draining = 6
-	value_mode_drained = 7
-	value_mode_other = 99
-)
-
-const (
-	in_value_na = "n/a"
-	in_value_nan = "NaN"
-)
-
-const (
-	function_net_stats          = "netstats"
-	function_gc_stats           = "gcstats"
-	function_tp_stats           = "tpstats"
-	function_get_logging_levels = "getlogginglevels"
-)
-
-var supportedFunctions = [...]string {
-	function_net_stats,
-	function_gc_stats,
-	function_tp_stats,
-	function_get_logging_levels,
-}
 
 type NodetoolMetricGatherer struct {
 	logger            l.Logger
@@ -58,7 +16,7 @@ type NodetoolMetricGatherer struct {
 
 func nodetoolFunctionSupported(nodeFunction string) bool {
 	lower := strings.ToLower(nodeFunction)
-	for _,supported := range supportedFunctions {
+	for _,supported := range nt.NodetoolAllSupportedFunctions {
 		if supported == lower {
 			return true;
 		}
@@ -116,10 +74,10 @@ func (gatherer *NodetoolMetricGatherer) GetMetrics() ([]c.Metric, error) {
 	var err error = nil
 
 	switch gatherer.nodeFunction {
-	case function_net_stats:			metrics, err = netstats(gatherer.command)
-	case function_gc_stats:				metrics, err = gcstats(gatherer.command)
-	case function_tp_stats:				metrics, err = tpstats(gatherer.command)
-	case function_get_logging_levels:	metrics, err = getlogginglevels(gatherer.command)
+	case nt.NodetoolFunction_netstats:			metrics, err = nt.Netstats(gatherer.command)
+	case nt.NodetoolFunction_gcstats:			metrics, err = nt.Gcstats(gatherer.command)
+	case nt.NodetoolFunction_tpstats:			metrics, err = nt.Tpstats(gatherer.command)
+	case nt.NodetoolFunction__getlogginglevels:	metrics, err = nt.Getlogginglevels(gatherer.command)
 	}
 
 	if err != nil {
@@ -127,16 +85,4 @@ func (gatherer *NodetoolMetricGatherer) GetMetrics() ([]c.Metric, error) {
 	}
 
 	return metrics, err
-}
-
-func numericMetricValue(value string) c.MetricValue {
-	if value == in_value_na {
-		return c.MetricValue(value_na)
-	}
-
-	if value == in_value_nan {
-		return c.MetricValue(value_nan)
-	}
-
-	return c.MetricValue(c.ToInt64(value, value_error))
 }

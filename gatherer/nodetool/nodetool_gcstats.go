@@ -1,12 +1,12 @@
-package gatherer
+package nodetool
 
 import (
 	"strings"
 	c "github.com/cloudurable/metricsd/common"
 )
 
-func gcstats(nodetoolCommand string) ([]c.Metric, error) {
-	output, err := c.ExecCommand(nodetoolCommand, function_gc_stats)
+func Gcstats(nodetoolCommand string) ([]c.Metric, error) {
+	output, err := c.ExecCommand(nodetoolCommand, NodetoolFunction_gcstats)
 	if err != nil {
 		return nil, err
 	}
