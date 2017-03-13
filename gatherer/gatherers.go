@@ -29,8 +29,11 @@ func LoadGatherers(config *c.Config) ([]c.MetricsGatherer) {
 			}
 
 		case c.PROVIDER_NODETOOL:
-			for _, nodetool := range NewNodetoolMetricGatherers(nil, config) {
-				gatherers = append(gatherers, nodetool)
+			tools := NewNodetoolMetricGatherers(nil, config)
+			if tools != nil {
+				for _, tool := range tools {
+					gatherers = append(gatherers, tool)
+				}
 			}
 		}
 	}

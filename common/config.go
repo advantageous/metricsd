@@ -25,7 +25,7 @@ type Config struct {
 	NameSpace         	string			`hcl:"namespace"`
 
 	DiskCommand       	string			`hcl:"disk_command"`
-	DiskIncludes		string			`hcl:"disk_includes"`
+	DiskFileSystems		[]string		`hcl:"disk_file_systems"`
 
 	CpuProcStat       	string			`hcl:"cpu_proc_stat"`
 
@@ -147,10 +147,11 @@ func ConfigEquals(c1 *Config, c2 *Config) (bool) {
 		c1.EC2InstanceNameTag == c2.EC2InstanceNameTag &&
 
 		c1.DiskCommand           == c2.DiskCommand &&
-		c1.DiskIncludes          == c2.DiskIncludes &&
 		c1.CpuProcStat           == c2.CpuProcStat &&
 		c1.FreeCommand           == c2.FreeCommand &&
 		c1.NodetoolCommand       == c2.NodetoolCommand &&
+
+		StringArraysEqual(c1.DiskFileSystems, c2.DiskFileSystems) &&
 		StringArraysEqual(c1.NodetoolFunctions, c2.NodetoolFunctions)
 }
 
@@ -174,7 +175,7 @@ func ConfigJsonString(cfg *Config) (string) {
 		Jstr("EC2InstanceNameTag", cfg.EC2InstanceNameTag, false) +
 
 		Jstr("DiskCommand", cfg.DiskCommand, false) +
-		Jstr("DiskIncludes", cfg.DiskIncludes, false) +
+		Jstrarr("DiskFileSystems", cfg.DiskFileSystems, false) +
 		Jstr("CpuProcStat", cfg.CpuProcStat, false) +
 		Jstr("FreeCommand", cfg.FreeCommand, false) +
 		Jstr("NodetoolCommand", cfg.NodetoolCommand, false) +

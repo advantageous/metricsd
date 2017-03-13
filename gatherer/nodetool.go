@@ -67,8 +67,12 @@ func nodetoolFunctionSupported(nodeFunction string) bool {
 }
 
 func NewNodetoolMetricGatherers(logger l.Logger, config *c.Config) []*NodetoolMetricGatherer {
-	gatherers := []*NodetoolMetricGatherer{}
 
+	if config.NodetoolFunctions == nil || len(config.NodetoolFunctions) == 0 {
+		return nil
+	}
+
+	gatherers := []*NodetoolMetricGatherer{}
 	for _, nodeFunction := range config.NodetoolFunctions {
 		if nodetoolFunctionSupported(nodeFunction) {
 			gatherers = append(gatherers, newNodetoolMetricGatherer(logger, config, nodeFunction))
@@ -104,15 +108,6 @@ func readNodetoolConfig(config *c.Config, logger l.Logger, nodeFunction string) 
 	}
 
 	return command
-}
-
-func isNodeFunctionRequested(config *c.Config, inNodeFunction string) (bool) {
-	for _, nodeFunction := range config.NodetoolFunctions {
-		if nodeFunction == inNodeFunction {
-			return true
-		}
-	}
-	return false
 }
 
 func (gatherer *NodetoolMetricGatherer) GetMetrics() ([]c.Metric, error) {

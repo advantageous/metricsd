@@ -98,7 +98,18 @@ func Jbool(name string, v bool, last bool) string {
 	return QUOTE + name + QUOTE_COLON + BoolToString(v) + COMMA
 }
 
+func Junquoted(name string, v string, last bool) string {
+	if last {
+		return QUOTE + name + QUOTE_COLON + v
+	}
+	return QUOTE + name + QUOTE_COLON + v + COMMA
+}
+
 func Jstrarr(name string, v []string, last bool) string {
+	if v == nil || len(v) == 0 {
+		return Junquoted(name, "[]", last)
+	}
+
 	temp := EMPTY
 	lastStr := COMMA
 	if last {

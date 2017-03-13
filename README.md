@@ -8,99 +8,101 @@ Configuration
 ####  /etc/metricsd.conf 
 ```conf
 # ------------------------------------------------------------
-# AWS Region         string        `hcl:"aws_region"`
-# If not set, uses aws current region for this instance.
-# Used for testing only.
-# ------------------------------------------------------------
-# aws_region = "us-west-1"
-
-# ------------------------------------------------------------
-# EC2InstanceId     string        `hcl:"ec2_instance_id"`
-# If not set, uses aws instance id for this instance
-# Used for testing only.
-# ------------------------------------------------------------
-# ec2_instance_id = "i-my-fake-instanceid"
-
-# ------------------------------------------------------------
-# Debug             bool          `hcl:"debug"`
-# Used for testing and debugging
-# ------------------------------------------------------------
-debug = false
-
-# ------------------------------------------------------------
-# Local             bool          `hcl:"local"`
-# Used to ingore local ec2 meta-data, used for development only.
-# ------------------------------------------------------------
-# local = true
-
-# ------------------------------------------------------------
-# TimePeriodSeconds time.Duration `hcl:"interval_seconds"`
-# Defaults to 30 seconds, how often metrics are collected.
-# ------------------------------------------------------------
-interval_seconds = 30
-
-# ------------------------------------------------------------
-# Used to specify the environment: prod, dev, qa, staging, etc.
-# This gets used as a dimension that is sent to cloudwatch. 
+# env bool
+#     Used to specify the environment: prod, dev, qa, staging, etc.
+#     This gets used as a dimension that is sent to repeaters
+#
+# debug bool
+#     true sets logging level to debug
+#
+# local bool
+#     Used to ignore local ec2 meta-data, used for development only.
 # ------------------------------------------------------------
 env="dev"
+#debug = true
+#local = true
 
 # ------------------------------------------------------------
-# Used to specify the top level namespace in cloudwatch.
+# interval_seconds int
+#     Defaults to 30 seconds
 # ------------------------------------------------------------
+#interval_seconds = 15
+
+# ------------------------------------------------------------
+# server_role
+#     Used to specify the role of the AMI instance.
+#     examples: dcos-master consul-master dcos-agent cassandra-node
+# ------------------------------------------------------------
+server_role = "dcos-master"
+
+# ------------------------------------------------------------
+# repeaters []string
+#     aws, logger
+#
+# gatherers []string
+#     disk cpu free nodetool
+# ------------------------------------------------------------
+repeaters = ["aws"]
+gatherers = ["disk", "nodetool"]
+
+# ------------------------------------------------------------
+# aws_Region string
+#     If not set, uses aws current region for this instance.
+#     Used for testing only???
+#
+# ec2_instance_id string
+#     If not set, uses aws instance id for this instance
+#     Used for testing only???
+#
+# namespace string
+#     Used to specify the top level namespace in cloudwatch.
+# ------------------------------------------------------------
+aws_region = "us-west-1"
+ec2_instance_id = "my-fake-instanceid"
 namespace="Cassandra Cluster"
 
 # ------------------------------------------------------------
-# Used to specify the role of the AMI instance.
-# Gets used as a dimension.
-# e.g., dcos-master, consul-master, dcos-agent, cassandra-node, etc.
+# disk_command string
+#     default: /usr/bin/df
+#     darwin example:  /bin/df
+#
+# disk_file_systems []string
+#     What FileSystems to include. defaults to /dev/*
+#
+# disk_fields []string     : what sf fields to output
+#     fields: source fstype itotal iused iavail ipcent size used avail pcent file target
+#     default:
 # ------------------------------------------------------------
-server_role="dcos-master"
+#disk_command = "/usr/mybin/df"
+#disk_file_systems = ["/dev/*", "udev"]
+#disk_fields
 
 # ------------------------------------------------------------
-# used to specify Disk gatherer properties and if it runs
-#
-# default disk_command: /usr/bin/df
-# darwin disk_command:  /bin/df
-#
-# default disk_includes:    "/dev/*"               includes all FileSystems starting with /dev/
-# example specific include: "/dev/sda5"            includes only /dev/sda5
-# example multiple include: "/dev/sda5 /other/*"   includes /dev/sda5 and all starting with /other/ evaluated in order in list
+# cpu_proc_stat string
+#     Used to specify /proc/stat or absolute file
+#     default:        /proc/stat
+#     darwin example: /home/batman/gospace/src/github.com/cloudurable/metricsd/test/test-data/proc/stat
 # ------------------------------------------------------------
-disk_gather = true
-disk_command = "df"
-#disk_includes = "/dev/*"
-
-# ------------------------------------------------------------
-# used to specify Cpu gatherer properties and if it runs
-#
-# default cpu_proc_stat: /proc/stat
-# darwin cpu_proc_stat:  /home/rickhigh/gospace/src/github.com/cloudurable/metricsd/test/test-data/proc/stat
-# ------------------------------------------------------------
-cpu_gather = true
 #cpu_proc_stat = "/proc/stat"
 
 # ------------------------------------------------------------
-# used to specify Free Ram gatherer properties and if it runs
-#
-# default free_command: /usr/bin/free
-# darwin free_command:  /usr/local/bin/free
+# free_command string
+#     default:        /usr/bin/free
+#     darwin example: /usr/local/bin/free
 # ------------------------------------------------------------
-free_gather = true
-#free_command = "/usr/bin/free"
+#free_command = "/usr/mybin/free"
 
 # ------------------------------------------------------------
-# used to specify Nodetool gatherer properties and if it runs
+# nodetool_command string
+#   default:        /usr/bin/nodetool
+#   darwin example: /usr/local/bin/nodetool
 #
-# default nodetool_command: /usr/bin/nodetool
-# darwin nodetool_command:  /usr/local/bin/nodetool
-#
-# specify nodetool_functions with space delimted string
-# all nodetool_functions: "cfstats compactionstats gcstats netstats tpstats getlogginglevels"
+# nodetool_functions []string    : required when nodetool will run
+#    specify nodetool_functions as array
+#      functions: cfstats compactionstats gcstats netstats tpstats getlogginglevels
 # ------------------------------------------------------------
-nodetool_gather = true
-#nodetool_command = "/usr/bin/nodetool"
-nodetool_functions = "gcstats"
+#nodetool_command = "/usr/mybin/nodetool"
+#nodetool_functions = ["tpstats", "gcstats"]
 ```
 
 

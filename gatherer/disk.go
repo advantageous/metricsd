@@ -70,14 +70,19 @@ func readDiskConfig(config *c.Config, logger l.Logger) (string, []diskInclude) {
 	var includes = []diskInclude{}
 	var includesLabel string
 	var includesString string
-	if config.DiskIncludes != c.EMPTY {
+	if config.DiskFileSystems != nil && len(config.DiskFileSystems) > 0 {
 		includesLabel = c.CONFIG_LABEL
-		includesString = config.DiskIncludes
-		for _,inc := range strings.Split(includesString, c.SPACE) {
-			if strings.HasSuffix(inc, "*") {
-				includes = append(includes, diskInclude{true, inc[:len(inc)-1]})
+		includesString = c.EMPTY
+		for _, dfs := range config.DiskFileSystems {
+			if (includesString == c.EMPTY) {
+				includesString = dfs
 			} else {
-				includes = append(includes, diskInclude{false, inc})
+				includesString = includesString + c.SPACE + dfs
+			}
+			if strings.HasSuffix(dfs, "*") {
+				includes = append(includes, diskInclude{true, dfs[:len(dfs)-1]})
+			} else {
+				includes = append(includes, diskInclude{false, dfs})
 			}
 		}
 	} else {
