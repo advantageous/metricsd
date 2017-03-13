@@ -8,6 +8,10 @@ import (
 	"time"
 )
 
+func GetLogger(debug bool, name string, flag string) l.Logger {
+	return EnsureLogger(nil, debug, name, flag)
+}
+
 func EnsureLogger(logger l.Logger, debug bool, name string, flag string) l.Logger {
 	if logger == nil {
 		if debug {

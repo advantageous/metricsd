@@ -11,7 +11,6 @@ type Config struct {
 	Env               	string			`hcl:"env"`
 	Local             	bool			`hcl:"local"`
 	Debug				bool			`hcl:"debug"`
-	NameSpace         	string			`hcl:"namespace"`
 	TimePeriodSeconds 	time.Duration	`hcl:"interval_seconds"`
 	ReadConfigSeconds 	time.Duration	`hcl:"interval_read_config_seconds"`
 
@@ -23,6 +22,7 @@ type Config struct {
 	IpAddress			string			`hcl:"ip_address"`
 	EC2InstanceId		string			`hcl:"ec2_instance_id"`
 	EC2InstanceNameTag	string			`hcl:"ec2_instance_name"`
+	NameSpace         	string			`hcl:"namespace"`
 
 	DiskCommand       	string			`hcl:"disk_command"`
 	DiskIncludes		string			`hcl:"disk_includes"`

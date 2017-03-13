@@ -1,4 +1,4 @@
-package metric
+package gatherer
 
 import (
 	l "github.com/advantageous/go-logback/logging"
