@@ -8,19 +8,15 @@ import (
 
 func TestNodetool(test *testing.T) {
 
-	logger := GetTestLogger(test)
+	logger := GetTestLogger(test, "nodetool")
 
 	config := c.Config{
-		Debug: true,
-		// NodetoolFunctions: []string{"cfstats", "tpstats", "gcstats", "getlogginglevels", "netstats", "gettimeout"},
-		NodetoolFunctions: []string{"cfstats"},
+		Debug: false,
+		 NodetoolFunctions: []string{"cfstats", "tpstats", "gcstats", "getlogginglevels", "netstats", "gettimeout"},
 	}
 
 	gatherers := g.NewNodetoolMetricGatherers(nil, &config)
 	for _,gatherer := range gatherers {
-		metrics, err := gatherer.GetMetrics()
-		if err == nil {
-			ShowTestMetrics(logger, metrics)
-		}
+		StandardTest(test, logger, gatherer)
 	}
 }

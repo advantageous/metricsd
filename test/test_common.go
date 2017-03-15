@@ -9,8 +9,8 @@ import (
 	"testing"
 )
 
-func GetTestLogger(test *testing.T) (lg.Logger) {
-	return l.NewTestSimpleLogger("test", test)
+func GetTestLogger(test *testing.T, label string) (lg.Logger) {
+	return l.NewTestSimpleLogger(label + "-test", test)
 }
 
 func GetTestConfig(logger lg.Logger) (*c.Config) {
@@ -27,6 +27,27 @@ func GetTestConfig(logger lg.Logger) (*c.Config) {
 	return config
 }
 
+func StandardTest(test *testing.T, logger lg.Logger, gatherer c.MetricsGatherer) {
+	metrics, err := gatherer.GetMetrics()
+	if err == nil {
+		AssertMetrics(test, metrics)
+		ShowTestMetrics(logger, metrics)
+	} else {
+		test.Errorf("Error found %s %v", err.Error(), err)
+	}
+}
+
+
+func AssertMetrics(test *testing.T, metrics []c.Metric) {
+	if metrics == nil {
+		test.Error("Nil metrics")
+	}
+
+	if len(metrics) == 0 {
+		test.Error("Empty metrics")
+	}
+}
+
 func ShowTestMetrics(logger lg.Logger, metrics []c.Metric) {
 	if metrics != nil && len(metrics) > 0 {
 		for _,m := range metrics {
@@ -34,4 +55,3 @@ func ShowTestMetrics(logger lg.Logger, metrics []c.Metric) {
 		}
 	}
 }
-

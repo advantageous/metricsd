@@ -39,30 +39,30 @@ func Netstats(nodetoolCommand string) ([]c.Metric, error) {
 }
 
 func appendNsMode(metrics []c.Metric, line string) []c.Metric {
-	value := value_mode_other
-	switch strings.ToLower(c.SplitGetFieldByIndex(line, 1)) {
-	case "starting":		value = value_mode_starting
-	case "normal":			value = value_mode_normal
-	case "joining":			value = value_mode_joining
-	case "leaving":			value = value_mode_leaving
-	case "decommissioned": 	value = value_mode_decommissioned
-	case "moving":			value = value_mode_moving
-	case "draining":		value = value_mode_draining
-	case "drained":			value = value_mode_drained
+	codeStr := strings.ToLower(c.SplitGetFieldByIndex(line, 1))
+	code := value_mode_other
+	switch codeStr {
+	case "starting":		code = value_mode_starting
+	case "normal":			code = value_mode_normal
+	case "joining":			code = value_mode_joining
+	case "leaving":			code = value_mode_leaving
+	case "decommissioned": 	code = value_mode_decommissioned
+	case "moving":			code = value_mode_moving
+	case "draining":		code = value_mode_draining
+	case "drained":			code = value_mode_drained
 	}
-	return append(metrics, c.Metric{c.MT_NO_UNIT, c.MetricValue(value), c.EMPTY, "ntNsMode", c.PROVIDER_NODETOOL})
+	return append(metrics, *c.NewMetricStringCode(c.MT_NONE, codeStr, code, "ntNsMode", c.PROVIDER_NODETOOL))
 }
 
 func appendNsReadRepair(metrics []c.Metric, line string, columnIndex int, name string) []c.Metric {
-	metricValue := c.MetricValue( c.ToInt64(c.SplitGetFieldByIndex(line, columnIndex), c.VALUE_ERROR) )
-	return append(metrics, c.Metric{c.MT_COUNT, metricValue, c.EMPTY, name, c.PROVIDER_NODETOOL})
+	return append(metrics, *c.NewMetricIntString(c.MT_COUNT, c.SplitGetFieldByIndex(line, columnIndex), name, c.PROVIDER_NODETOOL))
 }
 
 func appendNsPool(metrics []c.Metric, line string, prefix string) []c.Metric {
 	valuesOnly := strings.Fields(line)
-	metrics = append(metrics, c.Metric{c.MT_COUNT, c.StrToMetricValue(valuesOnly[2]), c.EMPTY, prefix + "Active", c.PROVIDER_NODETOOL})
-	metrics = append(metrics, c.Metric{c.MT_COUNT, c.StrToMetricValue(valuesOnly[3]), c.EMPTY, prefix + "Pending", c.PROVIDER_NODETOOL})
-	metrics = append(metrics, c.Metric{c.MT_COUNT, c.StrToMetricValue(valuesOnly[4]), c.EMPTY, prefix + "Completed", c.PROVIDER_NODETOOL})
-	return append(metrics, c.Metric{c.MT_COUNT, c.StrToMetricValue(valuesOnly[5]), c.EMPTY, prefix + "Dropped", c.PROVIDER_NODETOOL})
+	metrics = append(metrics, *c.NewMetricIntString(c.MT_COUNT, valuesOnly[2], prefix + "Active", c.PROVIDER_NODETOOL))
+	metrics = append(metrics, *c.NewMetricIntString(c.MT_COUNT, valuesOnly[3], prefix + "Pending", c.PROVIDER_NODETOOL))
+	metrics = append(metrics, *c.NewMetricIntString(c.MT_COUNT, valuesOnly[4], prefix + "Completed", c.PROVIDER_NODETOOL))
+	return append(metrics, *c.NewMetricIntString(c.MT_COUNT, valuesOnly[5], prefix + "Dropped", c.PROVIDER_NODETOOL))
 }
 

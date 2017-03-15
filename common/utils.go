@@ -47,6 +47,14 @@ func ToInt64(i string, dflt int64) int64 {
 	return i64
 }
 
+func ToFloat64(f string, dflt float64) float64 {
+	f64, err := strconv.ParseFloat(f, 64)
+	if err != nil {
+		return dflt
+	}
+	return f64
+}
+
 func GetLastIndex(a []string) int {
 	if a != nil && len(a) > 0 {
 		return len(a) - 1
@@ -99,8 +107,20 @@ func DurationToString(dur time.Duration) string {
 	return strconv.FormatInt(int64(dur), 10)
 }
 
+func ByteToString(b byte) string {
+	return strconv.FormatInt(int64(b), 10)
+}
+
 func Int64ToString(i int64) string {
 	return strconv.FormatInt(i, 10)
+}
+
+func Float64ToString(f float64) string {
+	return strconv.FormatFloat(f, 'f', -1, 64)
+}
+
+func Float64ToStringPrecise(f float64, prec int) string {
+	return strconv.FormatFloat(f, 'f', prec, 64)
 }
 
 func Jstr(name string, v string, last bool) string {
@@ -111,18 +131,30 @@ func Jstr(name string, v string, last bool) string {
 }
 
 func Jbyte(name string, v byte, last bool) string {
-	return Jint64(name, int64(v), last)
+	return jnum(name, ByteToString(v), last)
 }
 
 func Jdur(name string, v time.Duration, last bool) string {
-	return Jint64(name, int64(v), last)
+	return jnum(name, DurationToString(v), last)
 }
 
 func Jint64(name string, v int64, last bool) string {
+	return jnum(name, Int64ToString(v), last)
+}
+
+func Jfloat64(name string, v float64, last bool) string {
+	return jnum(name, Float64ToString(v), last)
+}
+
+func Jfloat64Precise(name string, v float64, prec int, last bool) string {
+	return jnum(name, Float64ToStringPrecise(v, prec), last)
+}
+
+func jnum(name string, numStr string, last bool) string {
 	if last {
-		return QUOTE + name + QUOTE_COLON_SPACE + Int64ToString(v)
+		return QUOTE + name + QUOTE_COLON_SPACE + numStr
 	}
-	return QUOTE + name + QUOTE_COLON_SPACE + Int64ToString(v) + COMMA_SPACE
+	return QUOTE + name + QUOTE_COLON_SPACE + numStr + COMMA_SPACE
 }
 
 func Jbool(name string, v bool, last bool) string {
@@ -186,16 +218,4 @@ func Percent(top float64, bot float64) float64 {
 
 func UpFirst(s string) string {
 	return strings.ToUpper(s[0:1]) + s[1:]
-}
-
-func StrToMetricValue(value string) MetricValue {
-	if value == IN_VALUE_N_A {
-		return MetricValue(VALUE_N_A)
-	}
-
-	if value == IN_VALUE_NAN {
-		return MetricValue(VALUE_NAN)
-	}
-
-	return MetricValue(ToInt64(value, VALUE_ERROR))
 }

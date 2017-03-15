@@ -43,7 +43,7 @@ func NewNodetoolMetricGatherers(logger l.Logger, config *c.Config) []*NodetoolMe
 }
 
 func newNodetoolMetricGatherer(logger l.Logger, config *c.Config, nodeFunction string) *NodetoolMetricGatherer {
-	logger = c.EnsureLogger(logger, config.Debug, c.PROVIDER_NODETOOL, c.FLAG_NODE)
+	logger = c.EnsureLogger(logger, config.Debug, c.PROVIDER_NODETOOL, c.FLAG_NODETOOL)
 	command := readNodetoolConfig(config, logger, nodeFunction)
 
 	return &NodetoolMetricGatherer{

@@ -1,45 +1,21 @@
 package test
 
 import (
-	"fmt"
-	l "github.com/advantageous/go-logback/logging/test"
-	c "github.com/cloudurable/metricsd/common"
 	g "github.com/cloudurable/metricsd/gatherer"
-	"os"
+	c "github.com/cloudurable/metricsd/common"
 	"testing"
+	"os"
 )
 
-func TestCpuCounts(z *testing.T) {
+func TestCpuCounts(test *testing.T) {
 
-	test := l.NewTestSimpleLogger("cpu", z)
-
+	logger := GetTestLogger(test, "cpu")
 	dir, _ := os.Getwd()
-	fmt.Println("DIR", dir)
+	config := c.Config{ Debug: false, CpuProcStat: dir + "/test-data/proc/stat1", }
 
-	config := c.Config{ Debug: true, CpuProcStat: dir + "/test-data/proc/stat", }
-	cpuG := g.NewCPUMetricsGatherer(nil, &config)
-	metrics, err := cpuG.GetMetrics()
+	cpu := g.NewCPUMetricsGatherer(nil, &config)
+	StandardTest(test, logger, cpu)
 
-	config = c.Config{ Debug: true, CpuProcStat: dir + "/test-data/proc/stat2", }
-	cpuG = g.NewCPUMetricsGatherer(nil, &config)
-	metrics, err = cpuG.GetMetrics()
-
-	if err != nil {
-		test.Errorf("Error found %s %v", err.Error(), err)
-	}
-
-	if len(metrics) == 0 {
-		test.Error("Empty metrics")
-	}
-
-	//metric := metrics[0]
-	//
-	//if metric.GetName() != "softirq" {
-	//	test.Error("softirq not found")
-	//}
-	//
-	//if metric.GetValue() != 100 {
-	//	test.Errorf("softirq wrong value %d", metric.GetValue())
-	//}
-
+	cpu.TestingChangeProcStatPath(dir + "/test-data/proc/stat2")
+	StandardTest(test, logger, cpu)
 }

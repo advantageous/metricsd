@@ -3,7 +3,6 @@ package nodetool
 import (
 	"strings"
 	c "github.com/cloudurable/metricsd/common"
-	"fmt"
 )
 
 func Cfstats(nodetoolCommand string) ([]c.Metric, error) {
@@ -22,15 +21,9 @@ func Cfstats(nodetoolCommand string) ([]c.Metric, error) {
 		if line != c.EMPTY  && !strings.HasPrefix(line, "---") {
 			if strings.HasPrefix(line, "Total number") {
 				value := c.SplitGetLastField(line)
-				metrics = append(metrics, c.Metric{c.MT_COUNT, c.StrToMetricValue(value), value, "ntCfTotalTables", c.PROVIDER_NODETOOL})
-
+				metrics = append(metrics, *c.NewMetricIntString(c.MT_COUNT, value, "ntCfTotalTables", c.PROVIDER_NODETOOL))
 			} else {
 				fields := fields(line)
-				for _, f := range fields {
-					fmt.Print(f + " | ")
-				}
-				fmt.Println()
-
 				if strings.HasPrefix(fields[0], "Keyspace") {
 					currentKeyspace = fields[1]
 					currentTable = c.EMPTY
@@ -49,8 +42,12 @@ func Cfstats(nodetoolCommand string) ([]c.Metric, error) {
 						}
 						value := fields[lastIndex]
 						name := cfName(fields, lastIndex, currentKeyspace, currentTable)
-						metric := c.Metric{mt, c.StrToMetricValue(value), value, name, c.PROVIDER_NODETOOL}
-						fmt.Println(c.MetricJsonString(&metric))
+						var metric c.Metric
+						if strings.Contains(value, c.DOT) {
+							metric = *c.NewMetricFloatString(mt, value, name, c.PROVIDER_NODETOOL)
+						} else {
+							metric = *c.NewMetricIntString(mt, value, name, c.PROVIDER_NODETOOL)
+						}
 						metrics = append(metrics, metric)
 					}
 				}

@@ -46,6 +46,19 @@ type CpuTimes struct {
 	GuestNice CpuTime
 }
 
+//cpu  13761633 12805 3121528 171746421 158717 0 7708 0 0 0
+//cpu0 3446824 3018 816772 42845024 25964 0 712 0 0 0
+//cpu1 3461972 4316 817690 42760371 93670 0 2989 0 0 0
+//cpu2 3395036 2706 758030 43069668 14793 0 3312 0 0 0
+//cpu3 3457800 2764 729034 43071357 24288 0 693 0 0 0
+//intr 676492475 20 15 0 0 0 0 0 0 1 76 0 0 329 0 0 0 66768 0 0 0 0 0 0 1211524 0 0 1932502 2739244 14 17870042 661 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+//ctxt 1663680895
+//btime 1489105326
+//processes 3326310
+//procs_running 2
+//procs_blocked 0
+//softirq 370470175 1215735 135209363 21947 3127466 1690346 0 174465 124692639 0 104338214
+
 func NewCPUMetricsGatherer(logger l.Logger, config *c.Config) *CPUMetricsGatherer {
 
 	logger = c.EnsureLogger(logger, config.Debug, c.PROVIDER_CPU, c.FLAG_CPU)
@@ -72,6 +85,10 @@ func readCpuConfig(config *c.Config, logger l.Logger) (string) {
 	return procStatPath
 }
 
+func (cpu *CPUMetricsGatherer) TestingChangeProcStatPath(inProcStatPath string) {
+	cpu.procStatPath = inProcStatPath
+}
+
 func (cpu *CPUMetricsGatherer) GetMetrics() ([]c.Metric, error) {
 
 	if cpu.debug {
@@ -94,89 +111,39 @@ func (cpu *CPUMetricsGatherer) GetMetrics() ([]c.Metric, error) {
 
 }
 
+func appendCount(metrics []c.Metric, name string, count int64) []c.Metric {
+	if count > 0 {
+		metrics = append(metrics, *c.NewMetricInt(c.MT_COUNT, count, name, c.PROVIDER_CPU))
+	}
+	return metrics
+}
+
 func convertToMetrics(lastTimeStats *CpuStats, nowStats *CpuStats) []c.Metric {
 	var metrics = []c.Metric{}
 
 	if lastTimeStats != nil {
 
-		softInterruptCount := nowStats.SoftInterruptCount - lastTimeStats.SoftInterruptCount
-		if softInterruptCount > 0 {
-			metrics = append(metrics, c.Metric{c.MT_COUNT, c.MetricValue(softInterruptCount), c.EMPTY, "softIrqCnt", c.PROVIDER_CPU})
-		}
-
-		interruptCount := nowStats.InterruptCount - lastTimeStats.InterruptCount
-		if interruptCount > 0 {
-			metrics = append(metrics, c.Metric{c.MT_COUNT, c.MetricValue(interruptCount), c.EMPTY, "intrCnt", c.PROVIDER_CPU})
-		}
-
-		contextSwitchCount := nowStats.ContextSwitchCount - lastTimeStats.ContextSwitchCount
-		if contextSwitchCount > 0 {
-			metrics = append(metrics, c.Metric{c.MT_COUNT, c.MetricValue(contextSwitchCount), c.EMPTY, "ctxtCnt", c.PROVIDER_CPU})
-		}
-
-		processCount := nowStats.ProcessCount - lastTimeStats.ProcessCount
-		if processCount > 0 {
-			metrics = append(metrics, c.Metric{c.MT_COUNT, c.MetricValue(processCount), c.EMPTY, "processesStrtCnt", c.PROVIDER_CPU})
-		}
+		metrics = appendCount(metrics, "softIrqCnt", int64(nowStats.SoftInterruptCount - lastTimeStats.SoftInterruptCount))
+		metrics = appendCount(metrics, "intrCnt", int64(nowStats.InterruptCount - lastTimeStats.InterruptCount))
+		metrics = appendCount(metrics, "ctxtCnt", int64(nowStats.ContextSwitchCount - lastTimeStats.ContextSwitchCount))
+		metrics = appendCount(metrics, "processesStrtCnt", int64(nowStats.ProcessCount - lastTimeStats.ProcessCount))
 
 		for index, cput := range nowStats.CpuTimeList {
-
-			guest := cput.Guest - lastTimeStats.CpuTimeList[index].Guest
-			if guest > 0 {
-				metrics = append(metrics, c.Metric{c.MT_COUNT, c.MetricValue(guest), c.EMPTY, cput.Name + "GuestJif", c.PROVIDER_CPU})
-			}
-
-			user := cput.User - lastTimeStats.CpuTimeList[index].User
-			if user > 0 {
-				metrics = append(metrics, c.Metric{c.MT_COUNT, c.MetricValue(user), c.EMPTY, cput.Name + "UsrJif", c.PROVIDER_CPU})
-			}
-
-			idle := cput.Idle - lastTimeStats.CpuTimeList[index].Idle
-			if idle > 0 {
-				metrics = append(metrics, c.Metric{c.MT_COUNT, c.MetricValue(idle), c.EMPTY, cput.Name + "IdleJif", c.PROVIDER_CPU})
-			}
-
-			IoWait := cput.IoWait - lastTimeStats.CpuTimeList[index].IoWait
-			if IoWait > 0 {
-				metrics = append(metrics, c.Metric{c.MT_COUNT, c.MetricValue(IoWait), c.EMPTY, cput.Name + "IowaitJif", c.PROVIDER_CPU})
-			}
-
-			Irq := cput.Irq - lastTimeStats.CpuTimeList[index].Irq
-			if Irq > 0 {
-				metrics = append(metrics, c.Metric{c.MT_COUNT, c.MetricValue(Irq), c.EMPTY, cput.Name + "IrqJif", c.PROVIDER_CPU})
-			}
-
-			GuestNice := cput.GuestNice - lastTimeStats.CpuTimeList[index].GuestNice
-			if GuestNice > 0 {
-				metrics = append(metrics, c.Metric{c.MT_COUNT, c.MetricValue(GuestNice), c.EMPTY, cput.Name + "GuestniceJif", c.PROVIDER_CPU})
-			}
-
-			Steal := cput.Steal - lastTimeStats.CpuTimeList[index].Steal
-			if Steal > 0 {
-				metrics = append(metrics, c.Metric{c.MT_COUNT, c.MetricValue(Steal), c.EMPTY, cput.Name + "StealJif", c.PROVIDER_CPU})
-			}
-
-			Nice := cput.Nice - lastTimeStats.CpuTimeList[index].Nice
-			if Nice > 0 {
-				metrics = append(metrics, c.Metric{c.MT_COUNT, c.MetricValue(Nice), c.EMPTY, cput.Name + "NiceJif", c.PROVIDER_CPU})
-			}
-
-			System := cput.System - lastTimeStats.CpuTimeList[index].System
-			if System > 0 {
-				metrics = append(metrics, c.Metric{c.MT_COUNT, c.MetricValue(System), c.EMPTY, cput.Name + "SysJif", c.PROVIDER_CPU})
-			}
-
-			SoftIrq := cput.SoftIrq - lastTimeStats.CpuTimeList[index].SoftIrq
-			if SoftIrq > 0 {
-				metrics = append(metrics, c.Metric{c.MT_COUNT, c.MetricValue(SoftIrq), c.EMPTY, cput.Name + "SoftIrqJif", c.PROVIDER_CPU})
-			}
-
+			metrics = appendCount(metrics, "GuestJif", int64(cput.Guest - lastTimeStats.CpuTimeList[index].Guest))
+			metrics = appendCount(metrics, "UsrJif", int64(cput.User - lastTimeStats.CpuTimeList[index].User))
+			metrics = appendCount(metrics, "IdleJif", int64(cput.Idle - lastTimeStats.CpuTimeList[index].Idle))
+			metrics = appendCount(metrics, "IowaitJif", int64(cput.IoWait - lastTimeStats.CpuTimeList[index].IoWait))
+			metrics = appendCount(metrics, "IrqJif", int64(cput.Irq - lastTimeStats.CpuTimeList[index].Irq))
+			metrics = appendCount(metrics, "GuestniceJif", int64(cput.GuestNice - lastTimeStats.CpuTimeList[index].GuestNice))
+			metrics = appendCount(metrics, "StealJif", int64(cput.Steal - lastTimeStats.CpuTimeList[index].Steal))
+			metrics = appendCount(metrics, "NiceJif", int64(cput.Nice - lastTimeStats.CpuTimeList[index].Nice))
+			metrics = appendCount(metrics, "SysJif", int64(cput.System - lastTimeStats.CpuTimeList[index].System))
+			metrics = appendCount(metrics, "SoftIrqJif", int64(cput.SoftIrq - lastTimeStats.CpuTimeList[index].SoftIrq))
 		}
-
 	}
 
-	metrics = append(metrics, c.Metric{c.MT_COUNT, c.MetricValue(nowStats.ProcessRunningCount), c.EMPTY, "procsRunning", c.PROVIDER_CPU})
-	metrics = append(metrics, c.Metric{c.MT_COUNT, c.MetricValue(nowStats.ProcessBlockCount), c.EMPTY, "procsBlocked", c.PROVIDER_CPU})
+	metrics = append(metrics, *c.NewMetricInt(c.MT_COUNT, int64(nowStats.ProcessRunningCount), "procsRunning", c.PROVIDER_CPU))
+	metrics = append(metrics, *c.NewMetricInt(c.MT_COUNT, int64(nowStats.ProcessBlockCount), "procsBlocked", c.PROVIDER_CPU))
 
 	return metrics
 }

@@ -8,19 +8,14 @@ import (
 
 func TestDisk(test *testing.T) {
 
-	logger := GetTestLogger(test)
+	logger := GetTestLogger(test, "disk")
 
 	config := c.Config{
-		Debug: true,
+		Debug: false,
 		DiskCommand: "df",
 		DiskFileSystems: []string{"/dev/*", "udev"},
 		DiskFields: []string{"total", "used", "available", "usedpct", "availablepct", "capacitypct", "mount"},
 	}
 
-	gatherer := g.NewDiskMetricsGatherer(nil, &config)
-	metrics, err := gatherer.GetMetrics()
-	if err == nil {
-		ShowTestMetrics(logger, metrics)
-	}
-
+	StandardTest(test, logger, g.NewDiskMetricsGatherer(nil, &config))
 }

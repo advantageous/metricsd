@@ -36,26 +36,88 @@ const (
 )
 
 const (
-	FLAG_CPU  = "MT_CPU_DEBUG"
-	FLAG_DISK = "MT_DISK_DEBUG"
-	FLAG_FREE = "MT_FREE_DEBUG"
-	FLAG_NODE = "MT_NODE_DEBUG"
+	FLAG_CPU      = "MT_CPU_DEBUG"
+	FLAG_DISK     = "MT_DISK_DEBUG"
+	FLAG_FREE     = "MT_FREE_DEBUG"
+	FLAG_NODETOOL = "MT_NODETOOL_DEBUG"
 )
 
+type MetricValueSource byte
 const (
-	MT_COUNT   MetricType = iota
+	MVS_INT MetricValueSource = iota
+	MVS_FLOAT
+	MVS_STRING
+)
+
+func (mvs *MetricValueSource) Name() string {
+	switch *mvs {
+	case MVS_INT: return "int"
+	case MVS_FLOAT: return "float"
+	case MVS_STRING: return "str"
+	}
+	return EMPTY
+}
+
+type MetricType byte
+const (
+	MT_COUNT MetricType = iota
 	MT_PERCENT
 	MT_MILLIS
-	MT_SIZE_B
+	MT_SIZE_BYTE
 	MT_SIZE_MB
-	MT_SIZE_K
-	MT_NO_UNIT
+	MT_SIZE_KB
+	MT_NONE
 )
 
+func (mt *MetricType) Name() string {
+	switch *mt {
+	case MT_COUNT:     return "Count"
+	case MT_PERCENT:   return "Percent"
+	case MT_MILLIS:    return "Milliseconds"
+	case MT_SIZE_BYTE: return "Byte"
+	case MT_SIZE_MB:   return "Megabytes"
+	case MT_SIZE_KB:   return "Kilobytes"
+	case MT_NONE:   return "None"
+	}
+	return EMPTY
+}
+
+/* Cloudwatch for reference
 const (
-	VALUE_N_A    = -125
-	VALUE_NAN   = -126
-	VALUE_ERROR = -127
+	StandardUnitSeconds = "Seconds"
+	StandardUnitMicroseconds = "Microseconds"
+	StandardUnitMilliseconds = "Milliseconds"
+	StandardUnitBytes = "Bytes"
+	StandardUnitKilobytes = "Kilobytes"
+	StandardUnitMegabytes = "Megabytes"
+	StandardUnitGigabytes = "Gigabytes"
+	StandardUnitTerabytes = "Terabytes"
+	StandardUnitBits = "Bits"
+	StandardUnitKilobits = "Kilobits"
+	StandardUnitMegabits = "Megabits"
+	StandardUnitGigabits = "Gigabits"
+	StandardUnitTerabits = "Terabits"
+	StandardUnitPercent = "Percent"
+	StandardUnitCount = "Count"
+	StandardUnitBytesSecond = "Bytes/Second"
+	StandardUnitKilobytesSecond = "Kilobytes/Second"
+	StandardUnitMegabytesSecond = "Megabytes/Second"
+	StandardUnitGigabytesSecond = "Gigabytes/Second"
+	StandardUnitTerabytesSecond = "Terabytes/Second"
+	StandardUnitBitsSecond = "Bits/Second"
+	StandardUnitKilobitsSecond = "Kilobits/Second"
+	StandardUnitMegabitsSecond = "Megabits/Second"
+	StandardUnitGigabitsSecond = "Gigabits/Second"
+	StandardUnitTerabitsSecond = "Terabits/Second"
+	StandardUnitCountSecond = "Count/Second"
+	StandardUnitNone = "None"
+)
+*/
+
+const (
+	VALUE_N_A   int64 = -125
+	VALUE_NAN   int64 = -126
+	VALUE_ERROR int64 = -127
 )
 
 const (

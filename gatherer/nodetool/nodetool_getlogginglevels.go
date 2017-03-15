@@ -28,16 +28,16 @@ func Getlogginglevels(nodetoolCommand string) ([]c.Metric, error) {
 			split := strings.Split(line, c.SPACE)
 			name := "ntLl:" + split[0]
 			logLevelString := strings.ToLower(split[len(split)-1])
-			value := value_level_off
+			code := value_level_off
 			switch logLevelString {
-			case "all":		value = value_level_all
-			case "debug":	value = value_level_debug
-			case "error":	value = value_level_error
-			case "fatal":	value = value_level_fatal
-			case "info":	value = value_level_info
-			case "warn":	value = value_level_warn
+			case "all":		code = value_level_all
+			case "debug":	code = value_level_debug
+			case "error":	code = value_level_error
+			case "fatal":	code = value_level_fatal
+			case "info":	code = value_level_info
+			case "warn":	code = value_level_warn
 			}
-			metrics = append(metrics, c.Metric{c.MT_NO_UNIT, c.MetricValue(value), c.EMPTY, name, c.PROVIDER_NODETOOL})
+			metrics = append(metrics, *c.NewMetricStringCode(c.MT_NONE, logLevelString, code, name, c.PROVIDER_NODETOOL))
 		}
 	}
 
