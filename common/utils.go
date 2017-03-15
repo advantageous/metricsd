@@ -47,12 +47,33 @@ func ToInt64(i string, dflt int64) int64 {
 	return i64
 }
 
-func FieldByIndex(text string, columnIndex int) string {
-	temp := strings.Fields(text)
-	if len(temp) > columnIndex {
-		return temp[columnIndex]
+func GetLastIndex(a []string) int {
+	if a != nil && len(a) > 0 {
+		return len(a) - 1
+	}
+	return -1
+}
+
+func GetLastField(a []string) string {
+	if a != nil && len(a) > 0 {
+		return a[len(a) - 1]
 	}
 	return EMPTY
+}
+
+func GetFieldByIndex(a []string, columnIndex int) string {
+	if a != nil && len(a) > columnIndex {
+		return a[columnIndex]
+	}
+	return EMPTY
+}
+
+func SplitGetFieldByIndex(text string, columnIndex int) string {
+	return GetFieldByIndex(strings.Fields(text), columnIndex)
+}
+
+func SplitGetLastField(text string) string {
+	return GetLastField(strings.Fields(text))
 }
 
 func StringArraysEqual(sa1 []string, sa2 []string) bool {
@@ -78,6 +99,10 @@ func DurationToString(dur time.Duration) string {
 	return strconv.FormatInt(int64(dur), 10)
 }
 
+func Int64ToString(i int64) string {
+	return strconv.FormatInt(i, 10)
+}
+
 func Jstr(name string, v string, last bool) string {
 	if last {
 		return QUOTE + name + QUOTE_COLON_SPACE_QUOTE + v + QUOTE
@@ -85,11 +110,19 @@ func Jstr(name string, v string, last bool) string {
 	return QUOTE + name + QUOTE_COLON_SPACE_QUOTE + v + QUOTE_COMMA_SPACE
 }
 
+func Jbyte(name string, v byte, last bool) string {
+	return Jint64(name, int64(v), last)
+}
+
 func Jdur(name string, v time.Duration, last bool) string {
+	return Jint64(name, int64(v), last)
+}
+
+func Jint64(name string, v int64, last bool) string {
 	if last {
-		return QUOTE + name + QUOTE_COLON_SPACE + DurationToString(v)
+		return QUOTE + name + QUOTE_COLON_SPACE + Int64ToString(v)
 	}
-	return QUOTE + name + QUOTE_COLON_SPACE + DurationToString(v) + COMMA_SPACE
+	return QUOTE + name + QUOTE_COLON_SPACE + Int64ToString(v) + COMMA_SPACE
 }
 
 func Jbool(name string, v bool, last bool) string {
@@ -149,4 +182,20 @@ func Round(f float64) int64 {
 
 func Percent(top float64, bot float64) float64 {
 	return top * 100 / bot
+}
+
+func UpFirst(s string) string {
+	return strings.ToUpper(s[0:1]) + s[1:]
+}
+
+func StrToMetricValue(value string) MetricValue {
+	if value == IN_VALUE_N_A {
+		return MetricValue(VALUE_N_A)
+	}
+
+	if value == IN_VALUE_NAN {
+		return MetricValue(VALUE_NAN)
+	}
+
+	return MetricValue(ToInt64(value, VALUE_ERROR))
 }

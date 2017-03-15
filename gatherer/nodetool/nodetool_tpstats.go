@@ -56,22 +56,22 @@ func Tpstats(nodetoolCommand string) ([]c.Metric, error) {
 
 func appendTpPool(metrics []c.Metric, line string) []c.Metric {
 	valuesOnly := strings.Fields(line)
-	prefix := "tpPool" + valuesOnly[0]
-	metrics = append(metrics, c.Metric{c.COUNT, numericMetricValue(valuesOnly[1]), prefix + "Active", c.PROVIDER_NODETOOL})
-	metrics = append(metrics, c.Metric{c.COUNT, numericMetricValue(valuesOnly[2]), prefix + "Pending", c.PROVIDER_NODETOOL})
-	metrics = append(metrics, c.Metric{c.COUNT, numericMetricValue(valuesOnly[3]), prefix + "Completed", c.PROVIDER_NODETOOL})
-	metrics = append(metrics, c.Metric{c.COUNT, numericMetricValue(valuesOnly[4]), prefix + "Blocked", c.PROVIDER_NODETOOL})
-	return append(metrics, c.Metric{c.COUNT, numericMetricValue(valuesOnly[5]), prefix + "AllTimeBlocked", c.PROVIDER_NODETOOL})
+	prefix := "ntTpPool" + valuesOnly[0]
+	metrics = append(metrics, c.Metric{c.MT_COUNT, c.StrToMetricValue(valuesOnly[1]), c.EMPTY, prefix + "Active", c.PROVIDER_NODETOOL})
+	metrics = append(metrics, c.Metric{c.MT_COUNT, c.StrToMetricValue(valuesOnly[2]), c.EMPTY, prefix + "Pending", c.PROVIDER_NODETOOL})
+	metrics = append(metrics, c.Metric{c.MT_COUNT, c.StrToMetricValue(valuesOnly[3]), c.EMPTY, prefix + "Completed", c.PROVIDER_NODETOOL})
+	metrics = append(metrics, c.Metric{c.MT_COUNT, c.StrToMetricValue(valuesOnly[4]), c.EMPTY, prefix + "Blocked", c.PROVIDER_NODETOOL})
+	return append(metrics, c.Metric{c.MT_COUNT, c.StrToMetricValue(valuesOnly[5]), c.EMPTY, prefix + "AllTimeBlocked", c.PROVIDER_NODETOOL})
 }
 
 func appendTpMessageType(metrics []c.Metric, line string) []c.Metric {
 	valuesOnly := strings.Fields(line)
 	parts := strings.Split(valuesOnly[0], c.UNDER)
-	name := "tpMsgType"
+	name := "ntTpMsgType"
 	for _,part := range parts {
 		if part != c.EMPTY {
-			name = name + part[0:1] + strings.ToLower(part[1:])
+			name = name + c.UpFirst(part)
 		}
 	}
-	return append(metrics, c.Metric{c.COUNT, numericMetricValue(valuesOnly[1]), name, c.PROVIDER_NODETOOL})
+	return append(metrics, c.Metric{c.MT_COUNT, c.StrToMetricValue(valuesOnly[1]), c.EMPTY, name, c.PROVIDER_NODETOOL})
 }

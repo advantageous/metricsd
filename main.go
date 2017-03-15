@@ -20,11 +20,12 @@ func main() {
 	logger := l.NewSimpleLogger("main-init")
 	config, err := c.LoadConfig(*configFile, logger)
 	if err != nil {
-		panic(err)
+		logger.CriticalError("Error reading config", err)
+		os.Exit(1)
 	}
 
 	logger = c.GetLogger(config.Debug, "main", "MT_MAIN_DEBUG")
-	logger.Info("Config file INIT", c.ConfigJsonString(config))
+	logger.Info("Config file:", c.ConfigJsonString(config))
 
 	// begin the work
 	interval, intervalConfigRefresh, debug := readRunConfig(config)
@@ -46,6 +47,7 @@ func main() {
 
 		case <-timer.C:
 			if load {
+				load = false
 				gatherers = g.LoadGatherers(config)
 				repeaters = r.LoadRepeaters(config)
 			}
@@ -55,16 +57,18 @@ func main() {
 
 		case <-configTimer.C:
 			if newConfig, err := c.LoadConfig(*configFile, logger); err != nil {
-				logger.Error("Error reading config", err)
+				logger.Error("Error reading config, changes ignored!", err)
 			} else {
 				load = !c.ConfigEquals(config, newConfig)
 				if load {
 					config = newConfig
 					interval, intervalConfigRefresh, debug = readRunConfig(config)
-					logger.Info("Config file CHANGED", c.ConfigJsonString(config))
+					if debug {
+						logger.Debug("Config file changed:", c.ConfigJsonString(config))
+					}
 				} else {
 					if debug {
-						logger.Info("Config file SAME")
+						logger.Debug("Config file same.")
 					}
 				}
 			}
@@ -80,7 +84,7 @@ func makeTerminateChannel() <-chan os.Signal {
 }
 
 func readRunConfig(config *c.Config) (time.Duration, time.Duration, bool){
-	return 	config.TimePeriodSeconds * time.Second,
+	return config.TimePeriodSeconds * time.Second,
 		config.ReadConfigSeconds * time.Second,
 		config.Debug
 }

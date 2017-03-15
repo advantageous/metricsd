@@ -26,6 +26,17 @@ type MetricsRepeater interface {
 type Metric struct {
 	MetricType MetricType
 	Value      MetricValue
+	StrValue   string
 	Name       string
 	Provider   string
+}
+
+func MetricJsonString(m *Metric) (string) {
+	return "{" +
+		Jint64("MetricType", int64(m.MetricType), false) +
+		Jint64("Value", int64(m.Value), false) +
+		Jstr("StrValue", m.StrValue, false) +
+		Jstr("Name", m.Name, false) +
+		Jstr("Provider", m.Provider, true) +
+		"}"
 }

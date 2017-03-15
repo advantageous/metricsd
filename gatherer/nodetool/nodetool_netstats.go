@@ -27,20 +27,20 @@ func Netstats(nodetoolCommand string) ([]c.Metric, error) {
 
 	var metrics = appendNsMode([]c.Metric{}, lines[0])
 
-	metrics = appendNsReadRepair(metrics, lines[3], 1, "nsRrAttempted")
-	metrics = appendNsReadRepair(metrics, lines[4], 2, "nsRrBlocking")
-	metrics = appendNsReadRepair(metrics, lines[4], 2, "nsRrBackground")
+	metrics = appendNsReadRepair(metrics, lines[3], 1, "ntNsRrAttempted")
+	metrics = appendNsReadRepair(metrics, lines[4], 2, "ntNsRrBlocking")
+	metrics = appendNsReadRepair(metrics, lines[4], 2, "ntNsRrBackground")
 
-	metrics = appendNsPool(metrics, lines[7], "nsPoolLargeMsgs")
-	metrics = appendNsPool(metrics, lines[8], "nsPoolSmallMsgs")
-	metrics = appendNsPool(metrics, lines[9], "nsPoolGossipMsgs")
+	metrics = appendNsPool(metrics, lines[7], "ntNsPoolLargeMsgs")
+	metrics = appendNsPool(metrics, lines[8], "ntNsPoolSmallMsgs")
+	metrics = appendNsPool(metrics, lines[9], "ntNsPoolGossipMsgs")
 
 	return metrics, nil
 }
 
 func appendNsMode(metrics []c.Metric, line string) []c.Metric {
 	value := value_mode_other
-	switch strings.ToLower(c.FieldByIndex(line, 1)) {
+	switch strings.ToLower(c.SplitGetFieldByIndex(line, 1)) {
 	case "starting":		value = value_mode_starting
 	case "normal":			value = value_mode_normal
 	case "joining":			value = value_mode_joining
@@ -50,19 +50,19 @@ func appendNsMode(metrics []c.Metric, line string) []c.Metric {
 	case "draining":		value = value_mode_draining
 	case "drained":			value = value_mode_drained
 	}
-	return append(metrics, c.Metric{c.NO_UNIT, c.MetricValue(value), "nsMode", c.PROVIDER_NODETOOL})
+	return append(metrics, c.Metric{c.MT_NO_UNIT, c.MetricValue(value), c.EMPTY, "ntNsMode", c.PROVIDER_NODETOOL})
 }
 
 func appendNsReadRepair(metrics []c.Metric, line string, columnIndex int, name string) []c.Metric {
-	metricValue := c.MetricValue( c.ToInt64(c.FieldByIndex(line, columnIndex), value_error) )
-	return append(metrics, c.Metric{c.COUNT, metricValue, name, c.PROVIDER_NODETOOL})
+	metricValue := c.MetricValue( c.ToInt64(c.SplitGetFieldByIndex(line, columnIndex), c.VALUE_ERROR) )
+	return append(metrics, c.Metric{c.MT_COUNT, metricValue, c.EMPTY, name, c.PROVIDER_NODETOOL})
 }
 
 func appendNsPool(metrics []c.Metric, line string, prefix string) []c.Metric {
 	valuesOnly := strings.Fields(line)
-	metrics = append(metrics, c.Metric{c.COUNT, numericMetricValue(valuesOnly[2]), prefix + "Active", c.PROVIDER_NODETOOL})
-	metrics = append(metrics, c.Metric{c.COUNT, numericMetricValue(valuesOnly[3]), prefix + "Pending", c.PROVIDER_NODETOOL})
-	metrics = append(metrics, c.Metric{c.COUNT, numericMetricValue(valuesOnly[4]), prefix + "Completed", c.PROVIDER_NODETOOL})
-	return append(metrics, c.Metric{c.COUNT, numericMetricValue(valuesOnly[5]), prefix + "Dropped", c.PROVIDER_NODETOOL})
+	metrics = append(metrics, c.Metric{c.MT_COUNT, c.StrToMetricValue(valuesOnly[2]), c.EMPTY, prefix + "Active", c.PROVIDER_NODETOOL})
+	metrics = append(metrics, c.Metric{c.MT_COUNT, c.StrToMetricValue(valuesOnly[3]), c.EMPTY, prefix + "Pending", c.PROVIDER_NODETOOL})
+	metrics = append(metrics, c.Metric{c.MT_COUNT, c.StrToMetricValue(valuesOnly[4]), c.EMPTY, prefix + "Completed", c.PROVIDER_NODETOOL})
+	return append(metrics, c.Metric{c.MT_COUNT, c.StrToMetricValue(valuesOnly[5]), c.EMPTY, prefix + "Dropped", c.PROVIDER_NODETOOL})
 }
 

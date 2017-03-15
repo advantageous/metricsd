@@ -34,6 +34,8 @@ func NewNodetoolMetricGatherers(logger l.Logger, config *c.Config) []*NodetoolMe
 	for _, nodeFunction := range config.NodetoolFunctions {
 		if nodetoolFunctionSupported(nodeFunction) {
 			gatherers = append(gatherers, newNodetoolMetricGatherer(logger, config, nodeFunction))
+		} else {
+			logger.Warn("Unsupported or unknown Nodetool function", nodeFunction)
 		}
 	}
 
@@ -77,7 +79,9 @@ func (gatherer *NodetoolMetricGatherer) GetMetrics() ([]c.Metric, error) {
 	case nt.NodetoolFunction_netstats:			metrics, err = nt.Netstats(gatherer.command)
 	case nt.NodetoolFunction_gcstats:			metrics, err = nt.Gcstats(gatherer.command)
 	case nt.NodetoolFunction_tpstats:			metrics, err = nt.Tpstats(gatherer.command)
-	case nt.NodetoolFunction__getlogginglevels:	metrics, err = nt.Getlogginglevels(gatherer.command)
+	case nt.NodetoolFunction_getlogginglevels:	metrics, err = nt.Getlogginglevels(gatherer.command)
+	case nt.NodetoolFunction_gettimeout:	    metrics, err = nt.Gettimeout(gatherer.command)
+	case nt.NodetoolFunction_cfstats:	        metrics, err = nt.Cfstats(gatherer.command)
 	}
 
 	if err != nil {

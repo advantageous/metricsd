@@ -43,11 +43,22 @@ const (
 )
 
 const (
-	COUNT MetricType = iota
-	LEVEL_PERCENT
-	TIMING_MS
-	SIZE_B
-	SIZE_MB
-	SIZE_K
-	NO_UNIT
+	MT_COUNT   MetricType = iota
+	MT_PERCENT
+	MT_MILLIS
+	MT_SIZE_B
+	MT_SIZE_MB
+	MT_SIZE_K
+	MT_NO_UNIT
+)
+
+const (
+	VALUE_N_A    = -125
+	VALUE_NAN   = -126
+	VALUE_ERROR = -127
+)
+
+const (
+	IN_VALUE_N_A = "n/a"
+	IN_VALUE_NAN = "NaN"
 )

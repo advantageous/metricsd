@@ -93,12 +93,12 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(context c.MetricContext, metrics
 
 		datumUnit := c.EMPTY
 		switch d.MetricType {
-		case c.COUNT:			datumUnit = cloudwatch.StandardUnitCount
-		case c.LEVEL_PERCENT: 	datumUnit = cloudwatch.StandardUnitPercent
-		case c.TIMING_MS: 		datumUnit = cloudwatch.StandardUnitMilliseconds
-		case c.SIZE_B: 			datumUnit = cloudwatch.StandardUnitBytes
-		case c.SIZE_K:			datumUnit = cloudwatch.StandardUnitKilobytes
-		case c.SIZE_MB: 		datumUnit = cloudwatch.StandardUnitMegabytes
+		case c.MT_COUNT:			datumUnit = cloudwatch.StandardUnitCount
+		case c.MT_PERCENT: 	datumUnit = cloudwatch.StandardUnitPercent
+		case c.MT_MILLIS: 		datumUnit = cloudwatch.StandardUnitMilliseconds
+		case c.MT_SIZE_B: 			datumUnit = cloudwatch.StandardUnitBytes
+		case c.MT_SIZE_K:			datumUnit = cloudwatch.StandardUnitKilobytes
+		case c.MT_SIZE_MB: 		datumUnit = cloudwatch.StandardUnitMegabytes
 		}
 
 		if (datumUnit != c.EMPTY) {
@@ -125,7 +125,7 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(context c.MetricContext, metrics
 					cw.logger.Error("Error writing metrics", err, index)
 				} else {
 					if cw.config.Debug {
-						cw.logger.Info("SENT..........................")
+						cw.logger.Debug("SENT..........................")
 					}
 				}
 			}
