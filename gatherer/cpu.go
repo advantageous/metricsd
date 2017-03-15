@@ -19,6 +19,7 @@ type CPUMetricsGatherer struct {
 	lastTime     *CpuStats
 	logger       l.Logger
 	debug        bool
+	reportZeros  bool
 }
 
 type CpuStats struct {
@@ -68,6 +69,7 @@ func NewCPUMetricsGatherer(logger l.Logger, config *c.Config) *CPUMetricsGathere
 		procStatPath: procStatPath,
 		logger:       logger,
 		debug:        config.Debug,
+		reportZeros:  config.CpuReportZeros,
 	}
 }
 
@@ -102,7 +104,7 @@ func (cpu *CPUMetricsGatherer) GetMetrics() ([]c.Metric, error) {
 		return nil, err
 	}
 
-	metrics := convertToMetrics(cpu.lastTime, cpuStats)
+	metrics := cpu.convertToMetrics(cpu.lastTime, cpuStats)
 	cpu.lastTime = cpuStats
 	if (cpu.debug) {
 		cpu.logger.Debugf("%+v \n", cpuStats)
@@ -111,34 +113,34 @@ func (cpu *CPUMetricsGatherer) GetMetrics() ([]c.Metric, error) {
 
 }
 
-func appendCount(metrics []c.Metric, name string, count int64) []c.Metric {
-	if count > 0 {
+func (cpu *CPUMetricsGatherer) appendCount(metrics []c.Metric, name string, count int64) []c.Metric {
+	if cpu.reportZeros || count > 0 {
 		metrics = append(metrics, *c.NewMetricInt(c.MT_COUNT, count, name, c.PROVIDER_CPU))
 	}
 	return metrics
 }
 
-func convertToMetrics(lastTimeStats *CpuStats, nowStats *CpuStats) []c.Metric {
+func (cpu *CPUMetricsGatherer) convertToMetrics(lastTimeStats *CpuStats, nowStats *CpuStats) []c.Metric {
 	var metrics = []c.Metric{}
 
 	if lastTimeStats != nil {
 
-		metrics = appendCount(metrics, "softIrqCnt", int64(nowStats.SoftInterruptCount - lastTimeStats.SoftInterruptCount))
-		metrics = appendCount(metrics, "intrCnt", int64(nowStats.InterruptCount - lastTimeStats.InterruptCount))
-		metrics = appendCount(metrics, "ctxtCnt", int64(nowStats.ContextSwitchCount - lastTimeStats.ContextSwitchCount))
-		metrics = appendCount(metrics, "processesStrtCnt", int64(nowStats.ProcessCount - lastTimeStats.ProcessCount))
+		metrics = cpu.appendCount(metrics, "softIrqCnt", int64(nowStats.SoftInterruptCount - lastTimeStats.SoftInterruptCount))
+		metrics = cpu.appendCount(metrics, "intrCnt", int64(nowStats.InterruptCount - lastTimeStats.InterruptCount))
+		metrics = cpu.appendCount(metrics, "ctxtCnt", int64(nowStats.ContextSwitchCount - lastTimeStats.ContextSwitchCount))
+		metrics = cpu.appendCount(metrics, "processesStrtCnt", int64(nowStats.ProcessCount - lastTimeStats.ProcessCount))
 
 		for index, cput := range nowStats.CpuTimeList {
-			metrics = appendCount(metrics, "GuestJif", int64(cput.Guest - lastTimeStats.CpuTimeList[index].Guest))
-			metrics = appendCount(metrics, "UsrJif", int64(cput.User - lastTimeStats.CpuTimeList[index].User))
-			metrics = appendCount(metrics, "IdleJif", int64(cput.Idle - lastTimeStats.CpuTimeList[index].Idle))
-			metrics = appendCount(metrics, "IowaitJif", int64(cput.IoWait - lastTimeStats.CpuTimeList[index].IoWait))
-			metrics = appendCount(metrics, "IrqJif", int64(cput.Irq - lastTimeStats.CpuTimeList[index].Irq))
-			metrics = appendCount(metrics, "GuestniceJif", int64(cput.GuestNice - lastTimeStats.CpuTimeList[index].GuestNice))
-			metrics = appendCount(metrics, "StealJif", int64(cput.Steal - lastTimeStats.CpuTimeList[index].Steal))
-			metrics = appendCount(metrics, "NiceJif", int64(cput.Nice - lastTimeStats.CpuTimeList[index].Nice))
-			metrics = appendCount(metrics, "SysJif", int64(cput.System - lastTimeStats.CpuTimeList[index].System))
-			metrics = appendCount(metrics, "SoftIrqJif", int64(cput.SoftIrq - lastTimeStats.CpuTimeList[index].SoftIrq))
+			metrics = cpu.appendCount(metrics, "GuestJif", int64(cput.Guest - lastTimeStats.CpuTimeList[index].Guest))
+			metrics = cpu.appendCount(metrics, "UsrJif", int64(cput.User - lastTimeStats.CpuTimeList[index].User))
+			metrics = cpu.appendCount(metrics, "IdleJif", int64(cput.Idle - lastTimeStats.CpuTimeList[index].Idle))
+			metrics = cpu.appendCount(metrics, "IowaitJif", int64(cput.IoWait - lastTimeStats.CpuTimeList[index].IoWait))
+			metrics = cpu.appendCount(metrics, "IrqJif", int64(cput.Irq - lastTimeStats.CpuTimeList[index].Irq))
+			metrics = cpu.appendCount(metrics, "GuestniceJif", int64(cput.GuestNice - lastTimeStats.CpuTimeList[index].GuestNice))
+			metrics = cpu.appendCount(metrics, "StealJif", int64(cput.Steal - lastTimeStats.CpuTimeList[index].Steal))
+			metrics = cpu.appendCount(metrics, "NiceJif", int64(cput.Nice - lastTimeStats.CpuTimeList[index].Nice))
+			metrics = cpu.appendCount(metrics, "SysJif", int64(cput.System - lastTimeStats.CpuTimeList[index].System))
+			metrics = cpu.appendCount(metrics, "SoftIrqJif", int64(cput.SoftIrq - lastTimeStats.CpuTimeList[index].SoftIrq))
 		}
 	}
 

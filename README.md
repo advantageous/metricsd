@@ -84,15 +84,17 @@ namespace="Cassandra Cluster"
 #disk_file_systems = ["/dev/*", "udev"]
 #disk_fields = ["total", "used", "available", "usedpct", "availablepct", "mount"]
 
-1024-blocks    Used Available Capacity Mounted on
-
 # ------------------------------------------------------------
 # cpu_proc_stat string
 #     Used to specify /proc/stat or absolute file
 #     default:        /proc/stat
 #     darwin example: /home/batman/gospace/src/github.com/cloudurable/metricsd/test/test-data/proc/stat
+#
+# cpu_report_zeros bool
+#     default: false
 # ------------------------------------------------------------
 #cpu_proc_stat = "/proc/stat"
+#cpu_report_zeros = true
 
 # ------------------------------------------------------------
 # free_command string

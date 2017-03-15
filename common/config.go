@@ -29,6 +29,7 @@ type Config struct {
 	DiskFields          []string		`hcl:"disk_fields"`
 
 	CpuProcStat       	string			`hcl:"cpu_proc_stat"`
+	CpuReportZeros     	bool			`hcl:"cpu_report_zeros"`
 
 	FreeCommand       	string			`hcl:"free_command"`
 
@@ -149,6 +150,7 @@ func ConfigEquals(c1 *Config, c2 *Config) (bool) {
 
 		c1.DiskCommand           == c2.DiskCommand &&
 		c1.CpuProcStat           == c2.CpuProcStat &&
+		c1.CpuReportZeros        == c2.CpuReportZeros &&
 		c1.FreeCommand           == c2.FreeCommand &&
 		c1.NodetoolCommand       == c2.NodetoolCommand &&
 
@@ -181,6 +183,7 @@ func ConfigJsonString(cfg *Config) (string) {
 		Jstrarr("DiskFields", cfg.DiskFields, false) +
 
 		Jstr("CpuProcStat", cfg.CpuProcStat, false) +
+		Jbool("CpuReportZeros", cfg.CpuReportZeros, false) +
 
 		Jstr("FreeCommand", cfg.FreeCommand, false) +
 
