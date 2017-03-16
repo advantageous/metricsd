@@ -154,8 +154,8 @@ func (disk *DiskMetricsGatherer) appendDf(metrics []c.Metric, line string) []c.M
 	var arnd = c.Round(apct)
 
 	if disk.debug {
-		disk.logger.Printf("name %s  total %d  used %d  available %d  usedpct %2.2f  (%d) availablepct %2.2f (%d)  capacity %d  mount %s",
-			                name,    total,    used,    available,    upct, urnd,    apct, arnd,                   capacity,    mount)
+		disk.logger.Printf("name %s, total %d, used %d, available %d, usedpct %2.2f (%d), availablepct %2.2f (%d), capacity %d, mount %s",
+			                name,    total,    used,    available,    upct, urnd,         apct, arnd,              capacity,    mount)
 	}
 
 	for _,field := range disk.fields {
@@ -173,7 +173,7 @@ func (disk *DiskMetricsGatherer) appendDf(metrics []c.Metric, line string) []c.M
 		case DiskField_capacitypct:
 			metrics = append(metrics, *c.NewMetricInt(c.MT_PERCENT, capacity, "diskCapacityPct:" + name, c.PROVIDER_DISK))
 		case DiskField_mount:
-			metrics = append(metrics, *c.NewMetricString(c.MT_NONE, mount, "diskAvailMount:" + name, c.PROVIDER_DISK))
+			metrics = append(metrics, *c.NewMetricString(mount, "diskAvailMount:" + name, c.PROVIDER_DISK))
 		}
 	}
 

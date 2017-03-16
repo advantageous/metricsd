@@ -110,7 +110,7 @@ namespace="Cassandra Cluster"
 #
 # nodetool_functions []string    : required when nodetool will run
 #    specify nodetool_functions as array
-#      functions: cfstats compactionstats gcstats netstats tpstats getlogginglevels
+#      functions: cfstats compactionstats gcstats netstats tpstats getlogginglevels proxyhistograms listsnapshots, statuses
 # ------------------------------------------------------------
 #nodetool_command = "/usr/mybin/nodetool"
 #nodetool_functions = ["tpstats", "gcstats"]

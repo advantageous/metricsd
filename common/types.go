@@ -62,8 +62,8 @@ func NewMetricFloatString(mt MetricType, value string, name string, provider str
 	return newMetricString(mt, MVS_FLOAT, value, name, provider, VALUE_ERROR)
 }
 
-func NewMetricString(mt MetricType, value string, name string, provider string) *Metric {
-	return newMetricString(mt, MVS_STRING, value, name, provider, VALUE_N_A)
+func NewMetricString(value string, name string, provider string) *Metric {
+	return newMetricString(MT_NONE, MVS_STRING, value, name, provider, VALUE_N_A)
 }
 
 func newMetricString(mt MetricType, mvs MetricValueSource, value string, name string, provider string, errorValue int64) *Metric {

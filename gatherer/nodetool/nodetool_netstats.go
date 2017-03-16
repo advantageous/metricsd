@@ -6,7 +6,7 @@ import (
 )
 
 func Netstats(nodetoolCommand string) ([]c.Metric, error) {
-	output, err := c.ExecCommand(nodetoolCommand, NodetoolFunction_netstats)
+	output, err := c.ExecCommand(nodetoolCommand, NtFunc_netstats)
 	if err != nil {
 		return nil, err
 	}

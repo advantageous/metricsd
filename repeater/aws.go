@@ -93,6 +93,7 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(context c.MetricContext, metrics
 		switch metric.Type {
 		case c.MT_COUNT:	 datum.Unit = aws.String(cloudwatch.StandardUnitCount)
 		case c.MT_PERCENT: 	 datum.Unit = aws.String(cloudwatch.StandardUnitPercent)
+		case c.MT_MICROS: 	 datum.Unit = aws.String(cloudwatch.StandardUnitMicroseconds)
 		case c.MT_MILLIS: 	 datum.Unit = aws.String(cloudwatch.StandardUnitMilliseconds)
 		case c.MT_SIZE_BYTE: datum.Unit = aws.String(cloudwatch.StandardUnitBytes)
 		case c.MT_SIZE_MB: 	 datum.Unit = aws.String(cloudwatch.StandardUnitMegabytes)

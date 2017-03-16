@@ -10,7 +10,8 @@ func TestNodetool(test *testing.T) {
 
 	config := c.Config{
 		Debug: false,
-		 NodetoolFunctions: []string{"cfstats", "tpstats", "gcstats", "getlogginglevels", "netstats", "gettimeout"},
+		//NodetoolFunctions: []string{"cfstats", "tpstats", "gcstats", "getlogginglevels", "netstats", "gettimeout", "proxyhistograms", "listsnapshots", "statuses"},
+		NodetoolFunctions: []string{"statuses"},
 	}
 
 	gatherers := g.NewNodetoolMetricGatherers(nil, &config)

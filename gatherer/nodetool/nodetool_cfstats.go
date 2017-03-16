@@ -6,7 +6,7 @@ import (
 )
 
 func Cfstats(nodetoolCommand string) ([]c.Metric, error) {
-	output, err := c.ExecCommand(nodetoolCommand, NodetoolFunction_cfstats)
+	output, err := c.ExecCommand(nodetoolCommand, NtFunc_cfstats)
 	if err != nil {
 		return nil, err
 	}

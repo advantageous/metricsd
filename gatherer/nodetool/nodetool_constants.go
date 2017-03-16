@@ -23,19 +23,25 @@ const (
 )
 
 const (
-	NodetoolFunction_netstats         = "netstats"
-	NodetoolFunction_gcstats          = "gcstats"
-	NodetoolFunction_tpstats          = "tpstats"
-	NodetoolFunction_getlogginglevels = "getlogginglevels"
-	NodetoolFunction_gettimeout       = "gettimeout"
-	NodetoolFunction_cfstats          = "cfstats"
+	NtFunc_netstats         = "netstats"
+	NtFunc_gcstats          = "gcstats"
+	NtFunc_tpstats          = "tpstats"
+	NtFunc_getlogginglevels = "getlogginglevels"
+	NtFunc_gettimeout       = "gettimeout"
+	NtFunc_cfstats          = "cfstats"
+	NtFunc_proxyhistograms  = "proxyhistograms"
+	NtFunc_listsnapshots    = "listsnapshots"
+	NtFunc_statuses         = "statuses"
 )
 
 var NodetoolAllSupportedFunctions = []string {
-	NodetoolFunction_netstats,
-	NodetoolFunction_gcstats,
-	NodetoolFunction_tpstats,
-	NodetoolFunction_getlogginglevels,
-	NodetoolFunction_gettimeout,
-	NodetoolFunction_cfstats,
+	NtFunc_netstats,
+	NtFunc_gcstats,
+	NtFunc_tpstats,
+	NtFunc_getlogginglevels,
+	NtFunc_gettimeout,
+	NtFunc_cfstats,
+	NtFunc_proxyhistograms,
+	NtFunc_listsnapshots,
+	NtFunc_statuses,
 }

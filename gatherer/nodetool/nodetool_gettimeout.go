@@ -9,7 +9,7 @@ func Gettimeout(nodetoolCommand string) ([]c.Metric, error) {
 	var metrics = []c.Metric{}
 
 	for _, timeouttype := range []string{"read", "range", "write", "counterwrite", "cascontention", "truncate", "streamingsocket", "misc"} {
-		output, err := c.ExecCommand(nodetoolCommand, NodetoolFunction_gettimeout, timeouttype)
+		output, err := c.ExecCommand(nodetoolCommand, NtFunc_gettimeout, timeouttype)
 		if err != nil {
 			return nil, err
 		}

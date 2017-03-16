@@ -263,3 +263,15 @@ func ObjectToString(object interface{}) string {
 	s = strings.Replace(s, "(nil)", EMPTY, -1)
 	return s
 }
+
+func ToSizeMetricType(size string) MetricType {
+	switch strings.ToUpper(size) {
+	case "BYTE":  return MT_SIZE_BYTE
+	case "BYTES": return MT_SIZE_BYTE
+	case "KB":    return MT_SIZE_KB
+	case "MB":    return MT_SIZE_MB
+	case "GB":    return MT_SIZE_GB
+	case "TB":    return MT_SIZE_TB
+	}
+	return MT_NONE
+}

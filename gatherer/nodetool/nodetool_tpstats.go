@@ -6,7 +6,7 @@ import (
 )
 
 func Tpstats(nodetoolCommand string) ([]c.Metric, error) {
-	output, err := c.ExecCommand(nodetoolCommand, NodetoolFunction_tpstats)
+	output, err := c.ExecCommand(nodetoolCommand, NtFunc_tpstats)
 	if err != nil {
 		return nil, err
 	}

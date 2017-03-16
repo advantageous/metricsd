@@ -6,7 +6,7 @@ import (
 )
 
 func Getlogginglevels(nodetoolCommand string) ([]c.Metric, error) {
-	output, err := c.ExecCommand(nodetoolCommand, NodetoolFunction_getlogginglevels)
+	output, err := c.ExecCommand(nodetoolCommand, NtFunc_getlogginglevels)
 	if err != nil {
 		return nil, err
 	}

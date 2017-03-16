@@ -6,7 +6,7 @@ import (
 )
 
 func Gcstats(nodetoolCommand string) ([]c.Metric, error) {
-	output, err := c.ExecCommand(nodetoolCommand, NodetoolFunction_gcstats)
+	output, err := c.ExecCommand(nodetoolCommand, NtFunc_gcstats)
 	if err != nil {
 		return nil, err
 	}

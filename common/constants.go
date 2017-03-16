@@ -14,6 +14,7 @@ const (
 	QUOTE_COMMA_SPACE       = "\", "
 	OPEN_BRACE              = "["
 	CLOSE_BRACE             = "]"
+	COLON                   = ":"
 )
 
 const (
@@ -63,10 +64,13 @@ type MetricType int8
 const (
 	MT_COUNT MetricType = iota
 	MT_PERCENT
+	MT_MICROS
 	MT_MILLIS
 	MT_SIZE_BYTE
-	MT_SIZE_MB
 	MT_SIZE_KB
+	MT_SIZE_MB
+	MT_SIZE_GB
+	MT_SIZE_TB
 	MT_NONE
 )
 
@@ -74,6 +78,7 @@ func (mt *MetricType) Name() string {
 	switch *mt {
 	case MT_COUNT:     return "Count"
 	case MT_PERCENT:   return "Percent"
+	case MT_MICROS:    return "Microseconds"
 	case MT_MILLIS:    return "Milliseconds"
 	case MT_SIZE_BYTE: return "Byte"
 	case MT_SIZE_MB:   return "Megabytes"
