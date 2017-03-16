@@ -4,61 +4,41 @@ import (
 	l "github.com/advantageous/go-logback/logging"
 	c "github.com/cloudurable/metricsd/common"
 	"bufio"
-	"errors"
-	"fmt"
 	"os"
 	"strings"
 )
 
-type CpuTimeType byte
-type CpuTime uint64
-type CpuCount uint64
-
 type CPUMetricsGatherer struct {
 	procStatPath string
-	lastTime     *CpuStats
+	lastStats    *CpuStats
 	logger       l.Logger
 	debug        bool
 	reportZeros  bool
 }
 
-type CpuStats struct {
-	CpuTimeList         []CpuTimes
-	ContextSwitchCount  CpuCount
-	BootTime            CpuTime
-	ProcessCount        CpuCount
-	ProcessRunningCount CpuCount
-	ProcessBlockCount   CpuCount
-	InterruptCount      CpuCount
-	SoftInterruptCount  CpuCount
-}
-
 type CpuTimes struct {
-	Name      string
-	User      CpuTime
-	Nice      CpuTime
-	System    CpuTime
-	Idle      CpuTime
-	IoWait    CpuTime
-	Irq       CpuTime
-	SoftIrq   CpuTime
-	Steal     CpuTime
-	Guest     CpuTime
-	GuestNice CpuTime
+	User      int64
+	Nice      int64
+	System    int64
+	Idle      int64
+	IoWait    int64
+	Irq       int64
+	SoftIrq   int64
+	Steal     int64
+	Guest     int64
+	GuestNice int64
 }
 
-//cpu  13761633 12805 3121528 171746421 158717 0 7708 0 0 0
-//cpu0 3446824 3018 816772 42845024 25964 0 712 0 0 0
-//cpu1 3461972 4316 817690 42760371 93670 0 2989 0 0 0
-//cpu2 3395036 2706 758030 43069668 14793 0 3312 0 0 0
-//cpu3 3457800 2764 729034 43071357 24288 0 693 0 0 0
-//intr 676492475 20 15 0 0 0 0 0 0 1 76 0 0 329 0 0 0 66768 0 0 0 0 0 0 1211524 0 0 1932502 2739244 14 17870042 661 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-//ctxt 1663680895
-//btime 1489105326
-//processes 3326310
-//procs_running 2
-//procs_blocked 0
-//softirq 370470175 1215735 135209363 21947 3127466 1690346 0 174465 124692639 0 104338214
+type CpuStats struct {
+	CpuMap              map[string]CpuTimes
+	ContextSwitchCount  int64
+	BootTime            int64
+	ProcessCount        int64
+	ProcessRunningCount int64
+	ProcessBlockCount   int64
+	InterruptCount      int64
+	SoftInterruptCount  int64
+}
 
 func NewCPUMetricsGatherer(logger l.Logger, config *c.Config) *CPUMetricsGatherer {
 
@@ -100,17 +80,16 @@ func (cpu *CPUMetricsGatherer) GetMetrics() ([]c.Metric, error) {
 	var cpuStats *CpuStats
 	var err error
 
-	if cpuStats, err = cpu.readCpuStats(); err != nil {
+	if cpuStats, err = cpu.readProcStat(); err != nil {
 		return nil, err
 	}
 
-	metrics := cpu.convertToMetrics(cpu.lastTime, cpuStats)
-	cpu.lastTime = cpuStats
+	metrics := cpu.convertToMetrics(cpu.lastStats, cpuStats)
+	cpu.lastStats = cpuStats
 	if (cpu.debug) {
-		cpu.logger.Debugf("%+v \n", cpuStats)
+		cpu.logger.Debug(c.ObjectToString(cpuStats))
 	}
 	return metrics, nil
-
 }
 
 func (cpu *CPUMetricsGatherer) appendCount(metrics []c.Metric, name string, count int64) []c.Metric {
@@ -130,17 +109,21 @@ func (cpu *CPUMetricsGatherer) convertToMetrics(lastTimeStats *CpuStats, nowStat
 		metrics = cpu.appendCount(metrics, "ctxtCnt", int64(nowStats.ContextSwitchCount - lastTimeStats.ContextSwitchCount))
 		metrics = cpu.appendCount(metrics, "processesStrtCnt", int64(nowStats.ProcessCount - lastTimeStats.ProcessCount))
 
-		for index, cput := range nowStats.CpuTimeList {
-			metrics = cpu.appendCount(metrics, "GuestJif", int64(cput.Guest - lastTimeStats.CpuTimeList[index].Guest))
-			metrics = cpu.appendCount(metrics, "UsrJif", int64(cput.User - lastTimeStats.CpuTimeList[index].User))
-			metrics = cpu.appendCount(metrics, "IdleJif", int64(cput.Idle - lastTimeStats.CpuTimeList[index].Idle))
-			metrics = cpu.appendCount(metrics, "IowaitJif", int64(cput.IoWait - lastTimeStats.CpuTimeList[index].IoWait))
-			metrics = cpu.appendCount(metrics, "IrqJif", int64(cput.Irq - lastTimeStats.CpuTimeList[index].Irq))
-			metrics = cpu.appendCount(metrics, "GuestniceJif", int64(cput.GuestNice - lastTimeStats.CpuTimeList[index].GuestNice))
-			metrics = cpu.appendCount(metrics, "StealJif", int64(cput.Steal - lastTimeStats.CpuTimeList[index].Steal))
-			metrics = cpu.appendCount(metrics, "NiceJif", int64(cput.Nice - lastTimeStats.CpuTimeList[index].Nice))
-			metrics = cpu.appendCount(metrics, "SysJif", int64(cput.System - lastTimeStats.CpuTimeList[index].System))
-			metrics = cpu.appendCount(metrics, "SoftIrqJif", int64(cput.SoftIrq - lastTimeStats.CpuTimeList[index].SoftIrq))
+		for cpuName, nowCpuTimes := range nowStats.CpuMap {
+			lastCpuTimes, found := lastTimeStats.CpuMap[cpuName]
+			if !found {
+				lastCpuTimes = CpuTimes{}
+			}
+			metrics = cpu.appendCount(metrics, "GuestJif", int64(nowCpuTimes.Guest - lastCpuTimes.Guest))
+			metrics = cpu.appendCount(metrics, "UsrJif", int64(nowCpuTimes.User - lastCpuTimes.User))
+			metrics = cpu.appendCount(metrics, "IdleJif", int64(nowCpuTimes.Idle - lastCpuTimes.Idle))
+			metrics = cpu.appendCount(metrics, "IowaitJif", int64(nowCpuTimes.IoWait - lastCpuTimes.IoWait))
+			metrics = cpu.appendCount(metrics, "IrqJif", int64(nowCpuTimes.Irq - lastCpuTimes.Irq))
+			metrics = cpu.appendCount(metrics, "GuestniceJif", int64(nowCpuTimes.GuestNice - lastCpuTimes.GuestNice))
+			metrics = cpu.appendCount(metrics, "StealJif", int64(nowCpuTimes.Steal - lastCpuTimes.Steal))
+			metrics = cpu.appendCount(metrics, "NiceJif", int64(nowCpuTimes.Nice - lastCpuTimes.Nice))
+			metrics = cpu.appendCount(metrics, "SysJif", int64(nowCpuTimes.System - lastCpuTimes.System))
+			metrics = cpu.appendCount(metrics, "SoftIrqJif", int64(nowCpuTimes.SoftIrq - lastCpuTimes.SoftIrq))
 		}
 	}
 
@@ -150,109 +133,89 @@ func (cpu *CPUMetricsGatherer) convertToMetrics(lastTimeStats *CpuStats, nowStat
 	return metrics
 }
 
-func (cpu *CPUMetricsGatherer) readCpuStats() (*CpuStats, error) {
+func (cpu *CPUMetricsGatherer) readProcStat() (*CpuStats, error) {
 	org, err := os.Open(cpu.procStatPath)
-
 	fd := bufio.NewReader(org)
-
 	if err != nil {
 		cpu.logger.Emergencyf("Error reading file %v", err)
 	}
 
 	stats := CpuStats{}
-	stats.CpuTimeList = make([]CpuTimes, 0)
+	stats.CpuMap = make(map[string]CpuTimes)
 
 	for {
-		var name string
-		var value uint64
-		var line string
-
-		if bytes, _, err := fd.ReadLine(); err == nil {
-			line = string(bytes)
-		} else if err.Error() == "EOF" {
-			//Error EOF is ok
-			cpu.logger.Debug("EOF while reading /proc/stat file")
+		theLine := c.EMPTY
+		bytes, _, err := fd.ReadLine()
+		if err != nil {
+			if err.Error() != "EOF" { // EOF error is ok, other errors are not ok
+				cpu.logger.PrintError("Error reading line from /proc/stat", err)
+				return nil, err
+			}
+			break // EOF, leave the for loop
+		}
+		if len(bytes) == 0 {
 			break
-		} else {
-			//Others errors are not ok
-			cpu.logger.PrintError("Error reading line from /proc/stat", err)
-			return nil, err
 		}
 
-		if count, err := fmt.Sscanf(line, "%s %d ", &name, &value); err != nil {
-			cpu.logger.PrintError("Error scanning name / value from a line from /proc/stat", err)
-			return nil, err
-		} else if count == 0 {
-			cpu.logger.Debug("Count was 0 when scanning /proc/stat line")
-			break
+		theLine = string(bytes)
 
+		valuesOnly := strings.Fields(theLine)
+		lineName := valuesOnly[0]
+		value := c.ToInt64(valuesOnly[1], 0)
+
+		switch lineName {
+		case "ctxt":          stats.ContextSwitchCount = value
+		case "btime":         stats.BootTime = value
+		case "processes":     stats.ProcessCount = value
+		case "procs_running": stats.ProcessRunningCount = value
+		case "procs_blocked": stats.ProcessBlockCount = value
+		case "intr":          stats.InterruptCount = value
+		case "softirq":       stats.SoftInterruptCount = value
+		default:
+			if strings.HasPrefix(lineName, "cpu") {
+				cpuTimes := CpuTimes{}
+				for i := 1; i < len(valuesOnly); i++ {
+					value = c.ToInt64(valuesOnly[i], 0)
+					switch i {
+					case  1: cpuTimes.User = value
+					case  2: cpuTimes.Nice = value
+					case  3: cpuTimes.System = value
+					case  4: cpuTimes.Idle = value
+					case  5: cpuTimes.IoWait = value
+					case  6: cpuTimes.Irq = value
+					case  7: cpuTimes.SoftIrq = value
+					case  8: cpuTimes.Steal = value
+					case  9: cpuTimes.Guest = value
+					case 10: cpuTimes.GuestNice = value
+					default:
+						if (cpu.debug) {
+							cpu.logger.Debug("Unknown cpu time column, index:", i, "found in", theLine)
+						}
+					}
+				}
+				stats.CpuMap[lineName] = cpuTimes
+			} else {
+				if (cpu.debug) {
+					cpu.logger.Debug("Unknown Data", theLine)
+				}
+			}
 		}
-
-		if err = cpu.parseLine(name, value, line, &stats); err != nil {
-			return nil, err
-		}
-
-		cpu.logger.Debugf("%s %d", name, value)
 	}
-	cpu.logger.Debugf("%+v \n", stats)
+
 	return &stats, nil
 }
 
-func (cpu *CPUMetricsGatherer) parseLine(name string, value uint64, line string, stats *CpuStats) error {
-
-	//if cpu.debug {
-	//	cpu.logger.Println("LINE", line)
-	//	cpu.logger.Println(name, value)
-	//}
-
-	switch name {
-	case "ctxt":
-		stats.ContextSwitchCount = CpuCount(value)
-	case "btime":
-		stats.BootTime = CpuTime(value)
-	case "processes":
-		stats.ProcessCount = CpuCount(value)
-	case "procs_running":
-		stats.ProcessBlockCount = CpuCount(value)
-	case "procs_blocked":
-		stats.ProcessBlockCount = CpuCount(value)
-	case "intr":
-		stats.InterruptCount = CpuCount(value)
-	case "softirq":
-		stats.SoftInterruptCount = CpuCount(value)
-	default:
-		if strings.HasPrefix(name, c.PROVIDER_CPU) {
-			t := CpuTimes{}
-			t.Name = name
-			t.User = CpuTime(value)
-			count, err := fmt.Sscanf(line, "%s %d %d %d %d %d %d %d %d %d %d", &t.Name,
-				&t.User, &t.Nice, &t.System,
-				&t.Idle, &t.IoWait, &t.Irq,
-				&t.SoftIrq, &t.Steal, &t.Guest,
-				&t.GuestNice)
-
-			if cpu.debug {
-				cpu.logger.Printf("Name = %s,\t User=%d,\t Nice=%d,\t System=%d \n"+
-					"Idle = %d,\t IoWait = %d,\t Irq = %d,\tSftIrq=%d \n"+
-					"Steal = %d,\t Guest=%d,\t GuestNice=%d",
-					t.Name, t.User, t.Nice, t.System,
-					&t.Idle, &t.IoWait, &t.Irq, &t.SoftIrq,
-					&t.Steal, &t.Guest, &t.GuestNice)
-			}
-
-			if err != nil {
-				cpu.logger.PrintError("Failure parsing cpu stats", err)
-				return err
-			}
-
-			if count != 11 {
-				cpu.logger.Errorf("cpu scan amount is off expected 11, but got %d", count)
-				return errors.New("Unable to scan cpu times")
-			}
-			stats.CpuTimeList = append(stats.CpuTimeList, t)
-		} else {
-			return fmt.Errorf("Not sure what this is %s", name)
-		}
-	}
-	return nil
-}
+	/*
+	cpu  5017 1 3356 7561462 1674 2 53 3 4 5
+	cpu0 1105 0 1113 1890502 345 0 35 0 0 0
+	cpu1 1291 0 792 1889318 496 0 6 0 0 0
+	cpu2 1251 0 713 1890968 482 0 5 0 0 0
+	cpu3 1370 0 738 1890674 351 0 7 0 0 0
+	intr 1488221 27 0 0 0 348 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 159 0 12047 0 22568 1 0 3143 0 76 0 91494 83893 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+	ctxt 2710734
+	btime 1480893191
+	processes 9277
+	procs_running 3
+	procs_blocked 0
+	softirq 655105 0 221348 21 39766 0 0 1 215075 0 178894
+	*/

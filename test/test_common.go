@@ -7,6 +7,7 @@ import (
 	"os"
 	"flag"
 	"testing"
+	"fmt"
 )
 
 func GetTestLogger(test *testing.T, label string) (lg.Logger) {
@@ -14,7 +15,6 @@ func GetTestLogger(test *testing.T, label string) (lg.Logger) {
 }
 
 func GetTestConfig(logger lg.Logger) (*c.Config) {
-
 	// load the config file
 	configFile := flag.String("config", "/etc/metricsd.conf", "metrics config")
 
@@ -27,16 +27,15 @@ func GetTestConfig(logger lg.Logger) (*c.Config) {
 	return config
 }
 
-func StandardTest(test *testing.T, logger lg.Logger, gatherer c.MetricsGatherer) {
+func StandardTest(test *testing.T, gatherer c.MetricsGatherer) {
 	metrics, err := gatherer.GetMetrics()
 	if err == nil {
 		AssertMetrics(test, metrics)
-		ShowTestMetrics(logger, metrics)
+		ShowTestMetrics(metrics)
 	} else {
 		test.Errorf("Error found %s %v", err.Error(), err)
 	}
 }
-
 
 func AssertMetrics(test *testing.T, metrics []c.Metric) {
 	if metrics == nil {
@@ -48,10 +47,10 @@ func AssertMetrics(test *testing.T, metrics []c.Metric) {
 	}
 }
 
-func ShowTestMetrics(logger lg.Logger, metrics []c.Metric) {
+func ShowTestMetrics(metrics []c.Metric) {
 	if metrics != nil && len(metrics) > 0 {
 		for _,m := range metrics {
-			logger.Info(c.MetricJsonString(&m))
+			fmt.Println(c.ObjectToString(&m))
 		}
 	}
 }

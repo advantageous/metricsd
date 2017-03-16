@@ -7,7 +7,6 @@ import (
 )
 
 func TestFree(test *testing.T) {
-	logger := GetTestLogger(test, "free")
 	config := c.Config{ Debug: false, FreeCommand: "free"}
-	StandardTest(test, logger, g.NewFreeMetricGatherer(nil, &config))
+	StandardTest(test, g.NewFreeMetricGatherer(nil, &config))
 }

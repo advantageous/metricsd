@@ -25,7 +25,7 @@ func main() {
 	}
 
 	logger = c.GetLogger(config.Debug, "main", "MT_MAIN_DEBUG")
-	logger.Info("Config file:", c.ConfigJsonString(config))
+	logger.Debug("Init:", c.ObjectToString(config))
 
 	// begin the work
 	interval, intervalConfigRefresh, debug := readRunConfig(config)
@@ -64,11 +64,11 @@ func main() {
 					config = newConfig
 					interval, intervalConfigRefresh, debug = readRunConfig(config)
 					if debug {
-						logger.Debug("Config file changed:", c.ConfigJsonString(config))
+						logger.Debug("Changed:", c.ObjectToString(config))
 					}
 				} else {
 					if debug {
-						logger.Debug("Config file same.")
+						logger.Debug("Same Config")
 					}
 				}
 			}

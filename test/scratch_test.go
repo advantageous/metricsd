@@ -1,15 +1,24 @@
 package test
 
 import (
-	"fmt"
 	"testing"
+	c "github.com/cloudurable/metricsd/common"
+	"fmt"
 )
 
-func TestScratch(z *testing.T) {
-	var total = `          total        used        free      shared  buff/cache   available
-Mem:        7747784      130380     6942216       16624      675188     7355592
-Swap:             0           0           0
-`
-	fmt.Print(total)
+func TestScratch(test *testing.T) {
 
+	logger := GetTestLogger(test, "scratch")
+	config := GetTestConfig(logger)
+
+	fmt.Println(c.ObjectToString(config))
+
+	config = &c.Config{
+		Debug: false,
+		DiskCommand: "df",
+		DiskFileSystems: []string{"/dev/*", "udev"},
+		DiskFields: []string{"total", "used", "available", "usedpct", "availablepct", "capacitypct", "mount"},
+	}
+
+	fmt.Println(c.ObjectToString(config))
 }

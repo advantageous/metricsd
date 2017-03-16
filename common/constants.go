@@ -33,6 +33,7 @@ const (
 const (
 	REPEATER_AWS    = "aws"
 	REPEATER_LOGGER = "logger"
+	REPEATER_CONSOLE = "console"
 )
 
 const (
@@ -42,7 +43,7 @@ const (
 	FLAG_NODETOOL = "MT_NODETOOL_DEBUG"
 )
 
-type MetricValueSource byte
+type MetricValueSource int8
 const (
 	MVS_INT MetricValueSource = iota
 	MVS_FLOAT
@@ -58,7 +59,7 @@ func (mvs *MetricValueSource) Name() string {
 	return EMPTY
 }
 
-type MetricType byte
+type MetricType int8
 const (
 	MT_COUNT MetricType = iota
 	MT_PERCENT

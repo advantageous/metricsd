@@ -8,8 +8,6 @@ import (
 
 func TestDisk(test *testing.T) {
 
-	logger := GetTestLogger(test, "disk")
-
 	config := c.Config{
 		Debug: false,
 		DiskCommand: "df",
@@ -17,5 +15,5 @@ func TestDisk(test *testing.T) {
 		DiskFields: []string{"total", "used", "available", "usedpct", "availablepct", "capacitypct", "mount"},
 	}
 
-	StandardTest(test, logger, g.NewDiskMetricsGatherer(nil, &config))
+	StandardTest(test, g.NewDiskMetricsGatherer(nil, &config))
 }

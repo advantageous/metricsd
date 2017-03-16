@@ -158,37 +158,3 @@ func ConfigEquals(c1 *Config, c2 *Config) (bool) {
 		StringArraysEqual(c1.DiskFields, c2.DiskFields) &&
 		StringArraysEqual(c1.NodetoolFunctions, c2.NodetoolFunctions)
 }
-
-func ConfigJsonString(cfg *Config) (string) {
-	return "{" +
-		Jstr("Env", cfg.Env, false) +
-		Jbool("Local", cfg.Local, false) +
-		Jbool("Debug", cfg.Debug, false) +
-		Jstr("NameSpace", cfg.NameSpace, false) +
-
-		Jdur("TimePeriodSeconds", cfg.TimePeriodSeconds, false) +
-		Jdur("ReadConfigSeconds", cfg.ReadConfigSeconds, false) +
-
-		Jstrarr("Repeaters", cfg.Repeaters, false) +
-		Jstrarr("Gatherers", cfg.Gatherers, false) +
-
-		Jstr("AWSRegion", cfg.AWSRegion, false) +
-		Jstr("ServerRole", cfg.ServerRole, false) +
-		Jstr("IpAddress", cfg.IpAddress, false) +
-		Jstr("EC2InstanceId", cfg.EC2InstanceId, false) +
-		Jstr("EC2InstanceNameTag", cfg.EC2InstanceNameTag, false) +
-
-		Jstr("DiskCommand", cfg.DiskCommand, false) +
-		Jstrarr("DiskFileSystems", cfg.DiskFileSystems, false) +
-		Jstrarr("DiskFields", cfg.DiskFields, false) +
-
-		Jstr("CpuProcStat", cfg.CpuProcStat, false) +
-		Jbool("CpuReportZeros", cfg.CpuReportZeros, false) +
-
-		Jstr("FreeCommand", cfg.FreeCommand, false) +
-
-		Jstr("NodetoolCommand", cfg.NodetoolCommand, false) +
-
-		Jstrarr("NodetoolFunctions", cfg.NodetoolFunctions, true) +
-		"}"
-}

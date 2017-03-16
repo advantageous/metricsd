@@ -27,18 +27,6 @@ type Metric struct {
 	Provider   string
 }
 
-func MetricJsonString(m *Metric) (string) {
-	return "{" +
-		Jstr(    "source",     m.Source.Name(), false) +
-		Jstr(    "type",       m.Type.Name(), false) +
-		Jint64(  "intvalue",   m.IntValue, false) +
-		Jfloat64("floatvalue", m.FloatValue, false) +
-		Jstr(    "strvalue",   m.StrValue, false) +
-		Jstr(    "name",       m.Name, false) +
-		Jstr(    "provider",   m.Provider, true) +
-		"}"
-}
-
 func newMetric(mt MetricType, mvs MetricValueSource, name string, provider string) *Metric {
 	return &Metric{
 		Type:     mt,

@@ -8,8 +8,6 @@ import (
 
 func TestNodetool(test *testing.T) {
 
-	logger := GetTestLogger(test, "nodetool")
-
 	config := c.Config{
 		Debug: false,
 		 NodetoolFunctions: []string{"cfstats", "tpstats", "gcstats", "getlogginglevels", "netstats", "gettimeout"},
@@ -17,6 +15,6 @@ func TestNodetool(test *testing.T) {
 
 	gatherers := g.NewNodetoolMetricGatherers(nil, &config)
 	for _,gatherer := range gatherers {
-		StandardTest(test, logger, gatherer)
+		StandardTest(test, gatherer)
 	}
 }
