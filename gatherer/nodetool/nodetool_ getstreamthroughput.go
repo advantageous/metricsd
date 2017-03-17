@@ -12,7 +12,7 @@ func GetStreamThroughput(nodetoolCommand string) ([]c.Metric, error) {
 		return nil, err
 	}
 
-	//colonAt := strings.
+	// colonAt := strings.
 	var metrics = []c.Metric{}
 	for _,ntfun := range []string{"statusbackup", "statusbinary", "statusgossip", "statushandoff", "statusthrift"} {
 		name := "ntStatus" + c.UpFirst(ntfun[6:])
