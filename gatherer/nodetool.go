@@ -76,15 +76,16 @@ func (gatherer *NodetoolMetricGatherer) GetMetrics() ([]c.Metric, error) {
 	var err error = nil
 
 	switch gatherer.nodeFunction {
-	case nt.NtFunc_netstats:		 metrics, err = nt.Netstats(gatherer.command)
-	case nt.NtFunc_gcstats:			 metrics, err = nt.Gcstats(gatherer.command)
-	case nt.NtFunc_tpstats:			 metrics, err = nt.Tpstats(gatherer.command)
-	case nt.NtFunc_getlogginglevels: metrics, err = nt.Getlogginglevels(gatherer.command)
-	case nt.NtFunc_gettimeout:	     metrics, err = nt.Gettimeout(gatherer.command)
-	case nt.NtFunc_cfstats:	         metrics, err = nt.Cfstats(gatherer.command)
-	case nt.NtFunc_proxyhistograms:  metrics, err = nt.ProxyHistograms(gatherer.command)
-	case nt.NtFunc_listsnapshots:    metrics, err = nt.ListSnapshots(gatherer.command)
-	case nt.NtFunc_statuses:         metrics, err = nt.Statuses(gatherer.command)
+	case nt.NtFunc_netstats:		    metrics, err = nt.Netstats(gatherer.command)
+	case nt.NtFunc_gcstats:			    metrics, err = nt.Gcstats(gatherer.command)
+	case nt.NtFunc_tpstats:			    metrics, err = nt.Tpstats(gatherer.command)
+	case nt.NtFunc_getlogginglevels:    metrics, err = nt.Getlogginglevels(gatherer.command)
+	case nt.NtFunc_gettimeout:	        metrics, err = nt.Gettimeout(gatherer.command)
+	case nt.NtFunc_cfstats:	            metrics, err = nt.Cfstats(gatherer.command)
+	case nt.NtFunc_proxyhistograms:     metrics, err = nt.ProxyHistograms(gatherer.command)
+	case nt.NtFunc_listsnapshots:       metrics, err = nt.ListSnapshots(gatherer.command)
+	case nt.NtFunc_statuses:            metrics, err = nt.Statuses(gatherer.command)
+	case nt.NtFunc_getstreamthroughput: metrics, err = nt.GetStreamThroughput(gatherer.command)
 	}
 
 	if err != nil {

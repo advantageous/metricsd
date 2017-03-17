@@ -23,15 +23,16 @@ const (
 )
 
 const (
-	NtFunc_netstats         = "netstats"
-	NtFunc_gcstats          = "gcstats"
-	NtFunc_tpstats          = "tpstats"
-	NtFunc_getlogginglevels = "getlogginglevels"
-	NtFunc_gettimeout       = "gettimeout"
-	NtFunc_cfstats          = "cfstats"
-	NtFunc_proxyhistograms  = "proxyhistograms"
-	NtFunc_listsnapshots    = "listsnapshots"
-	NtFunc_statuses         = "statuses"
+	NtFunc_netstats            = "netstats"
+	NtFunc_gcstats             = "gcstats"
+	NtFunc_tpstats             = "tpstats"
+	NtFunc_getlogginglevels    = "getlogginglevels"
+	NtFunc_gettimeout          = "gettimeout"
+	NtFunc_cfstats             = "cfstats"
+	NtFunc_proxyhistograms     = "proxyhistograms"
+	NtFunc_listsnapshots       = "listsnapshots"
+	NtFunc_statuses            = "statuses"
+	NtFunc_getstreamthroughput = "getstreamthroughput"
 )
 
 var NodetoolAllSupportedFunctions = []string {
@@ -44,4 +45,5 @@ var NodetoolAllSupportedFunctions = []string {
 	NtFunc_proxyhistograms,
 	NtFunc_listsnapshots,
 	NtFunc_statuses,
+	NtFunc_getstreamthroughput,
 }
