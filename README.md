@@ -7,44 +7,114 @@ Metricsd gathers OS metrics for AWS CloudWatch. You can install it as a systemd 
 Configuration
 ####  /etc/metricsd.conf 
 ```conf
-
-
-# AWS Region         string        `hcl:"aws_region"`
-# If not set, uses aws current region for this instance.
-# Used for testing only.
-# aws_region = "us-west-1"
-
-# EC2InstanceId     string        `hcl:"ec2_instance_id"`
-# If not set, uses aws instance id for this instance
-# Used for testing only.
-# ec2_instance_id = "i-my-fake-instanceid"
-
-# Debug             bool          `hcl:"debug"`
-# Used for testing and debugging
-debug = false
-
-# Local             bool          `hcl:"local"`
-# Used to ingore local ec2 meta-data, used for development only.
-# local = true
-
-# TimePeriodSeconds time.Duration `hcl:"interval_seconds"`
-# Defaults to 30 seconds, how often metrics are collected.
-interval_seconds = 10
-
-# Used to specify the environment: prod, dev, qa, staging, etc.
-# This gets used as a dimension that is sent to cloudwatch. 
+# ------------------------------------------------------------
+# env bool
+#     Used to specify the environment: prod, dev, qa, staging, etc.
+#     This gets used as a dimension that is sent to repeaters
+#
+# debug bool
+#     true sets logging level to debug
+#
+# local bool
+#     Used to ignore local ec2 meta-data, used for development only.
+# ------------------------------------------------------------
 env="dev"
+#debug = true
+#local = true
 
-# Used to specify the top level namespace in cloudwatch.
+# ------------------------------------------------------------
+# interval_seconds int
+#     Defaults to 30 seconds
+# ------------------------------------------------------------
+#interval_seconds = 15
+
+# ------------------------------------------------------------
+# server_role
+#     Used to specify the role of the AMI instance.
+#     examples: dcos-master consul-master dcos-agent cassandra-node
+# ------------------------------------------------------------
+server_role = "dcos-master"
+
+# ------------------------------------------------------------
+# repeaters []string
+#     aws, logger
+#
+# gatherers []string
+#     disk cpu free nodetool
+# ------------------------------------------------------------
+repeaters = ["aws"]
+gatherers = ["disk", "cpu", "free", "nodetool"]
+
+# ------------------------------------------------------------
+# aws_Region string
+#     If not set, uses aws current region for this instance.
+#     Used for testing only???
+#
+# ec2_instance_id string
+#     If not set, uses aws instance id for this instance
+#     Used for testing only???
+#
+# namespace string
+#     Used to specify the top level namespace in cloudwatch.
+# ------------------------------------------------------------
+aws_region = "us-west-1"
+ec2_instance_id = "my-fake-instanceid"
 namespace="Cassandra Cluster"
 
-# Used to specify the role of the AMI instance.
-# Gets used as a dimension.
-# e.g., dcos-master, consul-master, dcos-agent, cassandra-node, etc.
-server_role="dcos-master"
+# ------------------------------------------------------------
+# disk_command string
+#     default: /usr/bin/df
+#     darwin example:  /bin/df
+#
+# disk_file_systems []string
+#     What FileSystems to include. defaults to /dev/*
+#
+# disk_fields []string
+#     what fields to output
+#     fields: total        - number of 1K bytes on the disk
+#             used         - number of 1K bytes used on the disk
+#             available    - number of 1K bytes available on the disk
+#             usedpct      - percentage of bytes used on the disk (calculated)
+#             availablepct - percentage of bytes available on the disk (calculated)
+#             capacitypct  - percentage of bytes available on the disk (reported)
+#             mount        - where FileSystem is mounted
+#     default: ["availablepct"]
+# ------------------------------------------------------------
+#disk_command = "/usr/mybin/df"
+#disk_file_systems = ["/dev/*", "udev"]
+#disk_fields = ["total", "used", "available", "usedpct", "availablepct", "mount"]
 
+# ------------------------------------------------------------
+# cpu_proc_stat string
+#     Used to specify /proc/stat or absolute file
+#     default:        /proc/stat
+#     darwin example: /home/batman/gospace/src/github.com/cloudurable/metricsd/test/test-data/proc/stat
+#
+# cpu_report_zeros bool
+#     default: false
+# ------------------------------------------------------------
+#cpu_proc_stat = "/proc/stat"
+#cpu_report_zeros = true
 
-``` 
+# ------------------------------------------------------------
+# free_command string
+#     default:        /usr/bin/free
+#     darwin example: /usr/local/bin/free
+# ------------------------------------------------------------
+#free_command = "/usr/mybin/free"
+
+# ------------------------------------------------------------
+# nodetool_command string
+#   default:        /usr/bin/nodetool
+#   darwin example: /usr/local/bin/nodetool
+#
+# nodetool_functions []string    : required when nodetool will run
+#    specify nodetool_functions as array
+#      functions: cfstats compactionstats gcstats netstats tpstats getlogginglevels proxyhistograms listsnapshots, statuses
+# ------------------------------------------------------------
+#nodetool_command = "/usr/mybin/nodetool"
+#nodetool_functions = ["tpstats", "gcstats"]
+```
 
 
 ## Installing as a service
@@ -135,3 +205,42 @@ The best doc is a working example.
 
 If swapping is enabled (which is unlikely), then you will get the above with `mSwpX` instead of `mX`.
 
+
+### Nodetool gcstats
+* `gcInterval` - Interval (ms)
+* `gcMaxElapsed` - Max GC Elapsed (ms)
+* `gcTotalElapsed` - Total GC Elapsed (ms)
+* `gcStdevElapsed` - Stdev GC Elapsed (ms)
+* `gcReclaimed` - GC Reclaimed (MB)
+* `gcCollections` - Collections
+* `gcDirectMemoryBytes` - Direct Memory Bytes
+
+### Nodetool netstats
+* `nsMode` - mode of the node
+ * STARTING = 0
+ * NORMAL = 1
+ * JOINING = 2
+ * LEAVING = 3
+ * DECOMMISSIONED = 4
+ * MOVING = 5
+ * DRAINING = 6
+ * DRAINED = 7
+ * OTHER = 99
+
+* `nsRrAttempted` - Read Repair Attempted
+* `nsRrBlocking` - Read Repair Mismatch (Blocking)
+* `nsRrBackground` - Read Repair Mismatch (Background)
+
+All message counts can be >= 0, or n/a (-125) or error (-127)
+* `nsPoolLargeMsgsActive` - Large messages Active
+* `nsPoolLargeMsgsPending` - Large messages Pending
+* `nsPoolLargeMsgsCompleted` - Large messages Completed
+* `nsPoolLargeMsgsDropped` - Large messages Dropped
+* `nsPoolSmallMsgsActive` - Small messages Active
+* `nsPoolSmallMsgsPending` - Small messages Pending
+* `nsPoolSmallMsgsCompleted` - Small messages Completed
+* `nsPoolSmallMsgsDropped` - Small messages Dropped
+* `nsPoolGossipMsgsActive` - Gossip messages Active
+* `nsPoolGossipMsgsPending` - Gossip messages Pending
+* `nsPoolGossipMsgsCompleted` - Gossip messages Completed
+* `nsPoolGossipMsgsDropped` - Gossip messages Dropped

@@ -2,8 +2,7 @@ package repeater
 
 import (
 	lg "github.com/advantageous/go-logback/logging"
-	m "github.com/advantageous/metricsd/metric"
-	"github.com/advantageous/metricsd/util"
+	c "github.com/cloudurable/metricsd/common"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
 	"time"
@@ -12,10 +11,15 @@ import (
 type AwsCloudMetricRepeater struct {
 	logger lg.Logger
 	conn   *cloudwatch.CloudWatch
-	config *m.Config
+	config *c.Config
 }
 
-func (cw AwsCloudMetricRepeater) ProcessMetrics(context m.MetricContext, metrics []m.Metric) error {
+const debugFormat = "{\"provider\": \"%s\", \"name\": \"%s\", \"type\": %d, \"value\": %d, \"unit\": \"%s\"}"
+
+func (lr AwsCloudMetricRepeater) RepeatForContext() bool { return true; }
+func (lr AwsCloudMetricRepeater) RepeatForNoIdContext() bool { return true; }
+
+func (cw AwsCloudMetricRepeater) ProcessMetrics(context c.MetricContext, metrics []c.Metric) error {
 
 	timestamp := aws.Time(time.Now())
 
@@ -30,7 +34,7 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(context m.MetricContext, metrics
 			}
 			dimensions = append(dimensions, instanceIdDim)
 
-			if cw.config.IpAddress != "" {
+			if cw.config.IpAddress != c.EMPTY {
 				ipDim := &cloudwatch.Dimension{
 					Name:  aws.String("IpAddress"),
 					Value: aws.String(cw.config.IpAddress),
@@ -38,7 +42,7 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(context m.MetricContext, metrics
 				dimensions = append(dimensions, ipDim)
 			}
 
-			if cw.config.EC2InstanceNameTag != "" {
+			if cw.config.EC2InstanceNameTag != c.EMPTY {
 				dim := &cloudwatch.Dimension{
 					Name:  aws.String("InstanceName"),
 					Value: aws.String(cw.config.EC2InstanceNameTag),
@@ -46,7 +50,7 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(context m.MetricContext, metrics
 				dimensions = append(dimensions, dim)
 			}
 		}
-		if context.GetEnv() != "" {
+		if context.GetEnv() != c.EMPTY {
 			dim := &cloudwatch.Dimension{
 				Name:  aws.String("Environment"),
 				Value: aws.String(context.GetEnv()),
@@ -54,7 +58,7 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(context m.MetricContext, metrics
 			dimensions = append(dimensions, dim)
 		}
 
-		if context.GetRole() != "" {
+		if context.GetRole() != c.EMPTY {
 			dim := &cloudwatch.Dimension{
 				Name:  aws.String("Role"),
 				Value: aws.String(context.GetRole()),
@@ -62,7 +66,7 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(context m.MetricContext, metrics
 			dimensions = append(dimensions, dim)
 		}
 
-		if provider != "" {
+		if provider != c.EMPTY {
 			dim := &cloudwatch.Dimension{
 				Name:  aws.String("Provider"),
 				Value: aws.String(provider),
@@ -81,26 +85,24 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(context m.MetricContext, metrics
 
 	var err error
 
-	for index, d := range metrics {
+	for index, metric := range metrics {
+
+		datum := createDatum(metric.Name, metric.Provider)
+		datum.Value = aws.Float64(metric.FloatValue)
+
+		switch metric.Type {
+		case c.MT_COUNT:	 datum.Unit = aws.String(cloudwatch.StandardUnitCount)
+		case c.MT_PERCENT: 	 datum.Unit = aws.String(cloudwatch.StandardUnitPercent)
+		case c.MT_MICROS: 	 datum.Unit = aws.String(cloudwatch.StandardUnitMicroseconds)
+		case c.MT_MILLIS: 	 datum.Unit = aws.String(cloudwatch.StandardUnitMilliseconds)
+		case c.MT_SIZE_BYTE: datum.Unit = aws.String(cloudwatch.StandardUnitBytes)
+		case c.MT_SIZE_MB: 	 datum.Unit = aws.String(cloudwatch.StandardUnitMegabytes)
+		case c.MT_SIZE_KB:	 datum.Unit = aws.String(cloudwatch.StandardUnitKilobytes)
+		default:	         datum.Unit = aws.String(cloudwatch.StandardUnitNone)
+		}
 
 		if cw.config.Debug {
-			cw.logger.Printf("%s %d %d %s", d.GetName(), d.GetType(), d.GetValue(), d.GetProvider())
-		}
-		value := float64(d.GetValue())
-		datum := createDatum(d.GetName(), d.GetProvider())
-		datum.Value = aws.Float64(float64(value))
-
-		switch d.GetType() {
-		case m.COUNT:
-			datum.Unit = aws.String(cloudwatch.StandardUnitCount)
-		case m.LEVEL:
-			datum.Unit = aws.String(cloudwatch.StandardUnitKilobytes)
-		case m.LEVEL_PERCENT:
-			datum.Unit = aws.String(cloudwatch.StandardUnitPercent)
-		case m.TIMING:
-			datum.Unit = aws.String(cloudwatch.StandardUnitMilliseconds)
-		default:
-			datum.Unit = aws.String(cloudwatch.StandardUnitCount)
+			cw.logger.Printf(debugFormat, metric.Provider, metric.Name, metric.Type, metric.FloatValue, datum.Unit)
 		}
 
 		data = append(data, datum)
@@ -119,7 +121,7 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(context m.MetricContext, metrics
 					cw.logger.Error("Error writing metrics", err, index)
 				} else {
 					if cw.config.Debug {
-						cw.logger.Info("SENT..........................")
+						cw.logger.Debug("SENT..........................")
 					}
 				}
 			}
@@ -139,8 +141,8 @@ func (cw AwsCloudMetricRepeater) ProcessMetrics(context m.MetricContext, metrics
 	return err
 }
 
-func NewAwsCloudMetricRepeater(config *m.Config) AwsCloudMetricRepeater {
-	session := util.NewAWSSession(config)
-	logger := lg.NewSimpleLogger("log-repeater")
-	return AwsCloudMetricRepeater{logger, cloudwatch.New(session), config}
+func NewAwsCloudMetricRepeater(config *c.Config) *AwsCloudMetricRepeater {
+	session := NewAWSSession(config)
+	logger := lg.NewSimpleLogger("aws-repeater")
+	return &AwsCloudMetricRepeater{logger, cloudwatch.New(session), config}
 }

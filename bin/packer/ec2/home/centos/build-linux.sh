@@ -6,7 +6,7 @@ rm metricsd_linux
 set -e
 
 
-cd /gopath/src/github.com/advantageous/metricsd/
+cd /gopath/src/github.com/cloudrable/metricsd/
 
 echo "Running go clean"
 go clean

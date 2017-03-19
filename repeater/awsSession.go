@@ -1,8 +1,8 @@
-package util
+package repeater
 
 import (
 	l "github.com/advantageous/go-logback/logging"
-	m "github.com/advantageous/metricsd/metric"
+	c "github.com/cloudurable/metricsd/common"
 	"github.com/aws/aws-sdk-go/aws"
 	awsCredentials "github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
@@ -14,7 +14,7 @@ import (
 
 var awsLogger = l.NewSimpleLogger("aws")
 
-func NewAWSSession(cfg *m.Config) *awsSession.Session {
+func NewAWSSession(cfg *c.Config) *awsSession.Session {
 
 	metaDataClient, session := getClient(cfg)
 	credentials := getCredentials(metaDataClient)
@@ -22,26 +22,25 @@ func NewAWSSession(cfg *m.Config) *awsSession.Session {
 	if credentials != nil {
 
 		credentials := getCredentials(metaDataClient)
-		readMeta(metaDataClient, cfg, session)
+		configAwsPart := readMeta(metaDataClient, cfg, session)
 
 		awsConfig := &aws.Config{
 			Credentials: credentials,
-			Region:      aws.String(cfg.AWSRegion),
+			Region:      aws.String(configAwsPart.AWSRegion),
 			MaxRetries:  aws.Int(3),
 		}
 		return awsSession.New(awsConfig)
 	} else {
-		readMeta(metaDataClient, cfg, session)
+		configAwsPart := readMeta(metaDataClient, cfg, session)
 
 		return awsSession.New(&aws.Config{
-			Region:     aws.String(cfg.AWSRegion),
+			Region:     aws.String(configAwsPart.AWSRegion),
 			MaxRetries: aws.Int(3),
 		})
 	}
-
 }
 
-func getClient(config *m.Config) (*ec2metadata.EC2Metadata, *awsSession.Session) {
+func getClient(config *c.Config) (*ec2metadata.EC2Metadata, *awsSession.Session) {
 	if !config.Local {
 		awsLogger.Debug("Config NOT set to local using meta-data client to find local")
 		var session = awsSession.New(&aws.Config{})
@@ -52,13 +51,29 @@ func getClient(config *m.Config) (*ec2metadata.EC2Metadata, *awsSession.Session)
 	}
 }
 
-func readMeta(client *ec2metadata.EC2Metadata, config *m.Config, session *awsSession.Session) {
+type configAwsPart struct {
+	AWSRegion          string
+	ServerRole         string
+	IpAddress          string
+	EC2InstanceId      string
+	EC2InstanceNameTag string
+}
+
+func readMeta(client *ec2metadata.EC2Metadata, config *c.Config, session *awsSession.Session) (configAwsPart) {
+
+	configAwsPart := configAwsPart{
+		config.AWSRegion,
+		config.ServerRole,
+		config.IpAddress,
+		config.EC2InstanceId,
+		config.EC2InstanceNameTag,
+	}
 
 	if client == nil {
 		awsLogger.Info("Client missing using config to set region")
-		if config.AWSRegion == "" {
+		if configAwsPart.AWSRegion == "" {
 			awsLogger.Info("AWSRegion missing using default region us-west-2")
-			config.AWSRegion = "us-west-2"
+			configAwsPart.AWSRegion = "us-west-2"
 		}
 	} else {
 		region, err := client.Region()
@@ -67,18 +82,19 @@ func readMeta(client *ec2metadata.EC2Metadata, config *m.Config, session *awsSes
 			os.Exit(3)
 		}
 
-		config.AWSRegion = region
-		config.IpAddress = findLocalIp(client)
-		config.EC2InstanceId, err = client.GetMetadata("instance-id")
-
-		config.EC2InstanceNameTag = findInstanceName(config.EC2InstanceId, config.AWSRegion, session)
+		configAwsPart.AWSRegion = region
+		configAwsPart.IpAddress = findLocalIp(client)
+		configAwsPart.EC2InstanceId, err = client.GetMetadata("instance-id")
+		configAwsPart.EC2InstanceNameTag = findInstanceName(config.EC2InstanceId, config.AWSRegion, session)
 		if err != nil {
 			awsLogger.Error("Unable to get instance id from aws meta client : %s %v", err.Error(), err)
 			os.Exit(4)
 		}
 	}
 
+	return configAwsPart
 }
+
 func findLocalIp(metaClient *ec2metadata.EC2Metadata) string {
 	ip, err := metaClient.GetMetadata("local-ipv4")
 
